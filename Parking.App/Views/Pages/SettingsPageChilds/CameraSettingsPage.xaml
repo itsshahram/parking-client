@@ -1,0 +1,278 @@
+﻿<Page x:Class="Parking.App.Views.Pages.SettingsPageChilds.CameraSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      FontFamily="{StaticResource IranYekanFont}" 
+      xmlns:local="clr-namespace:Parking.App.Views.Pages.SettingsPageChilds"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      xmlns:Properties="clr-namespace:Parking.App"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Title="CameraSettingsPage">
+
+    <StackPanel FlowDirection="RightToLeft" Margin="10">
+
+        <TextBlock Text="تنظیمات نمایشی" Grid.Row="0"  FontWeight="Bold" FontSize="15"    Margin="10 5"  />
+
+        <DockPanel>
+
+            <StackPanel  Height="50"  DockPanel.Dock="Right" >
+                <ui:Button Appearance="Transparent" 
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" 
+                           Icon="{ui:SymbolIcon Symbol=ArrowReset24}" 
+                           Content="بازنشانی" 
+                           Height="40" 
+                           Click="Reset_Btn_Click"
+                           />
+            </StackPanel>
+        </DockPanel>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch Click="ExitCameraToggleSwitch_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Camera_ExitCameraEnable, Mode=TwoWay}" DockPanel.Dock="Right" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نمایش تصویر خروج در رسید دیجیتال" />
+                </DockPanel>
+                <Border x:Name="exitCamConfigBox" Visibility="Collapsed" Background="#20B9B9B9" Margin="5 15 5 0" Padding="10" CornerRadius="7">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="2*"/>
+                                <ColumnDefinition  Width="*" />
+                                <ColumnDefinition  Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="رشته دریافت Snapshot" 
+                                   MinWidth="200"/>
+                                <ui:TextBox 
+                                        Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ExitCameraUrl, Mode=TwoWay}" 
+                                        TextChanged="Exit_TextBox_TextChanged"
+                                     x:Name="ExitCamUrlTextBox" 
+                                    Icon="{ui:SymbolIcon Symbol=Link24}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام کاربری" />
+                                <ui:TextBox PlaceholderText="Camera User" 
+                                            x:Name="ExitCamUserTextBox" 
+                                        Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ExitCameraUser, Mode=TwoWay}" 
+                                        TextChanged="Exit_TextBox_TextChanged"
+                                            Icon="{ui:SymbolIcon Symbol=Person24}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="رمز عبور" />
+                                <ui:PasswordBox PlaceholderText="xxxxx" 
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ExitCameraPass, Mode=TwoWay}"       
+                                                x:Name="ExitCamPassTextBox" 
+                                        TextChanged="Exit_TextBox_TextChanged"
+                                                Icon="{ui:SymbolIcon Symbol=Password24}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right" Click="EnteranceCameraToggleSwitch_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Camera_MainCameraEnable, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی تصویر دوربین ورودی" />
+                </DockPanel>
+                
+
+                <Border x:Name="entranceCameraConfig" Visibility="Collapsed" Background="#20B9B9B9" Margin="5 15 5 0" Padding="10" CornerRadius="7">
+                    <StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="2*"/>
+                                <ColumnDefinition  Width="*" />
+                                <ColumnDefinition  Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="رشته اتصال دوربین مدار بسته (Rtsp)" />
+                                <ui:TextBox 
+                                    x:Name="MainCameraUrlTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_MainCameraUrl, Mode=TwoWay}" 
+                                    TextChanged="Entrance_Config_TextChanged"        
+                                            Icon="{ui:SymbolIcon Symbol=Link24}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام کاربری" />
+                                <ui:TextBox PlaceholderText="Camera User"
+                                   x:Name="MainCameraUserTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_MainCameraUser, Mode=TwoWay}" 
+                                    TextChanged="Entrance_Config_TextChanged" 
+                                            Icon="{ui:SymbolIcon Symbol=Person24}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="رمز عبور" />
+                                <ui:TextBox PlaceholderText="xxxxx"
+                                    x:Name="MainCameraPassTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_MainCameraPass, Mode=TwoWay}" 
+                                    TextChanged="Entrance_Config_TextChanged" 
+                                                Icon="{ui:SymbolIcon Symbol=Password24}"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="aNPRBox" Visibility="Collapsed" Background="#20B9B9B9" Margin="5 10 5 0" Padding="10" CornerRadius="7">
+                    <StackPanel>
+                        <TextBlock  Margin="5"  Text="تنظیمات پلاکخوان" />
+                        <Border Background="#20B9B9B9" Margin="0 5" Padding="10" CornerRadius="7">
+                            <DockPanel>
+                                <ui:ToggleSwitch DockPanel.Dock="Right" 
+                                                  Click="Economy_Click" 
+                                                 IsChecked="{Binding Source={x:Static Properties:Settings.Default},
+                                    Path=Camera_ANPR_Enable, 
+                                    Mode=TwoWay}" 
+                                                 FlowDirection="LeftToRight" 
+                                                 OffContent="غیر فعال" 
+                                                 OnContent="فعال"
+                                                 />
+                                <TextBlock DockPanel.Dock="Left"  Margin="5"  Text="فعالسازی پلاکخوان" />
+                            </DockPanel>
+                        </Border>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="*"/>
+                                <ColumnDefinition  Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Grid.Row="0" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="تعداد فریم های رد پس از تشخیص" />
+                                <ui:TextBox 
+                                    x:Name="ANPR_FrameSkipTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ANPR_FrameSkip, Mode=TwoWay}"
+                                    TextChanged="ANPR_Config_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Grid.Row="0"  Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="کش VLC"/>
+                                <ui:TextBox 
+                                    x:Name="ANPR_VlcCacheTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ANPR_VlcCache, 
+                                    Mode=TwoWay}" 
+                                               TextChanged="ANPR_Config_Changed"/>
+
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Grid.Row="0"  Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نوع پلاک" />
+                                <ComboBox x:Name="plateTypeCombo" 
+                                          SelectionChanged="plateTypeCombo_SelectionChanged"  
+                                          SelectedIndex="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ANPR_PlateType, Mode=TwoWay}">
+                                    <ComboBoxItem Content="فقط پلاک استاندارد" />
+                                    <ComboBoxItem Content="پلاک استاندارد + پلاک اروند" />
+                                    <ComboBoxItem Content="پلاک استاندارد + پلاک ارگ" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Grid.Row="0"  Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5" ToolTip="آستانه ی تشخیص ورود خودرو برای تصاویر شب، مقدار 7 و برای روز مقدار 20 مناسب است مقدار بزرگتر حساسیت کمتری دارد و خودروی کمتری تشخیص می دهد">
+                                    <Run Text="پارامتر نور ویدئو" />
+                                </TextBlock>
+                                <ui:TextBox  
+                                    x:Name="ANPR_LightTextBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ANPR_LightParameter, Mode=TwoWay}"
+                                    TextChanged="ANPR_Config_Changed"/>
+
+                            </StackPanel>
+                            <StackPanel Grid.Column="0" Grid.Row="1" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="تعداد پلاک ها در بافر" />
+                                <ui:TextBox  
+                                    x:Name="ANPR_PlateCountBox"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default},
+                                    Path=Camera_ANPR_PlateCountInBuffer, Mode=TwoWay}"
+                                    TextChanged="ANPR_Config_Changed"/>
+
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Grid.Row="1" Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="دقت پلاکخوان (از 0 تا 100)" />
+                                <ui:TextBox  
+                                    x:Name="ANPR_Cnf"
+                                    Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=Camera_ANPR_Cnf, Mode=TwoWay}" 
+                                    TextChanged="ANPR_Config_Changed"/>
+
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1"  Margin="5" FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="CPU Economy Mode"/>
+                                <DockPanel>
+                                    <ui:ToggleSwitch Click="Economy_Click" 
+                                                     IsChecked="{Binding Source={x:Static Properties:Settings.Default},
+                                        Path=Camera_ANPR_Economy, Mode=TwoWay}" 
+                                                     DockPanel.Dock="Right" 
+                                                     FlowDirection="LeftToRight" 
+                                                     OffContent="غیر فعال" 
+                                                     OnContent="فعال" />
+                                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="حالت اکونومی سی پی یو" />
+                                </DockPanel>
+                            </StackPanel>
+
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            
+            <StackPanel HorizontalAlignment="Stretch">
+                <DockPanel FlowDirection="RightToLeft">
+                    <ui:Button DockPanel.Dock="Right" Content="افزودن دوربین" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Appearance="Primary" Click="AddCamera_Click"/>
+
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="لیست دوربین های فرعی" />
+
+                </DockPanel>
+                <ui:DataGrid x:Name="CameraDataGrid"  Margin="0 10" FlowDirection="LeftToRight" AutoGenerateColumns="False" 
+                     ItemsSource="{Binding Cameras, Mode=TwoWay}"
+                             CanUserAddRows="False">
+                    <ui:DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTextColumn Header="Snapshot URL" MinWidth="150" Binding="{Binding SnapshotUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTextColumn Header="Username" Binding="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTextColumn Header="Password" Binding="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTemplateColumn Header="Actions">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="ویرایش" Margin="5 0" Click="EditCamera_Click"/>
+                                        <ui:Button Appearance="Danger" Icon="{ui:SymbolIcon Symbol=Delete16}" Click="DeleteCamera_Click"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
+
+            </StackPanel>
+        </Border>
+
+    </StackPanel>
+</Page>

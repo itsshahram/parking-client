@@ -1,0 +1,328 @@
+﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.TicketDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Parking.App"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:components="clr-namespace:Parking.App.Views.Components" 
+        mc:Ignorable="d"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="{StaticResource IranYekanFont}"  
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        FlowDirection="RightToLeft"
+        KeyUp="TicketDetailsWindow_KeyUp"
+        Title="TicketDetailsWindow" 
+        d:DesignWidth="850"
+        Width="1024"
+        Height="800" 
+                 >
+    <!--Topmost="True"-->
+    <DockPanel x:Name="MainPanel" >
+
+        <ui:TitleBar
+        x:Name="TitleBar" 
+            DockPanel.Dock="Top"
+        Title="جزئیات قبض">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        
+        <Grid x:Name="MainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="0" x:Name="ExtraColumn" />
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0"  Margin="0 10 0 0">
+                <StackPanel DockPanel.Dock="Top" Background="Red" x:Name="seizedBox" Visibility="Collapsed">
+                    <TextBlock Text="این پلاک توقیفی است" HorizontalAlignment="Center" Margin="0 0 0 10" FontWeight="DemiBold" FontSize="20"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Top" Background="Green" x:Name="paymentResultBox" Visibility="Collapsed">
+                    <TextBlock Text="پرداخت موفق" Foreground="White" x:Name="paymentResultText" HorizontalAlignment="Center" Margin="0 10" FontWeight="DemiBold" FontSize="20"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical" >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="80"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
+                            <Border Background="#33828FA8" CornerRadius="7" Margin="10 5" >
+                                <StackPanel Margin="10 0">
+                                    <DockPanel  Margin="10">
+                                        <ui:ToggleSwitch x:Name="MissingCardToggle"  FlowDirection="LeftToRight" DockPanel.Dock="Right" Checked="MissingCardToggle_Checked" Unchecked="MissingCardToggle_Unchecked" OffContent="غیر فعال" OnContent="فعال"/>
+                                        <Label DockPanel.Dock="Left" Content="آیا کارت مفقود شده است.  (کلید F12 برای فعال شدن)" Margin="0 0 20 0"/>
+                                    </DockPanel>
+                                </StackPanel>
+
+                            </Border>
+
+                        </StackPanel>
+                        <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت (Space)" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
+                        <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی (F1)" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
+                        <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1" HorizontalAlignment="Stretch"  Grid.Column="2" Margin="3" IsDefault="True" Appearance="Info" Padding="20 5 20 5" Content="چاپ رسید (F3)" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                    </Grid>
+
+                </StackPanel>
+                <ScrollViewer>
+                    <StackPanel>
+                        <WrapPanel HorizontalAlignment="Center">
+                            <Border CornerRadius="8" 
+                             Background="White" 
+                             BorderThickness="2" 
+                             BorderBrush="Gray"
+                             Margin="10 5"
+                             Width="400"
+                             Height="90">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition  Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="60"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="Blue" CornerRadius="0 8 8 0" Grid.Column="4">
+                                        <StackPanel FlowDirection="LeftToRight" Margin="10 10">
+                                            <ui:Image Source="/Assets/iran.png" Margin="0 0 10 5"/>
+                                            <TextBlock Text="I.R." Foreground="White"/>
+                                            <TextBlock Text="IRAN" Foreground="White"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock  Grid.Column="3" 
+                     FontWeight="Bold" 
+                     FontSize="45" 
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Text="22" x:Name="plate_LeftNumber"  Foreground="Black"  />
+                                    <TextBlock  Grid.Column="2" 
+                     FontWeight="Bold" 
+                     FontSize="45" 
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Text="ب" x:Name="plate_Char"  Foreground="Black"  />
+                                    <TextBlock  Grid.Column="1" 
+                     FontWeight="Bold" 
+                     FontSize="45" 
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Text="123" Margin="15 0" x:Name="plate_RightNumber"  Foreground="Black"  />
+                                    <Border BorderBrush="Gray" BorderThickness="0 0 1 0" >
+                                        <TextBlock  Grid.Column="1" 
+                     FontWeight="Bold" 
+                     FontSize="45" 
+                     HorizontalAlignment="Center" 
+                     VerticalAlignment="Center" 
+                     Text="22" x:Name="plate_IRNumber"   Foreground="Black"  />
+                                    </Border>
+                                </Grid>
+
+                            </Border>
+                            <Border CornerRadius="8" 
+                            Background="#20B9B9B9"
+                            BorderThickness="2" 
+                            Margin="10 5"
+                            BorderBrush="#CECECE"
+                            Width="400">
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+
+                                        <TextBlock  Grid.Column="1" 
+                         FontWeight="Bold" 
+                         FontSize="45" 
+                         HorizontalAlignment="Center" 
+                         VerticalAlignment="Center" 
+                         Text="{Binding Item.TotalAmount, StringFormat=N0}"    />
+
+                                        <TextBlock  Grid.Column="1" 
+                         FontSize="30" 
+                         HorizontalAlignment="Center" 
+                         VerticalAlignment="Center" 
+                         Text="ريال"  Margin="10 0 0 0" />
+
+                                    </StackPanel>
+                                    <components:ExitedStatusBorder x:Name="exitedStatus" />
+                                </StackPanel>
+
+
+
+                            </Border>
+                        </WrapPanel>
+                        <Grid x:Name="ImageBox" Visibility="Visible">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="200"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border 
+                            BorderThickness="2"  
+                            BorderBrush="#10CECECE" 
+                            Background="Transparent"
+                            Margin="10"  
+                            Grid.Column="0">
+                                <Grid>
+                                    <!-- تصویر -->
+                                    <Image x:Name="EntryImage" Stretch="Fill" />
+
+                                    <!-- لایه متنی -->
+                                    <StackPanel VerticalAlignment="Top" Background="#80000000">
+                                        <TextBlock Text="ورود" 
+                       Foreground="White" 
+                       HorizontalAlignment="Center" 
+                       Margin="10"  />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border  
+                            BorderThickness="2"  
+                            BorderBrush="#10CECECE" 
+                            Background="Transparent"
+                            Margin="10"  
+                            Grid.Column="1">
+                                <Grid>
+                                    <!-- تصویر -->
+                                    <Image x:Name="currentImg" Stretch="Fill" />
+
+                                    <!-- لایه متنی -->
+                                    <StackPanel VerticalAlignment="Top" Background="#80000000">
+                                        <TextBlock Text="خروج" 
+                       Foreground="White" 
+                       HorizontalAlignment="Center" 
+                       Margin="10"  />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+
+
+                        </Grid>
+                        <!-- بخش اول: اطلاعات ورود -->
+                        <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="گروه پلاک:"/>
+                     <Run Text="{Binding Item.LicensePlateGroupName}" FontSize="18" FontWeight="Bold"/>
+                                </TextBlock>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="ورود:"/>
+                     <Run Text="{Binding Item.StartTimeString}" FontSize="18" FontWeight="Bold"/>
+                     <Separator/>
+                     <Run Text="{Binding Item.StartTimeOnlyString}" FontSize="18" FontWeight="Bold"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                        <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+
+                                <TextBlock Grid.Row="0" Grid.Column="0"  Margin="5">
+                     <Run  Text="توقف:"/>
+                     <Run Text="{Binding Item.DurationMinutes}" FontSize="20" FontWeight="Bold"/>
+          <Run  Text="دقیقه"/>
+                                </TextBlock>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="خروج:"/>
+                     <Run Text="{Binding Item.EndTimeString}" FontSize="18" FontWeight="Bold"/>
+                     <Separator/>
+                     <Run Text="{Binding Item.EndTimeOnlyString}" FontSize="18" FontWeight="Bold"/>
+                                </TextBlock>
+
+                            </Grid>
+                        </Border>
+                        <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="تخفیف:"/>
+                     <Run Text="{Binding Item.DiscountPercent}" FontSize="20" FontWeight="Bold"/>
+                     <Run Text="%"/>
+                     <Separator Margin="10 0"/>
+                     <Run  Text="معادل"/>
+                     <Run Text="{Binding Item.Discount, StringFormat=N0}" FontSize="20" FontWeight="Bold"/>
+                     <Run Text="ريال"/>
+                                </TextBlock>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="مبلغ پرداخت شده:"/>
+                     <Run Text="{Binding Item.PaidAmount, StringFormat=N0}" FontSize="20" FontWeight="Bold"/>
+                      <Run Text="ريال"/>
+                                </TextBlock>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="نوع پرداخت:"/>
+                     <Run Text="{Binding Item.PaidType}" FontSize="20" FontWeight="Bold"/>
+                                </TextBlock>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="شماره مرجع:"/>
+                     <Run Text="{Binding Item.RefId}" FontSize="20" FontWeight="Bold"/>
+                                </TextBlock>
+                                <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" 
+                 Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Padding="10 5">
+                                    <TextBlock>
+                     <Run  Text="توضیحات:"/>
+                     <Run Text="{Binding Item.Description}" FontSize="16" FontWeight="Bold"/>
+                                    </TextBlock>
+                                </Border>
+
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+            <ScrollViewer Grid.Column="1">
+                <StackPanel x:Name="ExtraImages" >
+
+                </StackPanel>
+            </ScrollViewer >
+
+        </Grid>
+
+
+
+
+
+
+
+    </DockPanel>
+</ui:FluentWindow>

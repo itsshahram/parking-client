@@ -1,0 +1,230 @@
+﻿<Page x:Class="Parking.App.Views.Pages.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:local="clr-namespace:Parking.App.Views.Pages"
+      xmlns:components="clr-namespace:Parking.App.Views.Components"  
+      mc:Ignorable="d"
+      FontFamily="{StaticResource IranYekanFont}" 
+      ScrollViewer.CanContentScroll="False"  
+      VerticalAlignment="Stretch"
+      d:DesignWidth="850"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"   
+      Title="MainPage">
+    <Page.Resources>
+        
+    </Page.Resources>
+    <DockPanel>
+        <components:ParkingInfo DockPanel.Dock="Top"/>
+        <Grid FlowDirection="RightToLeft"  x:Name="MainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <!--<ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />-->
+            </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Column="0" Margin="5" VerticalScrollBarVisibility="Auto" >
+                <StackPanel Margin="0 5 5 5">
+                    <TextBlock Text="ثبت ورود"/>
+                    <StackPanel Orientation="Vertical" x:Name="CamViewBox"  >
+                        <Border CornerRadius="10" FlowDirection="LeftToRight" Background="#33828FA8" BorderThickness="2" HorizontalAlignment="Stretch" >
+                            <Image Height="130" x:Name="imageBox" Source="{Binding CurrentFrame}"  Stretch="Fill" />
+
+                        </Border>
+                        <Grid>
+                        </Grid>
+
+                        <Border CornerRadius="10" x:Name="plateBorder" FlowDirection="LeftToRight" Background="#33828FA8" BorderThickness="2" HorizontalAlignment="Stretch" Height="70">
+                            <Rectangle RadiusX="10" RadiusY="10" >
+                                <Rectangle.Fill>
+                                    <ImageBrush  x:Name="plateImageBox" Stretch="Fill"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Border>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding CameraImages}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel x:Name="ExtraImages" Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="2" BorderBrush="Gray" Margin="5">
+                                    <Image Stretch="Fill" Source="{Binding ImageSource}" Height="60" Width="100"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+
+
+                    <StackPanel Margin="0 15 0 10" HorizontalAlignment="Stretch">
+                        <TextBlock Text="پلاک ایران" x:Name="PlateTitle" />
+                        <Grid x:Name="IRPlateBox" HorizontalAlignment="Stretch" FlowDirection="LeftToRight">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <ui:TextBox Grid.Row="0" x:Name="leftNumbersNumberTextBox"  
+                                        GotFocus="PlateTextBox_GotFocus" 
+                                        TextChanged="leftNumbersNumberTextBox_TextChanged"
+                                        FontSize="20" 
+                                        PlaceholderText="_ _" 
+                                        Grid.Column="0" 
+                                        MaxLength="2" 
+                                        FontWeight="Bold" 
+                                        HorizontalContentAlignment="Center" 
+                                        VerticalContentAlignment="Center"/>
+                            <ComboBox Grid.Row="0" 
+                                      
+                                      x:Name="plateCharsCombo"  
+                                      IsEditable="True" 
+                                      FontSize="20" 
+                                      SelectedIndex="0"   
+                                      Margin="1 0"
+                              Grid.Column="1">
+                            </ComboBox>
+                            <ui:TextBox Grid.Row="0"  
+                                        x:Name="rightNumbersNumberTextBox"
+                                        GotFocus="PlateTextBox_GotFocus"
+                                                         TextChanged="rightNumbersNumberTextBox_TextChanged"
+                                        FontSize="20" 
+                                        PlaceholderText="_ _ _" 
+                                        Grid.Column="2" 
+                                        MaxLength="3" 
+                                        Margin="1 0"  
+                                        FontWeight="Bold" 
+                                        HorizontalContentAlignment="Center" 
+                                        VerticalContentAlignment="Center"/>
+                            <ui:TextBox Grid.Row="0"   
+                                        x:Name="irNumberTextBox"
+                                        TextChanged="irNumberTextBox_TextChanged"
+                                        GotFocus="PlateTextBox_GotFocus"
+                                        FontSize="20"   
+                                        Grid.Column="3"  
+                                        MaxLength="2"  
+                                        Margin="1 0"  
+                                        FontWeight="Bold" 
+                                        HorizontalContentAlignment="Center" 
+                                        VerticalContentAlignment="Center" />
+                        </Grid>
+                        <StackPanel Visibility="Collapsed" x:Name="OtherPlateBox" >
+                            <ui:TextBox Grid.Row="1" Grid.ColumnSpan="4"  x:Name="OtherPlateTextBox"  FontSize="20" PlaceholderText="_ _"   Margin="1 0"   FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+
+                        </StackPanel>
+
+                        <Border Background="#33828FA8" CornerRadius="7" Margin="0 5">
+                            <DockPanel  Margin="10">
+                                <ui:ToggleSwitch DockPanel.Dock="Right" FlowDirection="LeftToRight" x:Name="OtherPlateToggle" Checked="OtherPlateToggle_Checked" Unchecked="OtherPlateToggle_Unchecked"  OffContent="غیر فعال" OnContent="فعال"/>
+                                <Label DockPanel.Dock="Left" Content="پلاک منطقه یا موتور" Margin="0 0 20 0"/>
+                            </DockPanel>
+                        </Border>
+
+
+                        <Border x:Name="plateCheck" Visibility="Visible" Background="#335fd17e" Margin="0 5" CornerRadius="6">
+                            <ui:TextBlock x:Name="platecheckText" Foreground="#309d2c" Text="فرمت پلاک درست است" Margin="5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Margin="0 15 0 0" Visibility="Collapsed" x:Name="plateInfoText" VerticalAlignment="Center" HorizontalAlignment="Center" Text="لطفا پلاک را بدرستی وارد کرده و enter را فشار دهید"    TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Margin="0 5">
+                        <TextBlock Text="نوع خودرو" />
+                        <ComboBox x:Name="VehicleSegmentComboBox" 
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding SelectedVehicleSegmentItem, Mode=TwoWay}"
+                                  SelectionChanged="VehicleSegmentComboBox_SelectionChanged"
+                                  
+                                  />
+
+
+                    </StackPanel>
+
+
+                    <StackPanel>
+                        <Border Background="#33828FA8" CornerRadius="7" Margin="0 5">
+                            <StackPanel>
+                                <DockPanel  Margin="10">
+                                    <ui:ToggleSwitch x:Name="customDateToggle"  FlowDirection="LeftToRight" DockPanel.Dock="Right" Checked="CustomDateToggle_Checked" Unchecked="CustomDateToggle_Unchecked" OffContent="غیر فعال" OnContent="فعال"/>
+                                    <Label DockPanel.Dock="Left" Content="ورود زمان بصورت دستی" Margin="0 0 20 0"/>
+                                </DockPanel>
+                                <Border Background="#33828FA8" FlowDirection="LeftToRight" x:Name="timeBox" Visibility="Collapsed" CornerRadius="5" Padding="10" Margin="5">
+                                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0 5 0 0">
+                                        <ui:TextBox x:Name="minutesTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="_ _" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
+                                        <TextBlock Text=":" HorizontalAlignment="Center" FontSize="25"/>
+                                        <ui:TextBox Name="hourTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="_ _" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
+                                        <Separator Margin="5 0 5 0"/>
+                                        <ui:TextBox x:Name="dayTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="روز" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
+                                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                                        <ui:TextBox x:Name="monthTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="ماه" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
+                                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                                        <ui:TextBox x:Name="yearTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="4" PlaceholderText="14xx" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+
+                        </Border>
+
+                    </StackPanel>
+                    <Border Background="#33828FA8" CornerRadius="5" Margin="0 5">
+
+                        <StackPanel>
+                            <DockPanel  Margin="10">
+                                <ui:ToggleSwitch DockPanel.Dock="Right"  FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" Click="ExtraInfoToggleSwitch_Click"/>
+                                <Label Content="اطلاعات اضافه" VerticalAlignment="Center" DockPanel.Dock="Left" />
+                            </DockPanel>
+                            <Border Background="#33828FA8" CornerRadius="7" Margin="5" Padding="10" x:Name="extraInfoBox" Visibility="Collapsed">
+                                <StackPanel>
+                                    <StackPanel Margin="0 5">
+                                        <TextBlock Text="شماره همراه راننده" />
+                                        <ui:TextBox Text="{Binding DriverPhoneNumber, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0 5">
+                                        <TextBlock Text="نام و نام خانوادگی راننده" />
+                                        <ui:TextBox Text="{Binding DriverFullName, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0 5">
+                                        <TextBlock Text="توصیحات راننده" />
+                                        <ui:TextBox Text="{Binding DriverDescription, Mode=TwoWay}" MinLines="2"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel >
+                        <ui:Button x:Name="CreateTicketBtn" Click="CreateTicketBtn_Click" HorizontalAlignment="Stretch" Height="80"  IsDefault="True" Appearance="Success" Padding="10 5 10 5"  Content="ثبت ورود" Icon="{ui:SymbolIcon Symbol=VehicleCarProfileLtrClock16}" FontSize="24"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer Grid.Column="1" Margin="5" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed"  x:Name="LatestEntriesColumn">
+                <StackPanel  Margin="0 5 10 5">
+                    <TextBlock Text="آخرین ورود ها"/>
+                    <StackPanel x:Name="TicketDetailsBox" Margin="6">
+
+                    </StackPanel>
+                    <components:TicketListView x:Name="LatestEntryList" Margin="0 0 0 50" ItemsSource="{Binding LatestEntryListItems}"/>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer Grid.Column="2" Margin="5" x:Name="LatestExitedColumn" CanContentScroll="True" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                <StackPanel Grid.Column="2" Margin="0 5 5 5">
+                    <TextBlock Text="آخرین خروج ها"/>
+                    <components:TicketListView  ItemsSource="{Binding LatestExitedListItems}" />
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid> 
+
+    </DockPanel>
+</Page>

@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="Parking.App.Views.Components.TicketDetails"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Parking.App.Views.Components"
+             mc:Ignorable="d" 
+             FontFamily="{StaticResource IranYekanFont}"
+              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             >
+    <Grid >
+        <Border x:Name="MainBorder" Background="{Binding BackgroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}"   CornerRadius="7">
+            <StackPanel>
+                
+                <StackPanel Margin="10">
+                    <!--<ProgressBar IsEnabled="True" Minimum="0" Maximum="100" IsIndeterminate="True" Visibility="Visible"  Foreground="Green"/>-->
+
+                    <Border BorderBrush="#80277327" Background="#20277327" BorderThickness="1" CornerRadius="6" Margin="5 10 5 10" HorizontalAlignment="Stretch"  Padding="20 5 20 5">
+                        <TextBlock Text="{Binding PlateText}" FontSize="20" FontStyle="Normal" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Grid FlowDirection="RightToLeft">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="10 5">
+                            <TextBlock  Text="ساعت ورود:" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10 5">
+                            <TextBlock   Text="{Binding EntryTime}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="10 5">
+                            <TextBlock  Text="تعرفه:" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10 5">
+                            <TextBlock  Text="{Binding VehicleSegmentPrice}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+                <ProgressBar Value="0" Maximum="100" Foreground="Green" Margin="3 0" x:Name="MyProgressBar" />
+            </StackPanel>
+
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Parking.App.Views.Components.TrayIconView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Parking.App.Views.Components"
+             xmlns:converters="clr-namespace:Parking.App.Helpers"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
+             mc:Ignorable="d" 
+             FontFamily="{StaticResource IranYekanFont}"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <tray:NotifyIcon x:Name="notifyTray" 
+           Grid.Row="0"
+           FocusOnLeftClick="True"
+           Icon="{Binding IconSource, Mode=TwoWay}" 
+           MenuOnRightClick="True"
+           TooltipText="Madaar Parking Manager Application">
+        
+        <tray:NotifyIcon.Menu>
+            <ContextMenu>
+                <MenuItem Header="نمایش اپلیکیشن" x:Name="ShowWindowBtn" Click="ShowWindowBtn_Click" Icon="{ui:SymbolIcon Symbol=Desktop24}" Margin="2" Padding="2 4" />
+                <Separator/>
+                <MenuItem Header="همگام سازی داده ها" Icon="{ui:SymbolIcon Symbol=CloudSync24}"  Margin="2" Padding="2 4" />
+                <Separator/>
+                <MenuItem Header="بستن اپلیکیشن" x:Name="CloseAppBtn" Click="CloseAppBtn_Click" Icon="{ui:SymbolIcon Symbol=ArrowExit20}"  Margin="2" Padding="2 4"/>
+            </ContextMenu>
+        </tray:NotifyIcon.Menu>
+    </tray:NotifyIcon>
+
+</UserControl>

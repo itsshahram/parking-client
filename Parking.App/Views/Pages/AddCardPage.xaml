@@ -1,0 +1,213 @@
+﻿<Page x:Class="Parking.App.Views.Pages.AddCardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Parking.App.Views.Pages"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:components="clr-namespace:Parking.App.Views.Components"
+      FontFamily="{StaticResource IranYekanFont}"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Title="AddCardPage">
+    <!--<Page.Resources>
+        <DataTemplate x:Key="ComboBoxItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Id}" Margin="5" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding NameFa}" Margin="5" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="GroupComboBoxItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Name}" Margin="5" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>-->
+    
+    <DockPanel>
+        <StackPanel  DockPanel.Dock="Top">
+            <TextBlock Text="تعریف کارت" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="20" Margin="10 10 10 0"/>
+        </StackPanel>
+        <Grid Margin="15" FlowDirection="RightToLeft">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="برای ثبت کارت ابتدا مقادیر را وارد کرده و سپس کارت را بر روی دستگاه قرار دهید" TextWrapping="Wrap" Margin="10"/>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <ui:ToggleSwitch IsChecked="{Binding IsActive, Mode=TwoWay}" 
+                                 DockPanel.Dock="Right"  
+                                 FlowDirection="LeftToRight" 
+                                 OffContent="غیر فعال" 
+                                 OnContent="فعال" />
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعال بودن کارت" />
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <ComboBox DockPanel.Dock="Right"  
+                                      x:Name="VehicleSegmentsComboBox"
+                                      MinWidth="200"
+                                      ItemsSource="{Binding VehicleSegments}"
+                                      SelectedItem="{Binding SelectedSegment, Mode=TwoWay}"
+                                      DisplayMemberPath="NameFa" />
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="تعرفه" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <ui:TextBox MinWidth="180" 
+                                            PlaceholderText="نام" 
+                                            Text="{Binding OwnerFirstName, Mode=TwoWay}" />
+                                <Separator Margin="2 0"/>
+                                <ui:TextBox MinWidth="150" 
+                                            PlaceholderText="نام خانوادگی" 
+                                            Text="{Binding OwnerLastName, Mode=TwoWay}" />
+                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام / نام خانوادگی" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <ui:TextBox MinWidth="80" 
+                                    PlaceholderText="0" 
+                                    x:Name="PercentDiscountTextBox"        
+                                    Text="{Binding PercentDiscount, Mode=TwoWay}" />
+                                <TextBlock Text="%"  VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="درصد تخفیف" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <ui:TextBox MinWidth="80" 
+                                            x:Name="ValidityPeriodTextBox"
+                                        PlaceholderText="3650" 
+                                        Text="{Binding ValidityPeriod, Mode=TwoWay}" />
+                                <TextBlock Text="روز"  VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="مدت اعتبار" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <ui:ToggleSwitch
+                                x:Name="PlateAssignmentToggle"
+                                DockPanel.Dock="Right"  
+                                FlowDirection="LeftToRight"
+                                OffContent="غیر فعال" 
+                                OnContent="فعال"
+                                Checked="PlateAssignmentToggle_Checked"
+                                Unchecked="PlateAssignmentToggle_Unchecked"/>
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="اختصاص به پلاک" />
+                        </DockPanel>
+                        <Border Visibility="Collapsed" x:Name="PlateBox" Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Right"   FlowDirection="LeftToRight" >
+                                        <Grid x:Name="IRPlateBox" HorizontalAlignment="Stretch" FlowDirection="LeftToRight">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+
+                                            <ui:TextBox Grid.Row="0" x:Name="leftNumbersNumberTextBox"  
+                        FontSize="20" 
+                        PlaceholderText="_ _" 
+                        Grid.Column="0" 
+                        MaxLength="2" 
+                        FontWeight="Bold" 
+                        HorizontalContentAlignment="Center" 
+                        VerticalContentAlignment="Center"/>
+                                            <ComboBox Grid.Row="0" 
+                      
+                      x:Name="plateCharsCombo"  
+                      IsEditable="True" 
+                      FontSize="20" 
+                      SelectedIndex="0"   
+                      Margin="1 0"
+              Grid.Column="1">
+                                            </ComboBox>
+                                            <ui:TextBox Grid.Row="0"  
+                        x:Name="rightNumbersNumberTextBox"
+                        FontSize="20" 
+                        PlaceholderText="_ _ _" 
+                        Grid.Column="2" 
+                        MaxLength="3" 
+                        Margin="1 0"  
+                        FontWeight="Bold" 
+                        HorizontalContentAlignment="Center" 
+                        VerticalContentAlignment="Center"/>
+                                            <ui:TextBox Grid.Row="0"   
+                        x:Name="irNumberTextBox"
+                        FontSize="20"   
+                        Grid.Column="3"  
+                        MaxLength="2"  
+                        Margin="1 0"  
+                        FontWeight="Bold" 
+                        HorizontalContentAlignment="Center" 
+                        VerticalContentAlignment="Center" />
+                                        </Grid>
+
+                                    </StackPanel>
+                                    <TextBlock DockPanel.Dock="Left" Margin="5" VerticalAlignment="Center" Text="پلاک" />
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+                <!--<StackPanel Margin="10">
+                    <ui:Button Appearance="Secondary" Content="بازنشانی اطلاعات" Icon="{ui:SymbolIcon Symbol=ArrowReset24}"/>
+
+                </StackPanel>-->
+            </StackPanel>
+
+            <StackPanel Grid.Column="1">
+                <Border Margin="10"  Height="150" Background="#10F5F5F5" CornerRadius="10" BorderThickness="1" BorderBrush="#BCBCBC">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0 20 0 20">
+                        <Image Source="/Assets/nfc.png"  Height="50"/>
+
+                        <TextBlock Margin="0 10 0 0" Text="در انتظار خواندن کارت" HorizontalAlignment="Center"   />
+                        <ProgressBar Margin="0 10 0 0"   IsIndeterminate="True"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="10 0 10 0" x:Name="SaveCardInfoBox" Visibility="Collapsed" MinHeight="30" Background="#29BF79" CornerRadius="10" BorderThickness="1" BorderBrush="#20A366">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock FontSize="10">
+                            <Run Text="اطلاعات کارت"/>
+                            <Run x:Name="UidTextBlock" Text="----" FontStyle="Oblique"/>
+                            <Run Text="ثبت شد"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+
+        </Grid>
+
+    </DockPanel>
+</Page>

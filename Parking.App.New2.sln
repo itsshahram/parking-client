@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35828.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.App", "Parking.App\Parking.App.csproj", "{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.Domain", "Parking.Domain\Parking.Domain.csproj", "{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.Infrastructure", "Parking.Infrastructure\Parking.Infrastructure.csproj", "{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugWithANPR|Any CPU = DebugWithANPR|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.DebugWithANPR|Any CPU.ActiveCfg = DebugWithANPR|Any CPU
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.DebugWithANPR|Any CPU.Build.0 = DebugWithANPR|Any CPU
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D0099DD-91EB-48F3-A014-D0D3CD9EBE41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.DebugWithANPR|Any CPU.ActiveCfg = DebugWithANPR|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.DebugWithANPR|Any CPU.Build.0 = DebugWithANPR|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C12FD2D-6CEC-43E6-8129-A71AEA0690E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.DebugWithANPR|Any CPU.ActiveCfg = DebugWithANPR|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.DebugWithANPR|Any CPU.Build.0 = DebugWithANPR|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75D94F9B-940E-4F9F-ADF0-4F471BFF2AA7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {651CA43E-237B-4113-9C64-12A3A814EE0D}
+	EndGlobalSection
+EndGlobal

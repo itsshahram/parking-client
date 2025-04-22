@@ -1,0 +1,90 @@
+﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:local="clr-namespace:Parking.App.Views.Windows"
+        mc:Ignorable="d"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="{StaticResource IranYekanFont}"  
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        FlowDirection="RightToLeft"   KeyUp="LoginWindow_KeyUp"
+        Title="ورود به اپلیکیشن" Height="550" Width="400">
+    <StackPanel>
+        <ui:TitleBar
+        x:Name="TitleBar" DockPanel.Dock="Top"
+        Title="اپلیکیشن مدیریت پارکینگ مدار"
+        Grid.Row="0"
+        CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/database.png" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        <StackPanel HorizontalAlignment="Center">
+            <ui:Image Source="pack://application:,,,/Assets/wpfui-icon-256.png" Width="100"/>
+            <ui:Image Source="pack://application:,,,/Assets/Madaar-Logo.png" Width="100"/>
+            <Separator Margin="0 5"/>
+            <TextBlock Text="ورود به اپلیکیشن"  FontSize="20" FontWeight="Bold"/>
+        </StackPanel>
+        <Border Visibility="Collapsed" x:Name="msgBox" CornerRadius="10" Background="#206ce09a" BorderThickness="1" Margin="20 10" Padding="10">
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock x:Name="connectionTestMessage"  />
+            </StackPanel>
+        </Border>
+        <StackPanel Margin="10" HorizontalAlignment="Center">
+            <StackPanel Width="300" Margin="5">
+                <TextBlock Text="نام کاربری"     />
+                <ui:TextBox x:Name="usernameBox" TextChanged="usernameBox_TextChanged" FlowDirection="LeftToRight"/>
+            </StackPanel>
+            <StackPanel Width="300" Margin="5">
+                <TextBlock Text="رمز عبور" />
+                <ui:PasswordBox x:Name="passwordBox" TextChanged="passwordBox_TextChanged" FlowDirection="LeftToRight"/>
+            </StackPanel>
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <ui:Button   Grid.Column="1" 
+                                           x:Name="LoginBtn"
+                                 Click="LoginBtn_Click"
+                             
+                                           IsEnabled="False" 
+                                           Icon="{ui:SymbolIcon Symbol=AppFolder24}" 
+                                           Content="ورود" 
+                                           Height="40" 
+                                           Margin="10 0"
+                               Appearance="Success"
+                                           HorizontalAlignment="Stretch"/>
+                <ui:Button Appearance="Transparent"  Grid.Column="0"
+                               x:Name="ExitBtn"
+                           Click="ExitBtn_Click"
+                           Icon="{ui:SymbolIcon Symbol=ArrowExit20}" 
+                           Content="انصراف" 
+                           Height="40"
+                           Margin="10 0" HorizontalAlignment="Stretch"
+                           />
+            </Grid>
+            <StackPanel Margin="40 10" x:Name="SyncBox" Visibility="Collapsed">
+                <DockPanel x:Name="GetParkingInfoBox">
+                    <ui:TextBlock Text="دریافت اطلاعات پارکینگ" DockPanel.Dock="Left" />
+                </DockPanel>
+                <DockPanel x:Name="GetUsersBox">
+                    <ui:TextBlock Text="همگام‌سازی لیست کاربران" DockPanel.Dock="Left" />
+                </DockPanel>
+                <DockPanel  x:Name="GetPricesBox">
+                    <ui:TextBlock DockPanel.Dock="Left"  Text="دریافت اطلاعات تعرفه ها" />
+                </DockPanel>
+                <DockPanel  x:Name="GetGroupsBox">
+                    <ui:TextBlock DockPanel.Dock="Left"  Text="دریافت لیست گروه ها" />
+                </DockPanel>
+            </StackPanel>
+            
+        </StackPanel>
+
+    </StackPanel>
+</ui:FluentWindow>

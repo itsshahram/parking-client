@@ -1,0 +1,81 @@
+﻿<Page x:Class="Parking.App.Views.Pages.SettingsPageChilds.POSSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Parking.App.Views.Pages.SettingsPageChilds"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:Properties="clr-namespace:Parking.App"
+      FontFamily="{StaticResource IranYekanFont}" 
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Title="POSSettingsPage">
+
+    <StackPanel FlowDirection="RightToLeft" Margin="10">
+        <TextBlock Text="تنظیمات دستگاه کارتخوان"   FontWeight="Bold" FontSize="15"    Margin="10 5"  />
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel >
+                <ui:InfoBar Title="Title" Message="Essential message."/>
+                <WrapPanel>
+
+                    <StackPanel Margin="5" Width="200">
+                        <TextBlock Text="انتخاب نوع کارتخوان"/>
+                        <ComboBox x:Name="POSTypeCombo" 
+                                       SelectionChanged="POSTypeCombo_SelectionChanged"
+                                    SelectedValue="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=POS_Type, Mode=TwoWay}" 
+                                   SelectedValuePath="Tag"
+                                  >
+                            <ComboBoxItem Tag="POS">
+                                <TextBlock  Text="ثابت"   />
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Sayar">
+                                <TextBlock  Text="سیار (بزودی)"   />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Margin="5" Width="200">
+                        <TextBlock Text="نوع اتصال"/>
+                        <ComboBox x:Name="Connection_Type" 
+                                  SelectionChanged="Connection_Type_SelectionChanged"
+                                    SelectedValue="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=POS_Connection_Type, Mode=TwoWay}"
+                                  SelectedValuePath="Tag">
+                            <ComboBoxItem Tag="USB">
+                                <TextBlock  Text="کابل USB"   />
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Network">
+                                <TextBlock  Text="شبکه"   />
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Margin="5 5" Width="200">
+                        <TextBlock Text="آدرس آی پی"/>
+                        <ui:TextBox  FlowDirection="LeftToRight" 
+                                     x:Name="POSIPTextBox"
+                                     TextChanged="POSIPTextBox_TextChanged"
+                                     Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=POS_IP, Mode=TwoWay}" 
+                                     PlaceholderText="192.168.xxx.xxx" />
+                    </StackPanel>
+                    <StackPanel Margin="5 5" Width="200">
+                        <TextBlock Text="پورت"/>
+                        <ui:TextBox                                      x:Name="POSPortTextBox"
+                                                                         TextChanged="POSPortTextBox_TextChanged"
+                                     Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                    Path=POS_Port, Mode=TwoWay}" FlowDirection="LeftToRight" PlaceholderText="0000"/>
+                    </StackPanel>
+                    <StackPanel Margin="5">
+                        <TextBlock Text=" "/>
+                        <ui:Button x:Name="SavePOSConfigBtn" Click="SavePOSConfigBtn_Click" HorizontalAlignment="Center" Padding="20 8" Icon="{ui:SymbolIcon Symbol=Checkmark24}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Content="ذخیره اطلاعات" Appearance="Primary"/>
+
+                    </StackPanel>
+                </WrapPanel>
+
+            </StackPanel>
+        </Border>
+      
+        
+    </StackPanel>
+</Page>
