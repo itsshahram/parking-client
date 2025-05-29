@@ -1,19 +1,4 @@
-﻿using Parking.App.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿
 using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
@@ -35,6 +20,11 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             if (Settings.Default.Application_DefaultVehicleSegmentPrice >0)
             {
                 VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault(v => (int)v.Tag == Settings.Default.Application_DefaultVehicleSegmentPrice));
+            }
+            if (Settings.Default.Application_Logging_In_Elastic)
+            {
+                if (ElasticBox != null)
+                    ElasticBox.Visibility = Visibility.Visible;
             }
             
         }
@@ -68,6 +58,23 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         {
             Settings.Default.Application_GatePCName = ((TextBox)sender).Text;
             Settings.Default.Save(); 
+        }
+
+        private void elasticConfigBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.Save();
+        }
+
+        private void ElasticToggleSwitch_Checked(object sender, RoutedEventArgs e)
+        {
+            if(ElasticBox!=null)
+                ElasticBox.Visibility = Visibility.Visible;
+        }
+
+        private void ElasticToggleSwitch_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (ElasticBox != null)
+                ElasticBox.Visibility = Visibility.Collapsed;
         }
     }
 }

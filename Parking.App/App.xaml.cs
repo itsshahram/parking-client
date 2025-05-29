@@ -146,25 +146,47 @@ public partial class App : Application
 
         if (Settings.Default.Application_Logging)
         {
-            Serilog.Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .Enrich.WithMachineName()
-                .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
-                .Enrich.WithProperty("MachineName", Settings.Default.Application_GatePCName)
-                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+            if (Settings.Default.Application_Logging_In_Elastic)
+            {
+                Serilog.Log.Logger = new LoggerConfiguration()
+                       .Enrich.FromLogContext()
+                       .Enrich.WithMachineName()
+                       .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
+                       .Enrich.WithProperty("MachineName", Settings.Default.Application_GatePCName)
+                       .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri($"{Settings.Default.Application_Logs_Elastic_Server}"))
+                       {
+                           AutoRegisterTemplate = true,
+                           IndexFormat = "logs-{0:yyyy.MM.dd}",
+                           MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information
+                       })
+                       .WriteTo.File("logs/log-.txt",
+                            rollingInterval: RollingInterval.Day,
+                            retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
+                            fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
+                            rollOnFileSizeLimit: true,
+                            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                            restrictedToMinimumLevel: LogEventLevel.Error)
+                       .CreateLogger();
+            }
+            else
+            {
+                if (Settings.Default.Application_Logging_In_Elastic)
                 {
-                    AutoRegisterTemplate = true,
-                    IndexFormat = "logs-{0:yyyy.MM.dd}",
-                    MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information
-                })
-                .WriteTo.File("logs/log-.txt",
-                     rollingInterval: RollingInterval.Day,
-                     retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
-                     fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
-                     rollOnFileSizeLimit: true,
-                     outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}", 
-                     restrictedToMinimumLevel: LogEventLevel.Error)
-                .CreateLogger();
+                    Serilog.Log.Logger = new LoggerConfiguration()
+                        .Enrich.FromLogContext()
+                        .Enrich.WithMachineName()
+                        .WriteTo.File("logs/log-.txt",
+                             rollingInterval: RollingInterval.Day,
+                             retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
+                             fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
+                             rollOnFileSizeLimit: true,
+                             outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                             restrictedToMinimumLevel: LogEventLevel.Error)
+                        .CreateLogger();
+                }
+
+            }
+
         }
         else
         {
@@ -174,10 +196,10 @@ public partial class App : Application
                 .Enrich.WithProperty("Username", TokenStore.Username ?? "Unknown Username")
                 .Enrich.WithProperty("MachineName", Settings.Default.Application_GatePCName)
                 .Enrich.FromLogContext()
-                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri($"{Settings.Default.Application_Logs_Elastic_Server}"))
                 {
                     AutoRegisterTemplate = true,
-                    IndexFormat = "logs-{0:yyyy.MM.dd}"  ,
+                    IndexFormat = "logs-{0:yyyy.MM.dd}",
                     MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information
                 })
                 .MinimumLevel.Error()

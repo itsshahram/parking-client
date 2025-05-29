@@ -872,7 +872,9 @@ public class ParkingService : IParkingService
                     RRN = s.RRN,
                     LicensePlateGroupId = s.LicensePlateGroupId,
                     Description = s.Description,
-                    CardUid = s.CardUid
+                    CardUid = s.CardUid,
+                    EntranceGate = s.EntranceGate,
+                    ExitGate = s.ExitGate,
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
@@ -1236,7 +1238,11 @@ public class ParkingService : IParkingService
                 IsExited = false,
                 CardUid = request.CardUid,
                 EntranceGate = request.EntranceGate,
-                BarcodeId = barcode
+                BarcodeId = barcode,
+                UserId = request.CreatorUserId,
+                DriverDescription = request.DriverDescription,
+                DriverFullName = request.DriverFullName,
+                DriverPhoneNumber = request.DriverPhoneNumber,
             };
             unitOfWork.ParkingTickets.Add(ticket);
             //unitOfWork.Commit();
@@ -2068,7 +2074,9 @@ public class ParkingService : IParkingService
                                                 .SetProperty(product => product.TraceNo, product => request.TraceNo)
                                                 .SetProperty(product => product.MerchantNumber, product => request.MerchantNumber)
                                                 .SetProperty(product => product.ExitGate, product => request.ExitGate)
+                                                .SetProperty(product => product.ExitImage, product => request.ExitImage)
                                                 .SetProperty(product => product.IsCardMissing, product => request.IsMissingCard)
+                                                .SetProperty(product => product.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
                                                 .SetProperty(product => product.TicketStatus, product => TicketStatus.Unsynced));
             //unitOfWork.Commit();
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, false));
@@ -2409,7 +2417,7 @@ public class ParkingService : IParkingService
                     OwnerPic = request.OwnerPic,
                     PercentDiscount = request.PercentDiscount,
                     LicensePlateGroupId = request.LicensePlateGroupId,
-                    VehicleSegmentId = request.VehicleSegmentId , 
+                    VehicleSegmentId = request.VehicleSegmentId,
                     EnLicensePlate = request.EnLicensePlate
                 };
                 unitOfWork.Cards.Add(card);

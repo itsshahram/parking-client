@@ -20,6 +20,7 @@ public interface ISynchronizationService
     TServiceResponse<bool> SendUnSyncedTicketToServer();
     Task<TServiceResponse<bool>> SendUnSyncedTicketToServerAsync();
     void SyncTicketImage();
+    void SyncTicketExitImage();
     Task SyncTicketImageAsync();
     Task SyncTicketExtraImagesAsync();
     TServiceResponse<bool> ReceiveLicensePlateGroupFromServer();

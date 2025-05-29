@@ -54,5 +54,7 @@ public class TicketsListViewModel
     public string? ExtraInfo { get; set; }
     public bool IsSeized { get; set; } = false;
     public bool IsMissingCard { get; set; } = false;
+    public string? EntranceGate { get; set; }
+    public string? ExitGate { get; set; }
 
 }

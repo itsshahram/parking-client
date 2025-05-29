@@ -16,6 +16,8 @@ public class TicketPaidInfoModel
     public string? RRN { get; set; }
     public string? TraceNo { get; set; }
     public string? ExitGate { get; set; }
+    public string? ExitImage { get; set; }
     public bool IsMissingCard { get; set; }
     public long? CardUid { get; set; }
+    public Guid? ExitRegistrarUserId { get; set; }
 }

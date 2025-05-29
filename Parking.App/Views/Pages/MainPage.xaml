@@ -181,7 +181,7 @@
                                 <ui:ToggleSwitch DockPanel.Dock="Right"  FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" Click="ExtraInfoToggleSwitch_Click"/>
                                 <Label Content="اطلاعات اضافه" VerticalAlignment="Center" DockPanel.Dock="Left" />
                             </DockPanel>
-                            <Border Background="#33828FA8" CornerRadius="7" Margin="5" Padding="10" x:Name="extraInfoBox" Visibility="Collapsed">
+                            <Border Background="#33828FA8" Visibility="Collapsed" CornerRadius="7" Margin="5" Padding="10" x:Name="extraInfoBox" >
                                 <StackPanel>
                                     <StackPanel Margin="0 5">
                                         <TextBlock Text="شماره همراه راننده" />
@@ -193,7 +193,7 @@
                                     </StackPanel>
                                     <StackPanel Margin="0 5">
                                         <TextBlock Text="توصیحات راننده" />
-                                        <ui:TextBox Text="{Binding DriverDescription, Mode=TwoWay}" MinLines="2"/>
+                                        <ui:TextBox Text="{Binding DriverDescription, Mode=TwoWay}" />
                                     </StackPanel>
                                 </StackPanel>
 

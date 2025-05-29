@@ -18,10 +18,10 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             DataContext = this;
             LoadCameras();
 
-            if (Settings.Default.Camera_ExitCameraEnable is true)
-            {
-                exitCamConfigBox.Visibility = Visibility.Visible;
-            }
+            //if (Settings.Default.Camera_ExitCameraEnable is true)
+            //{
+            //    exitCamConfigBox.Visibility = Visibility.Visible;
+            //}
             if (Settings.Default.Camera_MainCameraEnable is true)
             {
                 entranceCameraConfig.Visibility = Visibility.Visible;
@@ -101,15 +101,15 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         }
         private void ExitCameraToggleSwitch_Click(object sender, RoutedEventArgs e)
         {
-            var toggle = sender as ToggleSwitch;
-            if (toggle.IsChecked is true)
-            {
-                exitCamConfigBox.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                exitCamConfigBox.Visibility = Visibility.Collapsed;
-            }
+            //var toggle = sender as ToggleSwitch;
+            //if (toggle.IsChecked is true)
+            //{
+            //    exitCamConfigBox.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    exitCamConfigBox.Visibility = Visibility.Collapsed;
+            //}
 
             Settings.Default.Save();
         }
@@ -141,13 +141,13 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             }
         }
 
-        private void ExitCamConfigBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.Default.Camera_ExitCameraPass = ExitCamPassTextBox.Text;
-            Settings.Default.Camera_ExitCameraUser = ExitCamUserTextBox.Text;
-            Settings.Default.Camera_ExitCameraUrl = ExitCamUrlTextBox.Text;
-            Settings.Default.Save();
-        }
+        //private void ExitCamConfigBtn_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Settings.Default.Camera_ExitCameraPass = ExitCamPassTextBox.Text;
+        //    Settings.Default.Camera_ExitCameraUser = ExitCamUserTextBox.Text;
+        //    Settings.Default.Camera_ExitCameraUrl = ExitCamUrlTextBox.Text;
+        //    Settings.Default.Save();
+        //}
 
         private void EntranceCamConfigBtn_Click(object sender, RoutedEventArgs e)
         {

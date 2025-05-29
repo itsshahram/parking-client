@@ -60,6 +60,7 @@ public class MainPageViewModel : INotifyPropertyChanged
             }
         }
     }
+
     private string _driverDescription;
     public string DriverDescription
     {

@@ -53,7 +53,7 @@ namespace Parking.App.Views.Pages
                 satpa_object.stop_auto_process();
                 satpa_object = null;
             }
-            if(nfc!=null)
+            if (nfc != null)
             {
                 nfc.CardUidReceived -= OnCardUidReceivedSlot;
                 nfc = null;
@@ -428,7 +428,7 @@ namespace Parking.App.Views.Pages
                             CheckPlate();
                         }
 
-                        LogHelper.LogDetectedPlate(new_plate.plate_pic.BitmapToBase64(), new_plate.car_pic.ResizeAndCompressBitmap(800, 600, 65, 65, 50), LatestValidEnPlate, "License Plate Detected.",_logger);
+                        LogHelper.LogDetectedPlate(new_plate.plate_pic.BitmapToBase64(), new_plate.car_pic.ResizeAndCompressBitmap(800, 600, 65, 65, 50), LatestValidEnPlate, "License Plate Detected.", _logger);
                         plateImageBox.Dispatcher.Invoke(() =>
                         {
                             plateImageBox.ImageSource = new_plate.plate_pic.BitmapToImageSource();
@@ -456,7 +456,7 @@ namespace Parking.App.Views.Pages
                         LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
                     }
 
-                    
+
                 }
             }
 
@@ -464,14 +464,15 @@ namespace Parking.App.Views.Pages
 
         private void CheckPlate()
         {
-            if (irNumberTextBox.Text != null && rightNumbersNumberTextBox.Text != null && leftNumbersNumberTextBox.Text != null)
-            {
-                var letter = plateCharsCombo.SelectedItem as string;
 
-                LatestValidEnPlate = $"{leftNumbersNumberTextBox.Text}_{letter.ConvertFaCharToEnCharIndex()}_{rightNumbersNumberTextBox.Text}_IR{irNumberTextBox.Text}";
-            }
-            plateCheck.Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>
             {
+                if (irNumberTextBox.Text != null && rightNumbersNumberTextBox.Text != null && leftNumbersNumberTextBox.Text != null)
+                {
+                    var letter = plateCharsCombo.SelectedItem as string;
+
+                    LatestValidEnPlate = $"{leftNumbersNumberTextBox.Text}_{letter.ConvertFaCharToEnCharIndex()}_{rightNumbersNumberTextBox.Text}_IR{irNumberTextBox.Text}";
+                }
                 plateCheck.Visibility = Visibility.Collapsed;
             });
 
@@ -588,7 +589,7 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
-                    
+
                     nfc.Init(0, false);
                     nfc.CardUidReceived += OnCardUidReceivedSlot;
                 }
@@ -618,7 +619,7 @@ namespace Parking.App.Views.Pages
             finally
             {
                 isProcessing = false;
-               
+
             }
         }
         #endregion
@@ -642,6 +643,7 @@ namespace Parking.App.Views.Pages
                     // ورودی=0   خروجی=1
                     if (Settings.Default.Application_GateType.ToString().Contains("1"))
                     {
+
                         ShowTicketDetails(plateTicketId ?? new Guid());
                         ResetForm();
                         return false;
@@ -668,26 +670,41 @@ namespace Parking.App.Views.Pages
                             // ورودی=0   خروجی=1
                             if (Settings.Default.Application_GateType.ToString().Contains("1"))
                             {
-
                                 Guid? cardTicketId = _parkingService.GetNotExitedTicketIdByCardSerialNo(_cardSerialNo);
                                 if (cardTicketId != null)
                                 {
-                                    ShowTicketDetails(cardTicketId ?? new Guid());
-                                    return false;
+                                    //چک کردن پلاک ثبتی کارت با پلاک عکس
+                                    if (Settings.Default.PlateCheckInExitGate)
+                                    {
+                                        var ticket = _parkingService.GetActiveTicketByCard(_cardSerialNo);
+                                        if (ticket?.EnLicensePlate != LatestValidEnPlate)
+                                        {
+                                            ShowMessage("خطا", "پلاک ثبت شده برای کارت با پلاک پردازش شده یکسان نمیباشد");
+                                            return false;
+                                        }
+                                        else
+                                        {
+                                            ShowTicketDetails(cardTicketId ?? new Guid());
+                                            return true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ShowTicketDetails(cardTicketId ?? new Guid());
+                                        return true;
+                                    }
                                 }
                                 else
                                 {
                                     ShowMessage("خطا", "لطفا با کارت دیگری تلاش نمایید");
                                     return false;
                                 }
-
                             }
                             else
                             {
                                 ShowMessage("خطا", "کارت در حال استفاده میباشد، لطفا برای ورود از یکی از گیت های خروجی، کارت را خالی نمایید");
                                 return false;
                             }
-
                         }
                         var cardSegment = _parkingService.GetCardVehicleSegment(_cardSerialNo);
                         if (cardSegment != null)
@@ -710,7 +727,7 @@ namespace Parking.App.Views.Pages
                 // ورودی=0   خروجی=1
                 if (!Settings.Default.Application_GateType.ToString().Contains("0"))
                 {
-                    ShowMessage("خطا", "این گیت فقط دسترسی ورود دارد");
+                    ShowMessage("خطا", "این گیت دسترسی ورود ندارد");
                     return false;
                 }
 
@@ -763,7 +780,8 @@ namespace Parking.App.Views.Pages
                     EntranceGate = EntranceGate,
                     StartTime = startTime,
                     VehicleSegmentId = VehicleSegmentId,
-                    VehicleManufacturerName = VehicleSegmentName ?? "نامشخص"
+                    VehicleManufacturerName = VehicleSegmentName ?? "نامشخص",
+                    CreatorUserId = TokenStore.UserId,
                 };
                 var ticketInfo = _parkingService.CreateTicket(ticketModel, LatestValidCarImage);
                 if (ticketInfo.Succeeded)
@@ -1083,7 +1101,7 @@ namespace Parking.App.Views.Pages
                         ViewModel.CameraImages.Add(new CameraImageModel { Name = cam.Name, ImageSource = bitmapImage });
                     }
                 }
-                if(result.Count == Cameras.Count)
+                if (result.Count == Cameras.Count)
                 {
                     ExtraImagesList.Clear();
                     ExtraImagesList = result;

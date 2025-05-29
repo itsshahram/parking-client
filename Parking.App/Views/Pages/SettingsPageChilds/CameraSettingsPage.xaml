@@ -28,7 +28,7 @@
                            />
             </StackPanel>
         </DockPanel>
-        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+        <!--<Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
                     <ui:ToggleSwitch Click="ExitCameraToggleSwitch_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Camera_ExitCameraEnable, Mode=TwoWay}" DockPanel.Dock="Right" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
@@ -78,13 +78,13 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-        </Border>
+        </Border>-->
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
                     <ui:ToggleSwitch DockPanel.Dock="Right" Click="EnteranceCameraToggleSwitch_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Camera_MainCameraEnable, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     
-                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی تصویر دوربین ورودی" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی تصویر دوربین" />
                 </DockPanel>
                 
 

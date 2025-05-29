@@ -26,4 +26,5 @@ public class CreateParkingTicketModel
     public string? DriverFullName { get; set; }
     public string? DriverPhoneNumber { get; set; }
     public string? DriverDescription { get; set; }
+    public Guid? CreatorUserId { get; set; }
 }

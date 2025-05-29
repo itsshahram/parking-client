@@ -50,11 +50,12 @@ public class ParkingTicket
     public string? EntranceGate { get; set; }
     public string? ExitGate { get; set; }
     public bool? IsCardMissing { get; set; } = false;
-
     //ExtraInfo
     public string? DriverFullName { get; set; }
     public string? DriverPhoneNumber { get; set; }
     public string? DriverDescription { get; set; }
+    public Guid? UserId { get; set; }
+    public Guid? ExitRegistrarUserId { get; set; }
     public TicketStatus TicketStatus { get; set; }
 
 }

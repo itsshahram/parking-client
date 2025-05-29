@@ -41,6 +41,14 @@
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=PlateCheckInExitGate, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="بررسی یکسان بودن پلاک کارت با تصویر" />
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
                     <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_PrintInvoiceAfterEntry, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="چاپ قبض بعد از ثبت ورود" />
                 </DockPanel>
@@ -100,26 +108,34 @@
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
-                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logging, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" Checked="ElasticToggleSwitch_Checked" Unchecked="ElasticToggleSwitch_Unchecked" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logging_In_Elastic, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="گزارش لاگ ها در سرور" />
                 </DockPanel>
-                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
-                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
-                        <DockPanel Margin="0 5">
-                            <ui:TextBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Server, Mode=TwoWay}" />
-                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="آدرس سرور الستیک" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <DockPanel Margin="0 5">
-                            <ui:TextBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Server, Mode=TwoWay}" />
-                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام کاربری" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <DockPanel Margin="0 5">
-                            <ui:PasswordBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Server, Mode=TwoWay}" />
-                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="پسورد" VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </StackPanel>
-                    
-                </Border>
+                <StackPanel x:Name="ElasticBox" Visibility="Collapsed">
+                    <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                        <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                            <DockPanel Margin="0 5">
+                                <ui:TextBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Server, Mode=TwoWay}" />
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="آدرس سرور الستیک" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <DockPanel Margin="0 5">
+                                <ui:TextBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Username, Mode=TwoWay}" />
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام کاربری" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <DockPanel Margin="0 5">
+                                <ui:PasswordBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Password, Mode=TwoWay}" />
+                                <TextBlock DockPanel.Dock="Left" Margin="5"  Text="پسورد" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <DockPanel Margin="0 5">
+                                <ui:Button Appearance="Primary" x:Name="elasticConfigBtn" Click="elasticConfigBtn_Click" DockPanel.Dock="Right" Content="ذخیره"/>
+                                <Label DockPanel.Dock="Left"/>
+                            </DockPanel>
+                        </StackPanel>
+
+                    </Border>
+
+                </StackPanel>
+
             </StackPanel>
         </Border>
     </StackPanel>

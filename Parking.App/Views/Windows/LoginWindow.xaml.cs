@@ -122,6 +122,7 @@ namespace Parking.App.Views.Windows
                         TokenStore.FullName = user.Firstname + " " + user.Lastname;
                         TokenStore.Username = username;
                         TokenStore.RoleName = _userService.GetUserRoleByUserId(user.Id);
+                        TokenStore.UserId = user.Id;
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
                         SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
@@ -160,6 +161,15 @@ namespace Parking.App.Views.Windows
                             Application.Current.MainWindow = mainWindow;
                             SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
                             mainWindow?.Show();
+
+                            Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
+                            ms.Title = "موفق";
+                            ms.Content = "همگام سازی اطلاعات با موفقیت انجام شد، لطفا اپلیکیشن را مجددا راه اندازی کنید";
+                            ms.IsPrimaryButtonEnabled = false;
+                            ms.IsSecondaryButtonEnabled = false;
+                            ms.CloseButtonText = "متوجه شدم";
+                            await ms.ShowDialogAsync();
+
                             this.Close();
                         }
                         else

@@ -75,6 +75,9 @@
                 </StackPanel>
                 <ScrollViewer>
                     <StackPanel>
+                        <StackPanel>
+                            <Label x:Name="PlateCharName" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
                         <WrapPanel HorizontalAlignment="Center">
                             <Border CornerRadius="8" 
                              Background="White" 
@@ -307,6 +310,30 @@
 
                             </Grid>
                         </Border>
+                        <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="گیت خروج:"/>
+                     <Run Text="{Binding Item.ExitGate}" FontSize="18" FontWeight="Bold"/>
+                                </TextBlock>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"  Margin="5">
+                     <Run  Text="گیت ورود:"/>
+                     <Run Text="{Binding Item.EntranceGate}" FontSize="18" FontWeight="Bold"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

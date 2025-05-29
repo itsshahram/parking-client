@@ -137,7 +137,7 @@
     <Setting Name="Application_Sync_Interval_Second" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="Application_Logs_In_Elastic" Type="System.Boolean" Scope="User">
+    <Setting Name="Application_Logging_In_Elastic" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Logs_Elastic_Server" Type="System.String" Scope="User">
@@ -148,6 +148,9 @@
     </Setting>
     <Setting Name="Application_Logs_Elastic_Password" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

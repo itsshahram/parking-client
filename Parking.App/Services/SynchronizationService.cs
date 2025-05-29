@@ -1464,6 +1464,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     PaidDate = ticket.PaidDate,
                     RRN = ticket.RRN,
                     TraceNo = ticket.TraceNo,
+                    CreatorUserId = ticket.UserId,
                     IsCardMissing = ticket.IsCardMissing ?? false
                 };
 
@@ -1538,6 +1539,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     PaidDate = ticket.PaidDate,
                     RRN = ticket.RRN,
                     TraceNo = ticket.TraceNo,
+                    CreatorUserId = ticket.UserId, 
+                    ExitRegistrarUserId = ticket.ExitRegistrarUserId,
                     IsCardMissing = ticket.IsCardMissing ?? false
                 };
 
@@ -1620,7 +1623,43 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
         }
     }
+    public void SyncTicketExitImage()
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+            var tickets = unitOfWork.ParkingTicketImages.Find(p => p.ExitImageAddress == null )
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
+                .Select(p => new { Id = p.TicketId }).ToList();
+            foreach (var item in tickets)
+            {
+                var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-exit-image/{item.Id}").Result;
+                var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
+                if(result?.StatusCode == 200)
+                {
+                    if (result?.Data != null)
+                    {
+                        unitOfWork.ParkingTicketImages.ExecuteUpdate(g => g.TicketId == item.Id,
+                                    update => update
+                                    .SetProperty(image => image.ExitImageAddress, image => result.Data)
+                                    );
+                        unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                            update => update
+                            .SetProperty(ticket => ticket.ExitImage, ticket => "0")
+                            );
+                    }
+                }
 
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+        }
+    }
     public async Task SyncTicketImageAsync()
     {
         try

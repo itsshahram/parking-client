@@ -11,9 +11,9 @@ public class ParkingCostCalculator
     private int entryFee;
     private int dailyRate;
     private int freeMinutes;
-    private int thresholdNumberOfDays; // همچنان وجود دارد
-    private decimal dailyPriceAfterCrossingThreshold; // همچنان وجود دارد
-    private int thresholdHoursPerDay; // اضافه شده
+    private int thresholdNumberOfDays; 
+    private decimal dailyPriceAfterCrossingThreshold;
+    private int thresholdHoursPerDay; 
     private decimal discountPercentage;
     private decimal taxPercentage;
 

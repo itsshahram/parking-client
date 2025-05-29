@@ -70,6 +70,7 @@
     <PackageReference Include="MiFare" Version="1.1.3" />
     <PackageReference Include="Nager.VideoStream" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RJCP.SerialPortStream" Version="3.0.2" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.1.2" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />

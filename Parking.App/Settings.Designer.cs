@@ -566,12 +566,12 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Application_Logs_In_Elastic {
+        public bool Application_Logging_In_Elastic {
             get {
-                return ((bool)(this["Application_Logs_In_Elastic"]));
+                return ((bool)(this["Application_Logging_In_Elastic"]));
             }
             set {
-                this["Application_Logs_In_Elastic"] = value;
+                this["Application_Logging_In_Elastic"] = value;
             }
         }
         
@@ -608,6 +608,18 @@ namespace Parking.App {
             }
             set {
                 this["Application_Logs_Elastic_Password"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PlateCheckInExitGate {
+            get {
+                return ((bool)(this["PlateCheckInExitGate"]));
+            }
+            set {
+                this["PlateCheckInExitGate"] = value;
             }
         }
     }

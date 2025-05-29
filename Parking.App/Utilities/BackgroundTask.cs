@@ -1,10 +1,5 @@
 ﻿using Coravel.Invocable;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Parking.App.Utilities;
 
@@ -19,7 +14,6 @@ public class BackgroundTask : IInvocable
     {
         _parkingService = App.GetService<IParkingService>();
         _synchronizationService = App.GetService<ISynchronizationService>();
-        //_synchronizationService?.SendUnSyncedTicketToServer();
         _logger = App.GetService<ILogger<BackgroundTask>>();
         _mainWindow = mainWindow;
 
@@ -65,7 +59,15 @@ public class BackgroundTask : IInvocable
                 _logger.LogError("Error in Sync Ticket Image", ex.Message);
                 SetAppIcon(TaskStatus.Error);
             }
-
+            try
+            {
+                _synchronizationService.SyncTicketExitImage();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error in Sync Ticket Exit Image", ex.Message);
+                SetAppIcon(TaskStatus.Error);
+            }
             try
             {
                 await _synchronizationService.SyncTicketExtraImagesAsync();

@@ -58,15 +58,16 @@ namespace Parking.App.Views.Windows
                     }
 
                     SetTicketData(ticketId);
-                    
+
                     if (currentImage != null)
                     {
                         currentImg.Source = currentImage;
                         ExitImage = currentImage.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
                     }
-                    if (extraimages != null) {
+                    if (extraimages != null)
+                    {
 
-                        foreach(var image in extraimages)
+                        foreach (var image in extraimages)
                         {
                             if (image.Image != null)
                             {
@@ -74,7 +75,7 @@ namespace Parking.App.Views.Windows
                             }
                         }
                     }
-                    if(cardUid != null)
+                    if (cardUid != null)
                     {
                         if (cardUid == 0 && !PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ForceExitRequest"))
                         {
@@ -132,7 +133,7 @@ namespace Parking.App.Views.Windows
                     ticket.EndTimeString = string.Empty;
                     ticket.EndTimeOnlyString = string.Empty;
                 }
-                
+
                 ViewModel.Item = ticket;
                 SetPlate(ViewModel.Item?.EnLicensePlate ?? "--_-_---_IR--");
                 ViewModel.Title = ticket.LicensePlate;
@@ -199,6 +200,9 @@ namespace Parking.App.Views.Windows
             plate_RightNumber.Text = plate.RightThreeDigits;
             plate_IRNumber.Text = plate.IranCode.Replace("IR", "");
             plate_Char.Text = plate.Letter.ConvertEnCharToFaCharIndex();
+
+            PlateCharName.Content = plate.Letter.ConvertToString();
+
         }
         private void TicketDetailsWindow_KeyUp(object sender, KeyEventArgs e)
         {
@@ -296,7 +300,9 @@ namespace Parking.App.Views.Windows
                                     TraceNo = result.TraceNo,
                                     ExitGate = GateName,
                                     IsMissingCard = IsMissingCard,
-                                    CardUid = ViewModel.Item.CardUid
+                                    CardUid = ViewModel.Item.CardUid,
+                                    ExitRegistrarUserId = TokenStore.UserId,
+                                    ExitImage = ExitImage
                                 });
                                 SetTicketData(ViewModel.Item.Id);
                                 SetPaymentStatus(true);
@@ -321,7 +327,8 @@ namespace Parking.App.Views.Windows
                                 TraceNo = "00000",
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid
+                                CardUid = ViewModel.Item.CardUid ,
+                                ExitImage = ExitImage
                             });
                             if (rs)
                             {
@@ -431,7 +438,7 @@ namespace Parking.App.Views.Windows
                     var entryimage = await _parkingService.GetTicketImage(ticketId);
                     await this.Dispatcher.InvokeAsync(() => EntryImage.Source = entryimage);
                 }
-                
+
                 var extraImages = await _parkingService.GetTicketExtraImageSourcesAsync(ticketId, true);
                 if (extraImages != null)
                 {
@@ -439,7 +446,7 @@ namespace Parking.App.Views.Windows
                     {
                         if (image.ImageSource != null)
                         {
-                            ExtraImagesList.Add(new(image.ImageSource , image.FaName??"_", false));
+                            ExtraImagesList.Add(new(image.ImageSource, image.FaName ?? "_", false));
                         }
                     }
                 }
@@ -493,7 +500,9 @@ namespace Parking.App.Views.Windows
                                 TraceNo = "00000",
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid
+                                CardUid = ViewModel.Item.CardUid,
+                                ExitRegistrarUserId = TokenStore.UserId ,
+                                ExitImage = ExitImage
                             });
 
                         }
@@ -512,7 +521,8 @@ namespace Parking.App.Views.Windows
                                 TraceNo = "00000",
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid
+                                CardUid = ViewModel.Item.CardUid ,
+                                ExitImage = ExitImage
                             });
                         }
                         SaveExtraImages();
@@ -591,17 +601,18 @@ namespace Parking.App.Views.Windows
                 }
 
 
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.Write(ex.Message);
             }
 
 
         }
-        
+
         private void SaveExtraImages()
         {
-            foreach (var image in ExtraImagesList.Where(e=>e.ForSave))
+            foreach (var image in ExtraImagesList.Where(e => e.ForSave))
             {
                 _parkingService?.AddTicketExtraImage(ViewModel.Item.Id, image.ImageSource.ImageSourceToBase64(), image.Name, true);
             }

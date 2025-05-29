@@ -30,11 +30,18 @@ public static class LicensePlateHelper
     }
     public static string ConvertFaCharToEnCharIndex(this string character)
     {
+        try
+        {
+            int index = charclassnames_fa.ToList().IndexOf(character);
 
-        int index = charclassnames_fa.ToList().IndexOf(character);
 
+            return charclassnames_en[index];
+        }
+        catch 
+        {
+            return "^";
+        }
 
-        return charclassnames_en[index];
     }
     public static string ConvertEnCharToFaCharIndex(this string character)
     {
@@ -91,5 +98,31 @@ public static class LicensePlateHelper
         }
 
         return true;
+    }
+
+    public static string ConvertToString(this string letter)
+    {
+        switch (letter)
+        {
+            case "ع":
+                return "عمومی";
+            case "ت":
+                return "تاکسی";
+            case "ک":
+                return "کشاورزی";
+            case "الف":
+                return "دولتی";
+            case "پ":
+                return "نظامی";
+            case "ز":
+                return "نظامی";
+            case "ش":
+                return "نظامی";
+            case "ف":
+                return "نظامی";
+            default:
+                return "عادی";
+        }
+
     }
 }

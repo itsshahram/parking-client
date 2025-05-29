@@ -115,7 +115,11 @@ namespace Parking.App.Views.Pages
                 var result = _parkingService.AddCard(card);
                 if (result)
                 {
-                    ShowCardInfoBox(card.CardSerialNo.ToString());
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        ShowCardInfoBox(card.CardSerialNo.ToString());
+                    });
+                    
                     return true;
                 }
                 return false;

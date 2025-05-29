@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Parking.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using Parking.Infrastructure.Context;
 namespace Parking.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250425221100_Mig_8_AddUserId")]
+    partial class Mig_8_AddUserId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,9 +175,6 @@ namespace Parking.Infrastructure.Migrations
 
                     b.Property<string>("ExitImage")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ExitRegistrarUserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool?>("IsCardMissing")
                         .HasColumnType("bit");
