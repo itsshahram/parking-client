@@ -1,20 +1,4 @@
-﻿using Parking.App.Helpers.Card;
-using Parking.App.Models.Dto.Card;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using Parking.App.Models.Dto.Card;
 
 namespace Parking.App.Views.Pages
 {
@@ -62,7 +46,6 @@ namespace Parking.App.Views.Pages
         {
             if (Settings.Default.Application_EntryCardRequirement)
             {
-
                 try
                 {
 
@@ -119,18 +102,19 @@ namespace Parking.App.Views.Pages
                     {
                         ShowCardInfoBox(card.CardSerialNo.ToString());
                     });
-                    
+
                     return true;
                 }
                 return false;
-            } 
+            }
             return false;
         }
         private void ShowCardInfoBox(string CardNo)
         {
             try
             {
-                this.Dispatcher.Invoke(() => {
+                this.Dispatcher.Invoke(() =>
+                {
                     UidTextBlock.Text = CardNo;
                     SaveCardInfoBox.Visibility = Visibility.Visible;
                 });
@@ -139,18 +123,18 @@ namespace Parking.App.Views.Pages
                 timer.Tick += (s, args) =>
                 {
                     timer.Stop();
-                    this.Dispatcher.Invoke(() => {
+                    this.Dispatcher.Invoke(() =>
+                    {
                         UidTextBlock.Text = CardNo;
                         SaveCardInfoBox.Visibility = Visibility.Collapsed;
                     });
                 };
                 timer.Start();
-            }   catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
             }
-
-
         }
 
         private bool CheckValidation()
@@ -179,7 +163,7 @@ namespace Parking.App.Views.Pages
                         ShowMessage("خطا", "لطفا مدت اعتبار را بدرستی وارد کنید");
                         return false;
                     }
-                    if (int.Parse(ValidityPeriodTextBox.Text) <1)
+                    if (int.Parse(ValidityPeriodTextBox.Text) < 1)
                     {
                         ShowMessage("خطا", "لطفا مدت اعتبار را بدرستی وارد کنید");
                         return false;
@@ -198,7 +182,8 @@ namespace Parking.App.Views.Pages
                     return true;
                 });
 
-            }   catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
                 return false;

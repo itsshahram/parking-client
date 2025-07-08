@@ -8,14 +8,15 @@ namespace Parking.App.Utilities.PriceCalculation;
 /// </summary>
 public class ParkingCostCalculator
 {
-    private int entryFee;
-    private int dailyRate;
-    private int freeMinutes;
-    private int thresholdNumberOfDays; 
-    private decimal dailyPriceAfterCrossingThreshold;
-    private int thresholdHoursPerDay; 
-    private decimal discountPercentage;
-    private decimal taxPercentage;
+    private readonly int entryFee;
+    private readonly int dailyRate;
+    private readonly int freeMinutes;
+    private readonly int thresholdNumberOfDays;
+    private readonly decimal dailyPriceAfterCrossingThreshold;
+    private readonly decimal discountPercentage;
+    private readonly decimal taxPercentage;
+    private int thresholdHoursPerDay;
+    private const int MinutesPerDay = 1440;
 
     private List<ParkingVehicleSegmentPrice> hourlyRates;
     private List<ParkingVehicleSegmentVariablePrice> variablePriceList;
@@ -70,7 +71,6 @@ public class ParkingCostCalculator
                 totalMinutes = 0;
         }
 
-
         // محاسبه هزینه برای زمان بیشتر از یک روز
         if (totalDays >= 1)
         {
@@ -80,19 +80,19 @@ public class ParkingCostCalculator
                 {
                     totalDays = (int)totalTime.TotalDays;
                     totalCost += totalDays * dailyPriceAfterCrossingThreshold;
-                    totalMinutes -= totalDays * 1440;
+                    totalMinutes -= totalDays * MinutesPerDay;
                     totalTime.Add(TimeSpan.FromDays(-totalDays));
                 }
                 else
                 {
                     totalCost += totalDays * dailyRate;
-                    totalMinutes -= totalDays * 1440; // کم کردن دقیقه‌های روزها
+                    totalMinutes -= totalDays * MinutesPerDay; // کم کردن دقیقه‌های روزها
                 }
             }
             else
             {
                 totalCost += totalDays * dailyRate;
-                totalMinutes -= totalDays * 1440; // کم کردن دقیقه‌های روزها
+                totalMinutes -= totalDays * MinutesPerDay; // کم کردن دقیقه‌های روزها
             }
 
         }
@@ -109,7 +109,6 @@ public class ParkingCostCalculator
                 }
             }
         }
-
 
         // محاسبه هزینه برای زمان کمتر از آستانه روزانه یا روزها
 
@@ -140,7 +139,6 @@ public class ParkingCostCalculator
 
         }
 
-
         // بررسی باقی‌مانده و اعمال تعرفه ساعتی
         if (remainingMinutes > 0)
         {
@@ -152,12 +150,12 @@ public class ParkingCostCalculator
                     currentTime.TimeOfDay >= rate.TimeFrom.ToTimeSpan() &&
                     currentTime.TimeOfDay < rate.TimeTo.ToTimeSpan());
 
-                if (currentRate != null)
-                {
-                    totalCost += currentRate.HourlyRate;
-                    currentTime = currentTime.AddMinutes(60); // حرکت به ساعت بعد
-                    remainingMinutes -= 60;
-                }
+                if (currentRate is null)
+                    break;
+
+                totalCost += currentRate.HourlyRate;
+                currentTime = currentTime.AddMinutes(60); // حرکت به ساعت بعد
+                remainingMinutes -= 60;
             }
         }
 
@@ -166,10 +164,10 @@ public class ParkingCostCalculator
         decimal totalWithDiscount = totalCost - discountAmount;
         decimal taxAmount = totalWithDiscount * (taxPercentage / 100);
         decimal payableAmount = totalWithDiscount + taxAmount;
+
         if (thresholdHoursPerDay == 0)
-        {
             thresholdHoursPerDay = 1;
-        }
+
         return new ParkingPriceOutputModel
         {
             TotalWithoutDiscount = totalCost,

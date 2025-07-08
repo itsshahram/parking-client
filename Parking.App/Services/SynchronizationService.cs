@@ -16,10 +16,10 @@ using Parking.Domain.General;
 
 namespace Parking.App.Services;
 
-public class SynchronizationService(IUnitOfWork _unitOfWork, 
-    ILogger<SynchronizationService> logger, 
-    IHttpClientFactory _httpClientFactory, 
-    UserManager<ApplicationUser> _userManager, 
+public class SynchronizationService(IUnitOfWork _unitOfWork,
+    ILogger<SynchronizationService> logger,
+    IHttpClientFactory _httpClientFactory,
+    UserManager<ApplicationUser> _userManager,
     RoleManager<ApplicationRole> _roleManager) : ISynchronizationService
 {
     private readonly ILogger<SynchronizationService> _logger = logger;
@@ -169,10 +169,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            ParkingVehicleSegmentPrice price;
             foreach (var item in request)
             {
-                price  = unitOfWork.ParkingVehicleSegmentPrices.GetById(item.Id);
+                ParkingVehicleSegmentPrice price = unitOfWork.ParkingVehicleSegmentPrices.GetById(item.Id);
                 if (price != null)
                 {
                     unitOfWork.ParkingVehicleSegmentPrices.ExecuteUpdate(p => p.Id == item.Id,
@@ -202,7 +201,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     unitOfWork.ParkingVehicleSegmentPrices.Add(price);
                     //unitOfWork.Commit();
                 }
-
             }
             return new TServiceResponse<bool>(true, "عملیات با موفقیت انجام شد", true);
 
@@ -218,7 +216,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            return unitOfWork.LicensePlateGroups.GetAll().ToList();
+            return unitOfWork.LicensePlateGroups.ToList();
         }
         catch (Exception ex)
         {
@@ -231,7 +229,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            return await unitOfWork.LicensePlateGroups.GetAll().AsQueryable().ToListAsync();
+            return await unitOfWork.LicensePlateGroups.ToListAsync();
         }
         catch (Exception ex)
         {
@@ -250,12 +248,12 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var responce =  client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-parking-users").Result;
+            var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-parking-users").Result;
             var result = JsonConvert.DeserializeObject<ApiResponse<List<ParkingUserViewModel>>>(responce);
             if (result?.StatusCode == 200)
             {
                 var users = result.Data;
-               var roles = users.Select(a => a.Role).Distinct().ToList();
+                var roles = users.Select(a => a.Role).Distinct().ToList();
                 foreach (var role in roles)
                 {
                     var localRole = unitOfWork.Roles.FirstOrDefault(a => a.Name == role);
@@ -302,8 +300,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             PasswordHash = user.PasswordHash,
                             ParkingLotId = user.ParkingLoId,
                             UserName = user.UserName,
-                            RegisterDate = DateTime.Now , NormalizedEmail = user.Email.ToUpper(),
-                            NormalizedUserName = user.UserName.ToUpper()   ,
+                            RegisterDate = DateTime.Now,
+                            NormalizedEmail = user.Email.ToUpper(),
+                            NormalizedUserName = user.UserName.ToUpper(),
                             SecurityStamp = GenerateSecurityStamp()
                         };
                         unitOfWork.Users.Add(userInfo);
@@ -348,10 +347,10 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         await roleManager.CreateAsync(newRole);
                     }
                 }
-                
+
                 foreach (var user in users)
                 {
-                    var localUser = await  unitOfWork.Users.GetByIdAsync(user.Id);
+                    var localUser = await unitOfWork.Users.GetByIdAsync(user.Id);
                     if (localUser != null)
                     {
                         localUser.Id = user.Id;
@@ -368,7 +367,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         unitOfWork.Users.Update(localUser);
                         var newUser = await userManager.FindByIdAsync(localUser.Id.ToString());
                         var x = await userManager.AddToRoleAsync(newUser, user.Role);
-                        
+
                     }
                     else
                     {
@@ -391,9 +390,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         var newUser = await userManager.FindByIdAsync(userInfo.Id.ToString());
                         var x = await userManager.AddToRoleAsync(newUser, user.Role);
                     }
-
-
-
                 }
                 return new TServiceResponse<bool>(true, "عملیات موفق", true);
             }
@@ -418,7 +414,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             if (result?.StatusCode == 200)
             {
                 var parking = result.Data;
-                var localParking = unitOfWork.ParkingLots.GetAll().FirstOrDefault();
+                var localParking = unitOfWork.ParkingLots.FirstOrDefault();
                 if (localParking != null)
                 {
                     if (localParking.Id == parking.Id)
@@ -478,7 +474,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 //unitOfWork.Commit();
                             }
                         }
-                        
+
                         foreach (var item in parking.ParkingSpaces)
                         {
                             var parkingSpace = unitOfWork.ParkingSpaces.GetById(item.Id);
@@ -511,7 +507,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     {
                         return new TServiceResponse<bool>(false, "پارکینگ دریافت شده با اطلاعات لوکال مطابقت ندارد", false);
                     }
-
                 }
                 else
                 {
@@ -603,7 +598,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
                     return new TServiceResponse<bool>(true, "عملیات موفق", true);
                 }
-
             }
             return new TServiceResponse<bool>(false, "خطای سیستمی", false);
 
@@ -626,7 +620,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             if (result?.StatusCode == 200)
             {
                 var parking = result.Data;
-                var localParking = unitOfWork.ParkingLots.GetAll().FirstOrDefault();
+                var localParking = unitOfWork.ParkingLots.FirstOrDefault();
                 if (localParking != null)
                 {
                     if (localParking.Id == parking.Id)
@@ -825,7 +819,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
     public TServiceResponse<bool> IsActiveParking()
     {
-        var localParking = unitOfWork.ParkingLots.GetAll().FirstOrDefault();
+        var localParking = unitOfWork.ParkingLots.FirstOrDefault();
         if (localParking != null)
         {
             return new TServiceResponse<bool>(true, "عملیات موفق", localParking.IsActive);
@@ -838,7 +832,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
     public async Task<TServiceResponse<bool>> IsActiveParkingAsync()
     {
-        var localParking = await unitOfWork.ParkingLots.GetAll().AsQueryable().FirstOrDefaultAsync();
+        var localParking = await unitOfWork.ParkingLots.FirstOrDefaultAsync();
         if (localParking != null)
         {
             return new TServiceResponse<bool>(true, "عملیات موفق", localParking.IsActive);
@@ -859,7 +853,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             var getListJsonResult = JsonConvert.DeserializeObject<ApiResponse<List<LicensePlateGroupModel>>>(getListResponse);
             if (getListJsonResult?.StatusCode == 200)
             {
-                var localPlateGroups = unitOfWork.LicensePlateGroups.GetAll().ToList();
+                var localPlateGroups = unitOfWork.LicensePlateGroups.ToList();
 
                 var toRemove = localPlateGroups.Where(a => !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
                 foreach (var item in toRemove)
@@ -893,8 +887,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         foreach (var subitem in groupItem.LicensePlates)
                         {
                             var licensePlate = unitOfWork.LicensePlates
-                            .Find(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate)
-                            .FirstOrDefault();
+                            .FirstOrDefault(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate);
                             if (licensePlate == null)
                             {
                                 LicensePlate newLicensePlate = new LicensePlate()
@@ -938,8 +931,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         foreach (var subitem in groupItem.LicensePlates)
                         {
                             var licensePlate = unitOfWork.LicensePlates
-                            .Find(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate)
-                            .FirstOrDefault();
+                            .FirstOrDefault(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate);
+
                             if (licensePlate == null)
                             {
                                 LicensePlate newLicensePlate = new LicensePlate()
@@ -985,7 +978,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             var getListJsonResult = JsonConvert.DeserializeObject<ApiResponse<List<LicensePlateGroupModel>>>(getListResponse);
             if (getListJsonResult?.StatusCode == 200)
             {
-                var localPlateGroups = unitOfWork.LicensePlateGroups.GetAll().ToList();
+                var localPlateGroups = unitOfWork.LicensePlateGroups.ToList();
 
                 var toRemove = localPlateGroups.Where(a => !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
                 foreach (var item in toRemove)
@@ -1019,8 +1012,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         foreach (var subitem in groupItem.LicensePlates)
                         {
                             var licensePlate = unitOfWork.LicensePlates
-                            .Find(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate)
-                            .FirstOrDefault();
+                            .FirstOrDefault(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate);
                             if (licensePlate == null)
                             {
                                 LicensePlate newLicensePlate = new LicensePlate()
@@ -1064,9 +1056,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         foreach (var subitem in groupItem.LicensePlates)
                         {
                             var licensePlate = unitOfWork.LicensePlates
-                            .Find(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate)
-                            .FirstOrDefault();
-                            if (licensePlate == null)
+                            .FirstOrDefault(p => p.GroupId == subitem.GroupId && p.EnLicensePlate == subitem.EnLicensePlate); if (licensePlate == null)
                             {
                                 LicensePlate newLicensePlate = new LicensePlate()
                                 {
@@ -1114,7 +1104,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 var localPlateGroups = unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(p => true).Result;
                 foreach (var item in getListJsonResult.Data)
                 {
-                    var LicensePlate = unitOfWork.SeizedLicensePlates.Find(p => p.EnLicensePlate == item.EnLicensePlate).FirstOrDefault();
+                    var LicensePlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(p => p.EnLicensePlate == item.EnLicensePlate);
                     if (LicensePlate == null)
                     {
                         SeizedLicensePlate newLicensePlate = new SeizedLicensePlate()
@@ -1156,7 +1146,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 var localPlateGroups = await unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(p => true);
                 foreach (var item in getListJsonResult.Data)
                 {
-                    var LicensePlate = unitOfWork.SeizedLicensePlates.Find(p => p.EnLicensePlate == item.EnLicensePlate).FirstOrDefault();
+                    var LicensePlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(p => p.EnLicensePlate == item.EnLicensePlate);
                     if (LicensePlate == null)
                     {
                         SeizedLicensePlate newLicensePlate = new SeizedLicensePlate()
@@ -1198,7 +1188,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 foreach (var vehicleSegment in result.Data)
                 {
                     var segment = unitOfWork.VehicleSegments.GetById(vehicleSegment.Id);
-                    if (segment!=null)
+                    if (segment != null)
                     {
                         segment.Description = vehicleSegment.Description;
                         segment.NameFa = vehicleSegment.NameFa;
@@ -1427,7 +1417,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == Domain.General.TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
+            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()
@@ -1502,7 +1492,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == Domain.General.TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
+            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()
@@ -1539,7 +1529,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     PaidDate = ticket.PaidDate,
                     RRN = ticket.RRN,
                     TraceNo = ticket.TraceNo,
-                    CreatorUserId = ticket.UserId, 
+                    CreatorUserId = ticket.UserId,
                     ExitRegistrarUserId = ticket.ExitRegistrarUserId,
                     IsCardMissing = ticket.IsCardMissing ?? false
                 };
@@ -1580,7 +1570,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
             var tickets = unitOfWork.ParkingTickets.Find(p => p.StartImage == null && p.TicketStatus == TicketStatus.Synced).Take(Settings.Default.Application_Sync_Interval_CountOfTake)
-                .Select(p => new { Id = p.Id }).ToList();
+                .Select(p => new { p.Id }).ToList();
             foreach (var item in tickets)
             {
                 var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-image/{item.Id}").Result;
@@ -1629,14 +1619,14 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var tickets = unitOfWork.ParkingTicketImages.Find(p => p.ExitImageAddress == null )
+            var tickets = unitOfWork.ParkingTicketImages.Find(p => p.ExitImageAddress == null)
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .Select(p => new { Id = p.TicketId }).ToList();
             foreach (var item in tickets)
             {
                 var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-exit-image/{item.Id}").Result;
                 var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
-                if(result?.StatusCode == 200)
+                if (result?.StatusCode == 200)
                 {
                     if (result?.Data != null)
                     {
@@ -1670,7 +1660,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 .Select(p => new { Id = p.Id }).ToList();
             foreach (var item in tickets)
             {
-                var responce = await  client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-image/{item.Id}");
+                var responce = await client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-image/{item.Id}");
                 var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
                 if (result?.Data != null)
                 {
@@ -1704,9 +1694,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             }
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-             _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, ex.Message);
         }
     }
 
@@ -1743,12 +1733,13 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedImages = unitOfWork.ParkingTicketExtraImages.Find(p => p.Image!= null && !p.Image.StartsWith("http")).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
+            var localUnsyncedImages = unitOfWork.ParkingTicketExtraImages.Find(p => p.Image != null && !p.Image.StartsWith("http")).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
             foreach (var ticket in localUnsyncedImages)
             {
                 SyncTicketExtraImageRequestModel requestInfo = new SyncTicketExtraImageRequestModel()
                 {
-                    Image = ticket.Image, CreateDateTime = ticket.CreateDateTime,
+                    Image = ticket.Image,
+                    CreateDateTime = ticket.CreateDateTime,
                     FaName = ticket.FaName,
                     GateName = ticket.GateName,
                     TicketId = ticket.TicketId,

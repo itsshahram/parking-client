@@ -22,8 +22,8 @@ namespace Parking.App.Services.Interfaces;
 public interface IParkingService
 {
     TServiceResponse<ParkingLotModel> GetParkingLotDetails();
-    Task<List<VehicleSegmentPriceListItemModel>>  GetVehicleSegmentPriceList();
-    Task<List<VehicleSegmentPriceListItemModel>>  GetVehicleSegmentPriceListAsync();
+    Task<List<VehicleSegmentPriceListItemModel>> GetVehicleSegmentPriceList();
+    Task<List<VehicleSegmentPriceListItemModel>> GetVehicleSegmentPriceListAsync();
     List<VehicleSegmentModel> GetVehicleSegments();
     List<ParkingSectionModel> GetSections();
     List<ParkingSpaceModel> GetSpaces();

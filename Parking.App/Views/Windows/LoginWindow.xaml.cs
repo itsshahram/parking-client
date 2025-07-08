@@ -92,11 +92,21 @@ namespace Parking.App.Views.Windows
                 {
                     var username = usernameBox.Text;
                     var pasword = passwordBox.Password;
-                    var result = _userService?.Login( username,pasword);
+                    var result = _userService?.Login(username, pasword);
+                    if (result == Domain.General.LoginStatus.NotActice)
+                    {
+                        Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
+                        ms.Title = "خطا";
+                        ms.Content = "کاربر فعال نمیباشد";
+                        ms.IsPrimaryButtonEnabled = false;
+                        ms.IsSecondaryButtonEnabled = false;
+                        ms.CloseButtonText = "متوجه شدم";
+                        await ms.ShowDialogAsync();
+                    }
                     bool syncStatus = false;
                     if (Settings.Default.Application_Sync_Enable)
                     {
-                        
+
                         var loginToServerResult = await _synchronizationService?.CheckTokenAsync(username, pasword);
                         if (loginToServerResult.Succeeded)
                         {
@@ -104,14 +114,10 @@ namespace Parking.App.Views.Windows
                         }
                     }
                     else
-                    {
                         syncStatus = true;
-                    }
 
 
-
-
-                    if (result ?? false && syncStatus)
+                    if (result == Domain.General.LoginStatus.Success && syncStatus)
                     {
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
@@ -152,7 +158,7 @@ namespace Parking.App.Views.Windows
                     var result = await _synchronizationService?.CheckTokenAsync(username, pasword);
                     if (result.Succeeded)
                     {
-                        var syncResult  = await StartSyncJobs();
+                        var syncResult = await StartSyncJobs();
 
                         if (syncResult)
                         {
@@ -226,7 +232,7 @@ namespace Parking.App.Views.Windows
                 }
                 else
                     await ChangeSyncJobsState("GetParkingInfo", JobState.Failed);
-               
+
 
 
                 await ChangeSyncJobsState("GetUsers", JobState.Syncing);
@@ -240,7 +246,8 @@ namespace Parking.App.Views.Windows
 
                 await ChangeSyncJobsState("GetPrices", JobState.Syncing);
                 result = await _synchronizationService?.ReceiveVehicleSegmentsListFromServerAsync();
-                if (result.Succeeded) { 
+                if (result.Succeeded)
+                {
                     await ChangeSyncJobsState("GetPrices", JobState.Success); resultList.Add(true);
                 }
                 else
@@ -253,10 +260,10 @@ namespace Parking.App.Views.Windows
                 {
                     await ChangeSyncJobsState("GetGroups", JobState.Success); resultList.Add(true);
                 }
-                    
+
                 else
                     await ChangeSyncJobsState("GetGroups", JobState.Failed);
-                if(resultList.Count(a=>a==true) == 4)
+                if (resultList.Count(a => a == true) == 4)
                     return true;
                 return false;
             }

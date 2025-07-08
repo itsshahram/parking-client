@@ -1,5 +1,6 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
+using Parking.App.Models.Dto.Card;
 using Parking.Domain.Entities.User;
 using static Parking.App.ANPR.SATPA_API;
 
@@ -108,8 +109,6 @@ namespace Parking.App.Views.Pages
             {
                 _logger.LogError(ex.Message, ex);
             }
-
-
         }
 
         // Then for the event handler
@@ -251,7 +250,7 @@ namespace Parking.App.Views.Pages
 
                         SLPRPropertyGrid propSettings = new SLPRPropertyGrid();
                         propSettings.detect_persian_plate = 1;
-                        propSettings.num_valid_chars = new int[] { 8, 5 };
+                        propSettings.num_valid_chars = [8, 5];
                         propSettings.n_frm_skip_on_success = Settings.Default.Camera_ANPR_FrameSkip;
                         propSettings.vlc_net_cache_time = Settings.Default.Camera_ANPR_VlcCache;
                         propSettings.plate_type = Settings.Default.Camera_ANPR_PlateType;
@@ -422,9 +421,7 @@ namespace Parking.App.Views.Pages
                                 plateCharsCombo.SelectedValue = plate[1].ToLower().ConvertEnCharToFaCharIndex();
                                 rightNumbersNumberTextBox.Text = plate[2].Substring(0, 3);
                                 irNumberTextBox.Text = plate[2].Substring(3, 2);
-
                             });
-
                             CheckPlate();
                         }
 
@@ -455,11 +452,8 @@ namespace Parking.App.Views.Pages
                         });
                         LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
                     }
-
-
                 }
             }
-
         }
 
         private void CheckPlate()
@@ -553,7 +547,6 @@ namespace Parking.App.Views.Pages
 
             await _client.StartFrameReaderAsync(inputSource, OutputImageFormat.Bmp, LocalCancellationTokenSource.Token).ConfigureAwait(false);
 
-
         }
         private VideoStreamClient _client;
         private CancellationTokenSource _cancellationTokenSource;
@@ -564,7 +557,7 @@ namespace Parking.App.Views.Pages
             {
                 if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
                 {
-                    await this.Dispatcher.InvokeAsync(() =>
+                    await Dispatcher.InvokeAsync(() =>
                      {
                          ViewModel.CurrentFrame = imageData.ToImageSource();
                      });
@@ -586,10 +579,8 @@ namespace Parking.App.Views.Pages
         {
             if (Settings.Default.Application_EntryCardRequirement)
             {
-
                 try
                 {
-
                     nfc.Init(0, false);
                     nfc.CardUidReceived += OnCardUidReceivedSlot;
                 }
@@ -636,6 +627,12 @@ namespace Parking.App.Views.Pages
         {
             try
             {
+                CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
+                if (card is null)
+                {
+                    ShowMessage("خطا", "کارت یافت نشد");
+                    return false;
+                }
                 //چک کردن پلاک
                 var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
                 if (plateTicketId != null)
@@ -731,7 +728,7 @@ namespace Parking.App.Views.Pages
                     return false;
                 }
 
-                //تخصیص فضای پارک
+                //تخصیص فضای پارک 
                 var parkingSpace = _parkingService.GetOneFreeSpaceId();
                 if (parkingSpace.SpaceId == null)
                 {
@@ -750,22 +747,22 @@ namespace Parking.App.Views.Pages
                         startTime = CreateDateTiem ?? DateTime.Now;
                     }
                 }
+
                 var plate = LatestValidEnPlate.ParsePlate();
                 var FaPlate = LatestValidEnPlate;
                 if (plate.IsIranianPlate)
-                {
                     FaPlate = "ایران" + plate.IranCode.Replace("IR", "") + "_" + plate.RightThreeDigits + plate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate.LeftTwoDigits}";
-                }
 
+                if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate)
+                {
+                    ShowMessage("خطا", "پلاک ثبت شده با پلاک کارت مطابقت ندارد");
+                    return false;
+                }
 
                 if (Settings.Default.Application_GatePCName?.Length < 3)
-                {
-                    EntranceGate = System.Environment.MachineName;
-                }
+                    EntranceGate = Environment.MachineName;
                 else
-                {
                     EntranceGate = Settings.Default.Application_GatePCName ?? "Unknown Gate";
-                }
 
                 CreateParkingTicketModel ticketModel = new CreateParkingTicketModel()
                 {
@@ -786,7 +783,6 @@ namespace Parking.App.Views.Pages
                 var ticketInfo = _parkingService.CreateTicket(ticketModel, LatestValidCarImage);
                 if (ticketInfo.Succeeded)
                 {
-
                     if (Settings.Default.Application_PrintInvoiceAfterEntry)
                     {
                         var ticket = _parkingService.GetTicketDetails(ticketInfo.Result);
@@ -904,8 +900,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
-
-        private async void PlateTextBox_GotFocus(object sender, RoutedEventArgs e)
+        private void PlateTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             try
             {

@@ -1,13 +1,7 @@
-﻿using MiFare.Classic;
+﻿using MiFare;
+using MiFare.Classic;
 using MiFare.Devices;
-using MiFare.PcSc;
-using MiFare;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parking.App.Helpers.Card;
 
@@ -34,19 +28,17 @@ public class NFC
 
     public void Init(int deviceId, bool _verbose = false)
     {
-        this.verbose = _verbose;
+        verbose = _verbose;
         GetDevices(deviceId);
     }
 
     public void SetSelectedSector(int _selectedSector)
     {
-        this.selectedSector = _selectedSector;
+        selectedSector = _selectedSector;
     }
 
     private IReadOnlyList<string> GetReaders()
-    {
-        return CardReader.GetReaderNames();
-    }
+        => CardReader.GetReaderNames();
 
     private async void GetDevices(int deviceId)
     {

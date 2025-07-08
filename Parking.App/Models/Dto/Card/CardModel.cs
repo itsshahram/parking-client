@@ -33,11 +33,9 @@ public class CardModel
     public long? Credit { get; set; }
 
     public decimal? CardSerialNo { get; set; }
-
     public bool IsGuest { get; set; }
     public bool IsActive { get; set; }
     public bool IsInUse { get; set; }
-
     public byte[]? OwnerPic { get; set; }
 
 }

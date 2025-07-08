@@ -1,6 +1,4 @@
-﻿using Parking.App.Models.Dto.Parking.ParkingSection;
-using Parking.App.Models.Dto.Parking.ParkingSpace;
-using Parking.App.Models.Dto.Vehicle.VehicleSegment;
+﻿using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
 using Parking.Domain.Entities.Vehicles;
 
