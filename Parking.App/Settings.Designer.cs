@@ -517,7 +517,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:7168/api")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://188.213.66.252:8090/api")]
         public string Application_ApiServerAddress {
             get {
                 return ((string)(this["Application_ApiServerAddress"]));
@@ -565,7 +565,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Application_Logging_In_Elastic {
             get {
                 return ((bool)(this["Application_Logging_In_Elastic"]));
@@ -577,7 +577,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://172.16.51.20:9200")]
         public string Application_Logs_Elastic_Server {
             get {
                 return ((string)(this["Application_Logs_Elastic_Server"]));
@@ -589,7 +589,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("elastic")]
         public string Application_Logs_Elastic_Username {
             get {
                 return ((string)(this["Application_Logs_Elastic_Username"]));
@@ -601,13 +601,13 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Application_Logs_Elastic_Password {
+        [global::System.Configuration.DefaultSettingValueAttribute("changeme")]
+        public string Application_Logs_Elastic_Pass {
             get {
-                return ((string)(this["Application_Logs_Elastic_Password"]));
+                return ((string)(this["Application_Logs_Elastic_Pass"]));
             }
             set {
-                this["Application_Logs_Elastic_Password"] = value;
+                this["Application_Logs_Elastic_Pass"] = value;
             }
         }
         

@@ -123,7 +123,7 @@
                                 <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام کاربری" VerticalAlignment="Center"/>
                             </DockPanel>
                             <DockPanel Margin="0 5">
-                                <ui:PasswordBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Password, Mode=TwoWay}" />
+                                <ui:PasswordBox FlowDirection="LeftToRight" DockPanel.Dock="Right" MinWidth="200" Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Logs_Elastic_Pass, Mode=TwoWay}" />
                                 <TextBlock DockPanel.Dock="Left" Margin="5"  Text="پسورد" VerticalAlignment="Center"/>
                             </DockPanel>
                             <DockPanel Margin="0 5">
