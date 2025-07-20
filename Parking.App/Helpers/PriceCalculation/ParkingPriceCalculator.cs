@@ -165,7 +165,7 @@ public class ParkingCostCalculator
         decimal taxAmount = totalWithDiscount * (taxPercentage / 100);
         decimal payableAmount = totalWithDiscount + taxAmount;
 
-        if (thresholdHoursPerDay == 0)
+            if (thresholdHoursPerDay == 0)
             thresholdHoursPerDay = 1;
 
         return new ParkingPriceOutputModel

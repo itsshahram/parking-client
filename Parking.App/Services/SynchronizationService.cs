@@ -364,7 +364,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         localUser.UserName = user.UserName;
                         localUser.NormalizedUserName = user.UserName.ToUpper();
                         localUser.RegisterDate = DateTime.Now;
-                        unitOfWork.Users.Update(localUser);
+                        await userManager.UpdateAsync(localUser);
                         var newUser = await userManager.FindByIdAsync(localUser.Id.ToString());
                         var x = await userManager.AddToRoleAsync(newUser, user.Role);
 
@@ -386,7 +386,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             NormalizedUserName = user.UserName.ToUpper(),
                             SecurityStamp = GenerateSecurityStamp()
                         };
-                        unitOfWork.Users.Add(userInfo);
+                        await userManager.CreateAsync(userInfo);
                         var newUser = await userManager.FindByIdAsync(userInfo.Id.ToString());
                         var x = await userManager.AddToRoleAsync(newUser, user.Role);
                     }
@@ -1490,8 +1490,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            var client = httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
             var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
             foreach (var ticket in localUnsyncedTickets)
             {
@@ -1539,7 +1537,11 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     requestInfo.StartImage = ticket.StartImage;
                 }
 
+                var client = httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
                 var response = await client.PostAsJsonAsync($"{TokenStore.BaseUrl}/Ticket/sync-ticket", requestInfo);
+
+                string message = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>();
@@ -1707,8 +1709,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             TokenStore.BaseUrl = Settings.Default.Application_ApiServerAddress;
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var responce = await client.GetStringAsync($"{TokenStore.BaseUrl}/Account/connection-check");
-            var result = JsonConvert.DeserializeObject<string>(responce);
+            var response = await client.GetStringAsync($"{TokenStore.BaseUrl}/Account/connection-check");
+            var result = JsonConvert.DeserializeObject<string>(response);
             if (result?.ToLower() == "true")
             {
                 return true;

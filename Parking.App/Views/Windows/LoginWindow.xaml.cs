@@ -93,6 +93,7 @@ namespace Parking.App.Views.Windows
                     var username = usernameBox.Text;
                     var pasword = passwordBox.Password;
                     var result = _userService?.Login(username, pasword);
+
                     if (result == Domain.General.LoginStatus.NotActice)
                     {
                         Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
@@ -110,7 +111,7 @@ namespace Parking.App.Views.Windows
                         var loginToServerResult = await _synchronizationService?.CheckTokenAsync(username, pasword);
                         if (loginToServerResult.Succeeded)
                         {
-                            syncStatus = loginToServerResult.Result;
+                            syncStatus = loginToServerResult.Succeeded;
                         }
                     }
                     else

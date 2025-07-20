@@ -1708,7 +1708,7 @@ public class ParkingService : IParkingService
     }
 
     public short GetLicensePlateDiscountPercent(string licenseEnPlate)
-    {
+    {   
         try
         {
             var licensePlate = unitOfWork.LicensePlates.Find(l => l.EnLicensePlate == licenseEnPlate).FirstOrDefault();
@@ -1755,7 +1755,7 @@ public class ParkingService : IParkingService
             {
                 return 0;
             }
-            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId && l.StartDate < DateTime.Now && l.EndDate > DateTime.Now).FirstOrDefaultAsync();
+            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId /*&& l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now*/).FirstOrDefaultAsync();
             if (licensePlateGroup == null)
             {
                 return 0;

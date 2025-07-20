@@ -1,6 +1,5 @@
 ﻿using Coravel.Invocable;
 
-
 namespace Parking.App.Utilities;
 
 public class BackgroundTask : IInvocable
