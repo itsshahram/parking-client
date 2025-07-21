@@ -327,8 +327,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var responce = await client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-parking-users");
-            var result = JsonConvert.DeserializeObject<ApiResponse<List<ParkingUserViewModel>>>(responce);
+            var response = await client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-parking-users");
+
+            var result = JsonConvert.DeserializeObject<ApiResponse<List<ParkingUserViewModel>>>(response);
             if (result?.StatusCode == 200)
             {
                 var users = result.Data;
@@ -361,13 +362,13 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         localUser.Lastname = user.LastName;
                         localUser.PasswordHash = user.PasswordHash;
                         localUser.ParkingLotId = user.ParkingLoId;
+                        localUser.PhoneNumber = user.PhoneNumber;
                         localUser.UserName = user.UserName;
                         localUser.NormalizedUserName = user.UserName.ToUpper();
                         localUser.RegisterDate = DateTime.Now;
                         await userManager.UpdateAsync(localUser);
                         var newUser = await userManager.FindByIdAsync(localUser.Id.ToString());
                         var x = await userManager.AddToRoleAsync(newUser, user.Role);
-
                     }
                     else
                     {
@@ -383,8 +384,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             UserName = user.UserName,
                             RegisterDate = DateTime.Now,
                             NormalizedEmail = user.Email.ToUpper(),
-                            NormalizedUserName = user.UserName.ToUpper(),
-                            SecurityStamp = GenerateSecurityStamp()
+                            SecurityStamp = GenerateSecurityStamp(),
+                            PhoneNumber = user.PhoneNumber
                         };
                         await userManager.CreateAsync(userInfo);
                         var newUser = await userManager.FindByIdAsync(userInfo.Id.ToString());

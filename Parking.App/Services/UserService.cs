@@ -146,9 +146,15 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
     {
         try
         {
-            var user = _unitOfWork.Users.FirstOrDefault(u => u.UserName == username);
+            ApplicationUser? user = new();
+            if (username.IsMobile())
+                user = unitOfWork.Users.FirstOrDefault(x => x.PhoneNumber == x.UserName);
+            else
+                user = _unitOfWork.Users.FirstOrDefault(u => u.UserName == username);
             if (user == null)
                 return LoginStatus.NotFound;
+            //check format is mobile
+
 
             if (!user.IsActive)
                 return LoginStatus.NotActice;

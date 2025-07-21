@@ -33,10 +33,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Camera_MainCameraEnable" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Camera_MainCameraUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">rtsp://21.55.66.253:8080/h264.sdp</Value>
     </Setting>
     <Setting Name="Camera_MainCameraUser" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -113,9 +113,6 @@
     <Setting Name="Application_ServerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Application_Logging" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -130,9 +127,6 @@
     </Setting>
     <Setting Name="Application_Sync_Interval_CountOfTake" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
-    </Setting>
-    <Setting Name="Application_Sync_Enable" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Sync_Interval_Second" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
@@ -151,6 +145,12 @@
     </Setting>
     <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Application_Sync_Enable" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

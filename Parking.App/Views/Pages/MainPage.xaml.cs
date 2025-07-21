@@ -1,11 +1,7 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
-using Parking.Domain.Entities.User;
 using static Parking.App.ANPR.SATPA_API;
-
-
-
 
 
 namespace Parking.App.Views.Pages
@@ -14,6 +10,7 @@ namespace Parking.App.Views.Pages
     /// Interaction logic for MainPage.xaml
     /// </summary>
     public partial class MainPage : Page
+
     {
         private readonly IParkingService _parkingService;
         private readonly ILogger<MainPage> _logger;
@@ -59,7 +56,6 @@ namespace Parking.App.Views.Pages
                 nfc.CardUidReceived -= OnCardUidReceivedSlot;
                 nfc = null;
             }
-
         }
         private async void LoadData()
         {
@@ -71,7 +67,6 @@ namespace Parking.App.Views.Pages
             {
                 InitializeCamera();
             });
-
         }
         private void InitializeRefreshDataTimer()
         {
@@ -171,7 +166,7 @@ namespace Parking.App.Views.Pages
 
         private void CustomDateToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            ViewModel.DriverDescription = string.Empty;
+            ViewModel.DriverDescription = string.Empty;  
             ViewModel.DriverPhoneNumber = string.Empty;
             ViewModel.DriverFullName = string.Empty;
             timeBox.Visibility = Visibility.Collapsed;
@@ -244,6 +239,7 @@ namespace Parking.App.Views.Pages
 
                     try
                     {
+
                         PictureBox pb = new PictureBox();
                         satpa_object = new SATPA(0, "cam1", pb, License.per_camera);
                         float cnf = ((float)Settings.Default.Camera_ANPR_Cnf) / 100;
@@ -258,7 +254,6 @@ namespace Parking.App.Views.Pages
                         propSettings.diff_thresh = Settings.Default.Camera_ANPR_LightParameter;
                         propSettings.plate_buf_size = Settings.Default.Camera_ANPR_PlateCountInBuffer;
                         propSettings.min_cnf = (cnf > 1) ? 1 : cnf;
-
 
                         satpa_object.satpa_settings = propSettings;
                         satpa_object.url = Settings.Default.Camera_MainCameraUrl;
@@ -540,7 +535,7 @@ namespace Parking.App.Views.Pages
 
 
             var inputSource = new StreamInputSource(Settings.Default.Camera_MainCameraUrl);
-            _client = new VideoStreamClient();
+            _client = new VideoStreamClient("C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe");
 
             _client.NewImageReceived += OnNewImageReceived;
 
@@ -553,20 +548,17 @@ namespace Parking.App.Views.Pages
 
         private async void OnNewImageReceived(byte[] imageData)
         {
-            await Task.Run(async () =>
+            if (App.GlobalCancellationTokenSource.IsCancellationRequested)
+                return;
+
+            // Convert image on background thread
+            var imageSource = await Task.Run(() => imageData.ToImageSource()).ConfigureAwait(false);
+
+            // Update UI on dispatcher
+            await Dispatcher.InvokeAsync(() =>
             {
-                if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
-                {
-                    await Dispatcher.InvokeAsync(() =>
-                     {
-                         ViewModel.CurrentFrame = imageData.ToImageSource();
-                     });
-
-
-                }
-            }).ConfigureAwait(false);
-
-            //imageBox.Source = imageData.ToImageSource();
+                ViewModel.CurrentFrame = imageSource;
+            });
         }
 
 

@@ -145,7 +145,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Camera_MainCameraEnable {
             get {
                 return ((bool)(this["Camera_MainCameraEnable"]));
@@ -157,7 +157,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("rtsp://21.55.66.253:8080/h264.sdp")]
         public string Camera_MainCameraUrl {
             get {
                 return ((string)(this["Camera_MainCameraUrl"]));
@@ -470,18 +470,6 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Application_EntryCardRequirement {
-            get {
-                return ((bool)(this["Application_EntryCardRequirement"]));
-            }
-            set {
-                this["Application_EntryCardRequirement"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Application_Logging {
             get {
                 return ((bool)(this["Application_Logging"]));
@@ -536,18 +524,6 @@ namespace Parking.App {
             }
             set {
                 this["Application_Sync_Interval_CountOfTake"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Application_Sync_Enable {
-            get {
-                return ((bool)(this["Application_Sync_Enable"]));
-            }
-            set {
-                this["Application_Sync_Enable"] = value;
             }
         }
         
@@ -620,6 +596,30 @@ namespace Parking.App {
             }
             set {
                 this["PlateCheckInExitGate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Application_EntryCardRequirement {
+            get {
+                return ((bool)(this["Application_EntryCardRequirement"]));
+            }
+            set {
+                this["Application_EntryCardRequirement"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Application_Sync_Enable {
+            get {
+                return ((bool)(this["Application_Sync_Enable"]));
+            }
+            set {
+                this["Application_Sync_Enable"] = value;
             }
         }
     }

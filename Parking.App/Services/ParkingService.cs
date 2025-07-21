@@ -1197,6 +1197,7 @@ public class ParkingService : IParkingService
                 DriverDescription = request.DriverDescription,
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
+                SystemId = ""   
             };
             unitOfWork.ParkingTickets.Add(ticket);
 
@@ -1708,7 +1709,7 @@ public class ParkingService : IParkingService
     }
 
     public short GetLicensePlateDiscountPercent(string licenseEnPlate)
-    {   
+    {
         try
         {
             var licensePlate = unitOfWork.LicensePlates.Find(l => l.EnLicensePlate == licenseEnPlate).FirstOrDefault();
@@ -2213,7 +2214,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
             {
@@ -2235,12 +2236,10 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
-            {
                 return true;
-            }
             return false;
         }
         catch (Exception ex)
@@ -2255,12 +2254,10 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
-            {
                 return card.PercentDiscount;
-            }
             return 0;
         }
         catch (Exception ex)
@@ -2350,7 +2347,7 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var cardInfo = unitOfWork.Cards.Find(c => c.CardSerialNo == request.CardSerialNo).FirstOrDefault();
+            var cardInfo = unitOfWork.Cards.FirstOrDefault(c => c.CardSerialNo == request.CardSerialNo);
             if (cardInfo == null)
             {
                 Card card = new Card
@@ -2370,14 +2367,17 @@ public class ParkingService : IParkingService
                     PercentDiscount = request.PercentDiscount,
                     LicensePlateGroupId = request.LicensePlateGroupId,
                     VehicleSegmentId = request.VehicleSegmentId,
-                    EnLicensePlate = request.EnLicensePlate
+                    EnLicensePlate = request.EnLicensePlate,
                 };
                 unitOfWork.Cards.Add(card);
                 return true;
             }
             else
             {
-                var card = unitOfWork.Cards.GetById(cardInfo.Id);
+                Card? card = unitOfWork.Cards.GetById(cardInfo.Id);
+                if (card is null)
+                    return false;
+
                 card.ActiveDate = request.ActiveDate;
                 card.CardSerialNo = request.CardSerialNo;
                 card.Credit = request.Credit;
@@ -2393,6 +2393,7 @@ public class ParkingService : IParkingService
                 card.PercentDiscount = request.PercentDiscount;
                 card.LicensePlateGroupId = request.LicensePlateGroupId;
                 card.VehicleSegmentId = request.VehicleSegmentId;
+                card.EnLicensePlate = request.EnLicensePlate;
                 unitOfWork.Cards.Update(card);
                 return true;
             }
@@ -2420,7 +2421,6 @@ public class ParkingService : IParkingService
                 Type = request.Type
             };
             unitOfWork.CardCreditHistories.Add(cardCreditHistory);
-            //unitOfWork.Commit();
             return true;
         }
         catch (Exception ex)

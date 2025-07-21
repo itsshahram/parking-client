@@ -57,5 +57,6 @@ public class ParkingTicket
     public Guid? UserId { get; set; }
     public Guid? ExitRegistrarUserId { get; set; }
     public TicketStatus TicketStatus { get; set; }
+    public  string SystemId { get; set; }
 
 }

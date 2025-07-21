@@ -177,7 +177,7 @@ public partial class App : Application
             {
                 if (Settings.Default.Application_Logging_In_Elastic)
                 {
-                    Serilog.Log.Logger = new LoggerConfiguration()
+                    Log.Logger = new LoggerConfiguration()
                         .Enrich.FromLogContext()
                         .Enrich.WithMachineName()
                         .WriteTo.File("logs/log-.txt",
@@ -189,9 +189,7 @@ public partial class App : Application
                              restrictedToMinimumLevel: LogEventLevel.Error)
                         .CreateLogger();
                 }
-
             }
-
         }
         else
         {
