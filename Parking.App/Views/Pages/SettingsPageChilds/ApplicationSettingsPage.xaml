@@ -89,6 +89,16 @@
                 </DockPanel>
             </StackPanel>
         </Border>
+        <Border Background="#20B9B9B9" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox Text="{Binding Application_DeviceId, Mode=TwoWay, Source={x:Static Properties:Settings.Default}}" TextChanged="DeviceId_TextChanged"  MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="شناسه دستگاه"  VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
@@ -138,5 +148,6 @@
 
             </StackPanel>
         </Border>
+
     </StackPanel>
 </Page>

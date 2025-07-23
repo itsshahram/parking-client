@@ -996,8 +996,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
-
             var ticket = unitOfWork.ParkingTickets.Find(s => s.BarcodeId == barcode)
                 .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
                 {
@@ -1017,6 +1015,7 @@ public class ParkingService : IParkingService
                     DurationMinutes = s.DurationMinutes,
                     EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
                     ExitImage = s.ExitImage,
+                    StartImage = s.StartImage,
                     IsExited = s.IsExited,
                     IsPaid = s.IsPaid,
                     PaidAmount = s.PaidAmount,
@@ -1066,6 +1065,7 @@ public class ParkingService : IParkingService
                     DurationMinutes = s.DurationMinutes,
                     EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
                     ExitImage = s.ExitImage,
+                    StartImage = s.StartImage,
                     IsExited = s.IsExited,
                     IsPaid = s.IsPaid,
                     PaidAmount = s.PaidAmount,
@@ -1115,6 +1115,7 @@ public class ParkingService : IParkingService
                         DiscountPercent = s.DiscountPercent,
                         DurationMinutes = s.DurationMinutes,
                         EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                        StartImage = s.StartImage,
                         ExitImage = s.ExitImage,
                         IsExited = s.IsExited,
                         IsPaid = s.IsPaid,
@@ -1197,7 +1198,7 @@ public class ParkingService : IParkingService
                 DriverDescription = request.DriverDescription,
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
-                SystemId = ""   
+                DeviceId = Settings.Default.Application_DeviceId,
             };
             unitOfWork.ParkingTickets.Add(ticket);
 
@@ -1298,6 +1299,7 @@ public class ParkingService : IParkingService
                 DiscountPercent = s.DiscountPercent,
                 DurationMinutes = s.DurationMinutes,
                 EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                StartImage = s.StartImage,
                 ExitImage = s.ExitImage,
                 IsExited = s.IsExited,
                 IsPaid = s.IsPaid,
@@ -1411,6 +1413,7 @@ public class ParkingService : IParkingService
                 DiscountPercent = s.DiscountPercent,
                 DurationMinutes = s.DurationMinutes,
                 EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                StartImage = s.StartImage,
                 ExitImage = s.ExitImage,
                 IsExited = s.IsExited,
                 IsPaid = s.IsPaid,
@@ -1503,7 +1506,8 @@ public class ParkingService : IParkingService
                 VehicleManufacturerName = t.VehicleManufacturerName,
                 VehicleModel = t.VehicleModel,
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
-                TraceNo = t.TraceNo
+                TraceNo = t.TraceNo,
+                DeviceId = Settings.Default.Application_DeviceId,
             }).FirstOrDefault();
             if (ticket != null && ticket.IsExited == false)
             {
@@ -1618,7 +1622,8 @@ public class ParkingService : IParkingService
                 VehicleManufacturerName = t.VehicleManufacturerName,
                 VehicleModel = t.VehicleModel,
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
-                TraceNo = t.TraceNo
+                TraceNo = t.TraceNo,
+                DeviceId = Settings.Default.Application_DeviceId,
             }).FirstOrDefaultAsync();
             if (ticket != null && ticket.IsExited == false)
             {

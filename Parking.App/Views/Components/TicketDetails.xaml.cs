@@ -38,7 +38,6 @@ namespace Parking.App.Views.Components
         }
         private void StartProgressAnimation(int seconds)
         {
-
             if (_progressTimer != null)
             {
                 _progressTimer.Stop();

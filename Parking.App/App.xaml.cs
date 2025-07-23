@@ -2,6 +2,7 @@
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic.Logging;
 using Parking.App.Utilities;
 using Parking.Domain.Contracts.Base;
@@ -99,10 +100,6 @@ public partial class App : Application
 
                 services.AddScoped<UsersListPage>();
                 services.AddScoped<UsersListPageViewModel>();
-
-
-
-
             }
             else
             {
@@ -143,8 +140,6 @@ public partial class App : Application
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
-
-
         if (Settings.Default.Application_Logging)
         {
             if (Settings.Default.Application_Logging_In_Elastic)
@@ -210,9 +205,9 @@ public partial class App : Application
         }
 
 
-        Serilog.Log.Information("Info: Application Started.");
-        Serilog.Log.Error("Error: Application Started.");
-        Serilog.Log.Warning("Warning: Application Started.");
+        Log.Information("Info: Application Started.");
+        Log.Error("Error: Application Started.");
+        Log.Warning("Warning: Application Started.");
 
 
         if (Settings.Default.Application_DbActiveStatus)
@@ -256,8 +251,6 @@ public partial class App : Application
                 //_host.Services.UseScheduler(s => s.Schedule<BackgroundTask>().EverySeconds(Settings.Default.Application_Sync_Interval_CountOfTake));
 
 
-
-
                 _host.Start();
                 var login = _host.Services.GetRequiredService<LoginWindow>();
 
@@ -270,9 +263,6 @@ public partial class App : Application
                 //}
 
                 //base.OnStartup(e);
-
-
-
             }
             catch (Exception ex)
             {

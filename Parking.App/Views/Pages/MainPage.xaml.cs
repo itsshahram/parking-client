@@ -166,7 +166,7 @@ namespace Parking.App.Views.Pages
 
         private void CustomDateToggle_Unchecked(object sender, RoutedEventArgs e)
         {
-            ViewModel.DriverDescription = string.Empty;  
+            ViewModel.DriverDescription = string.Empty;
             ViewModel.DriverPhoneNumber = string.Empty;
             ViewModel.DriverFullName = string.Empty;
             timeBox.Visibility = Visibility.Collapsed;
@@ -535,7 +535,7 @@ namespace Parking.App.Views.Pages
 
 
             var inputSource = new StreamInputSource(Settings.Default.Camera_MainCameraUrl);
-            _client = new VideoStreamClient("C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe");
+            _client = new VideoStreamClient();
 
             _client.NewImageReceived += OnNewImageReceived;
 
@@ -619,12 +619,19 @@ namespace Parking.App.Views.Pages
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(Settings.Default.Application_DeviceId))
+                {
+                    ShowMessage("خطا", "لطفا برای استفاده از خدمات قبض لطفا شناسه دستگاه را در بخش تنظیمات اپلیکیشن پر کنید");
+                    return false;
+                }
                 CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
                 if (card is null)
                 {
                     ShowMessage("خطا", "کارت یافت نشد");
                     return false;
                 }
+
+
                 //چک کردن پلاک
                 var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
                 if (plateTicketId != null)
