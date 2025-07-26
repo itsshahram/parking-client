@@ -1,16 +1,4 @@
-﻿
-
-
-using Microsoft.EntityFrameworkCore.Metadata;
-using Parking.App.Models.Config;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
-using Parking.App.Utilities;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Windows.Forms;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Border = Wpf.Ui.Controls.Border;
+﻿using Border = Wpf.Ui.Controls.Border;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using Grid = Wpf.Ui.Controls.Grid;
@@ -38,7 +26,6 @@ namespace Parking.App.Views.Windows
         {
             try
             {
-
                 _parkingService = App.GetService<IParkingService>();
                 Cameras = CameraConfigManager.GetActiveCameras();
 
@@ -93,8 +80,6 @@ namespace Parking.App.Views.Windows
             {
                 ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
             }
-
-
         }
         private void InitializeCloseTimer()
         {

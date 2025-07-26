@@ -11,4 +11,5 @@ public class ParkingUserViewModel
     public bool? IsActive { get; set; }
     public string? PasswordHash { get; set; }
     public string? Role { get; set; }
+    public string? PhoneNumber { get; internal set; }
 }

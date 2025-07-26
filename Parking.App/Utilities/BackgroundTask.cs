@@ -1,12 +1,11 @@
 ﻿using Coravel.Invocable;
 
-
 namespace Parking.App.Utilities;
 
 public class BackgroundTask : IInvocable
 {
     private readonly ISynchronizationService? _synchronizationService;
-    private readonly ILogger<BackgroundTask> _logger;   
+    private readonly ILogger<BackgroundTask> _logger;
     private readonly IParkingService? _parkingService;
     private readonly MainWindow _mainWindow;
 
@@ -80,30 +79,30 @@ public class BackgroundTask : IInvocable
             SetAppIcon(TaskStatus.Success);
             TokenStore.ServerStatus = true;
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             _logger.LogError("Error in establishing connection with the server", ex.Message);
             SetAppIcon(TaskStatus.Error);
         }
 
     }
-    public Task Invoke()
+    public async Task Invoke()
     {
-        
         try
         {
             if (Settings.Default.Application_Sync_Enable)
             {
-                if (_synchronizationService.ServerConnectiviyCheckAsync().Result)
+                if (await _synchronizationService.ServerConnectiviyCheckAsync())
                 {
 
                     if (Settings.Default.Application_Sync_Enable)
                     {
-                        SyncData().Wait();
-                        return Task.CompletedTask;
+                        await SyncData();
+                        return;
                     }
                     else
                     {
-                        return Task.CompletedTask;
+                        return;
                     }
 
                 }
@@ -112,22 +111,22 @@ public class BackgroundTask : IInvocable
                     _logger.LogError("Error in establishing connection with the server");
                     SetAppIcon(TaskStatus.Error);
                     TokenStore.ServerStatus = false;
-                    return Task.CompletedTask;
+                    return;
                 }
             }
             else
             {
                 SetAppIcon(TaskStatus.Error);
                 TokenStore.ServerStatus = false;
-                return Task.CompletedTask;
+                return;
             }
-                
+
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error in establishing connection with the server",ex.Message);
+            _logger.LogError("Error in establishing connection with the server", ex.Message);
             SetAppIcon(TaskStatus.Error);
-            return Task.CompletedTask;
+            return;
         }
     }
 
@@ -162,7 +161,7 @@ public class BackgroundTask : IInvocable
     {
         Syncing,
         Success,
-        Error, 
+        Error,
         Reset
     }
 }

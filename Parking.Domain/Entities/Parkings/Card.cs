@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Parking.Domain.Entities.Parkings;
 
@@ -11,10 +6,7 @@ public class Card
 {
     [Key]
     public int Id { get; set; }
-
-
     public string? OwnerFirstName { get; set; }
-
     public string? OwnerLastName { get; set; }
     public string? OwnerNationalCode { get; set; }
     public string? OwnerAddress { get; set; }

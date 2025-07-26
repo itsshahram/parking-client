@@ -12,7 +12,7 @@ namespace Parking.App {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -470,18 +470,6 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Application_EntryCardRequirement {
-            get {
-                return ((bool)(this["Application_EntryCardRequirement"]));
-            }
-            set {
-                this["Application_EntryCardRequirement"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Application_Logging {
             get {
                 return ((bool)(this["Application_Logging"]));
@@ -517,7 +505,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:7168/api")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://188.213.66.252:8090/api")]
         public string Application_ApiServerAddress {
             get {
                 return ((string)(this["Application_ApiServerAddress"]));
@@ -536,18 +524,6 @@ namespace Parking.App {
             }
             set {
                 this["Application_Sync_Interval_CountOfTake"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Application_Sync_Enable {
-            get {
-                return ((bool)(this["Application_Sync_Enable"]));
-            }
-            set {
-                this["Application_Sync_Enable"] = value;
             }
         }
         
@@ -577,7 +553,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Application_Logs_Elastic_Server {
             get {
                 return ((string)(this["Application_Logs_Elastic_Server"]));
@@ -602,12 +578,12 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Application_Logs_Elastic_Password {
+        public string Application_Logs_Elastic_Pass {
             get {
-                return ((string)(this["Application_Logs_Elastic_Password"]));
+                return ((string)(this["Application_Logs_Elastic_Pass"]));
             }
             set {
-                this["Application_Logs_Elastic_Password"] = value;
+                this["Application_Logs_Elastic_Pass"] = value;
             }
         }
         
@@ -620,6 +596,42 @@ namespace Parking.App {
             }
             set {
                 this["PlateCheckInExitGate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_EntryCardRequirement {
+            get {
+                return ((bool)(this["Application_EntryCardRequirement"]));
+            }
+            set {
+                this["Application_EntryCardRequirement"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Application_Sync_Enable {
+            get {
+                return ((bool)(this["Application_Sync_Enable"]));
+            }
+            set {
+                this["Application_Sync_Enable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ExitGate")]
+        public string Application_DeviceId {
+            get {
+                return ((string)(this["Application_DeviceId"]));
+            }
+            set {
+                this["Application_DeviceId"] = value;
             }
         }
     }

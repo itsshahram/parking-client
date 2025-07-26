@@ -1,33 +1,16 @@
-﻿using Azure.Core;
-using Azure.Core.Pipeline;
-using Microsoft.Extensions.Logging;
-using Parking.App.Helpers;
-using Parking.App.Models;
-using Parking.App.Models.Dto.Card;
+﻿using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
-using Parking.App.Models.Dto.Vehicle.LicensePlate;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
-using Parking.App.Models.Tickets;
-using Parking.App.Services.Interfaces;
 using Parking.App.Utilities.PriceCalculation;
-using Parking.Domain.Contracts;
 using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
-using Parking.Infrastructure.Uow;
 using System.Diagnostics;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -42,7 +25,7 @@ public class ParkingService : IParkingService
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
-    private List<VehicleSegment> _vehicleSegmentsList = new List<VehicleSegment>();
+    private List<VehicleSegment> _vehicleSegmentsList;
     public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory)
     {
         //this.unitOfWork = unitOfWork;
@@ -52,16 +35,14 @@ public class ParkingService : IParkingService
         _httpClientFactory = httpClientFactory;
         client = _httpClientFactory.CreateClient();
         unitOfWork = _unitOfWork;
-
-        _vehicleSegmentsList = unitOfWork.VehicleSegments.GetAll().ToList();
+        _vehicleSegmentsList = unitOfWork.VehicleSegments.ToList();
 
     }
     public TServiceResponse<ParkingLotModel> GetParkingLotDetails()
     {
         try
         {
-
-            var _localParkingInfo = unitOfWork.ParkingLots.GetAll().FirstOrDefault();
+            var _localParkingInfo = unitOfWork.ParkingLots.FirstOrDefault();
             if (_localParkingInfo != null)
             {
                 ParkingLotModel result = new ParkingLotModel()
@@ -105,7 +86,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
             List<VehicleSegmentPriceListItemModel> result = new List<VehicleSegmentPriceListItemModel>();
             result = await unitOfWork.VehicleSegments.GetAll().Select(v => new VehicleSegmentPriceListItemModel
             {
@@ -118,8 +98,8 @@ public class ParkingService : IParkingService
                 ParkingLotId = v.ParkingLotId,
                 Id = v.Id
             }).ToListAsync();
-            var vehicleSegmentPrices = unitOfWork.ParkingVehicleSegmentPrices.GetAll().ToList();
-            var vehicleSegmentVariablePrices = unitOfWork.ParkingVehicleSegmentVariablePrices.GetAll().ToList();
+            var vehicleSegmentPrices = unitOfWork.ParkingVehicleSegmentPrices.ToList();
+            var vehicleSegmentVariablePrices = unitOfWork.ParkingVehicleSegmentVariablePrices.ToList();
 
             foreach (var item in result)
             {
@@ -152,9 +132,7 @@ public class ParkingService : IParkingService
 
                 }
             }
-
             return result;
-
         }
         catch (Exception ex)
         {
@@ -205,8 +183,8 @@ public class ParkingService : IParkingService
                 ParkingLotId = v.ParkingLotId,
                 Id = v.Id
             }).ToListAsync();
-            var vehicleSegmentPricesTask = unitOfWork.ParkingVehicleSegmentPrices.GetAll().ToListAsync();
-            var vehicleSegmentVariablePricesTask = unitOfWork.ParkingVehicleSegmentVariablePrices.GetAll().ToListAsync();
+            var vehicleSegmentPricesTask = unitOfWork.ParkingVehicleSegmentPrices.ToListAsync();
+            var vehicleSegmentVariablePricesTask = unitOfWork.ParkingVehicleSegmentVariablePrices.ToListAsync();
 
 
             //var vehicleSegmentVariablePricesTask = Task.Run(async () =>
@@ -224,7 +202,6 @@ public class ParkingService : IParkingService
             result = vehicleSegments;
             foreach (var item in result)
             {
-
                 item.VehicleSegmentPrices = vehicleSegmentPrices.Where(p => p.VehicleSegmentId == item.Id).Select(p => new ParkingVehicleSegmentPriceListItemModel
                 {
                     Id = p.Id,
@@ -344,11 +321,10 @@ public class ParkingService : IParkingService
     {
         try
         {
-
-            var section = unitOfWork.ParkingSpaces.Find(p => p.IsOccupied == false && p.IsActive == true)
-.Select(p => new { Id = p.Id, SectionId = p.ParkingSectionId }).FirstOrDefault();
+            var section = unitOfWork.ParkingSpaces
+                .FirstOrDefault(p => p.IsOccupied == false && p.IsActive == true,
+                selector: p => new { p.Id, SectionId = p.ParkingSectionId });
             return (section?.Id, section?.SectionId);
-
         }
         catch (Exception ex)
         {
@@ -360,13 +336,11 @@ public class ParkingService : IParkingService
     {
         try
         {
-
-            var ticketImage = await unitOfWork.ParkingTicketImages.Find(t => t.TicketId == ticketId).FirstOrDefaultAsync();
+            var ticketImage = await unitOfWork.ParkingTicketImages.FirstOrDefaultAsync(t => t.TicketId == ticketId);
             if (ticketImage != null)
             {
                 try
                 {
-
                     //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
                     client.Timeout = TimeSpan.FromSeconds(5);
                     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
@@ -552,10 +526,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             List<TicketsListViewModel> result = new List<TicketsListViewModel>();
             if (type == TicketType.All)
             {
@@ -684,12 +654,7 @@ public class ParkingService : IParkingService
                 irem.IsSeized = IsSeizedLicensePlate(irem.EnLicensePlate);
             }
 
-
-
-
             return result;
-
-
         }
         catch (Exception ex)
         {
@@ -780,10 +745,8 @@ public class ParkingService : IParkingService
                     string description = $"{varTime.Days} روز و {varTime.Hours} ساعت و {varTime.Minutes} دقیقه در {segment.NameFa}";
                     if (ticket.CardUid != null)
                     {
-
                         if (card != null)
                         {
-
                             if (card.PercentDiscount > 0)
                             {
                                 description = description + " | " + $"کارت دارای تخفیف {card.PercentDiscount} درصدی میباشد ";
@@ -800,7 +763,6 @@ public class ParkingService : IParkingService
                                 }
                                 description = description + " | " + $"کارت دارای تخفیف {card.FixDiscount} ريال میباشد ";
                             }
-
                         }
                     }
                     ticket.DiscountPercent = (byte)discount;
@@ -820,7 +782,6 @@ public class ParkingService : IParkingService
                 {
                     return null;
                 }
-
             }
             else
             {
@@ -881,10 +842,10 @@ public class ParkingService : IParkingService
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var segmentTask = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefaultAsync();
+                var segmentTask = unitOfWork.VehicleSegments.FirstOrDefaultAsync(p => p.Id == ticket.VehicleSegmentId);
                 var discountTask = GetLicensePlateDiscountPercentAsync(ticket.EnLicensePlate ?? "_");
                 var segmentPriceTask = unitOfWork.ParkingVehicleSegmentPrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                var cardTask = unitOfWork.Cards.Find(c => c.CardSerialNo == ticket.CardUid).FirstOrDefaultAsync();
+                var cardTask = unitOfWork.Cards.FirstOrDefaultAsync(c => c.CardSerialNo == ticket.CardUid);
                 var segmentVariablePriceTask = unitOfWork.ParkingVehicleSegmentVariablePrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
                 await Task.WhenAll(segmentVariablePriceTask, segmentPriceTask, cardTask, segmentTask, discountTask);
                 var segment = segmentTask.Result;
@@ -1003,6 +964,7 @@ public class ParkingService : IParkingService
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
+                    ticket.DurationMinutes = (int)varTime.TotalMinutes;
 
                     unitOfWork.ParkingTickets.ExecuteUpdate(p => p.Id == ticketId, update => update
                     .SetProperty(p => p.DurationMinutes, (int)varTime.TotalMinutes)
@@ -1035,8 +997,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
-
             var ticket = unitOfWork.ParkingTickets.Find(s => s.BarcodeId == barcode)
                 .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
                 {
@@ -1056,6 +1016,7 @@ public class ParkingService : IParkingService
                     DurationMinutes = s.DurationMinutes,
                     EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
                     ExitImage = s.ExitImage,
+                    StartImage = s.StartImage,
                     IsExited = s.IsExited,
                     IsPaid = s.IsPaid,
                     PaidAmount = s.PaidAmount,
@@ -1105,6 +1066,7 @@ public class ParkingService : IParkingService
                     DurationMinutes = s.DurationMinutes,
                     EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
                     ExitImage = s.ExitImage,
+                    StartImage = s.StartImage,
                     IsExited = s.IsExited,
                     IsPaid = s.IsPaid,
                     PaidAmount = s.PaidAmount,
@@ -1154,6 +1116,7 @@ public class ParkingService : IParkingService
                         DiscountPercent = s.DiscountPercent,
                         DurationMinutes = s.DurationMinutes,
                         EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                        StartImage = s.StartImage,
                         ExitImage = s.ExitImage,
                         IsExited = s.IsExited,
                         IsPaid = s.IsPaid,
@@ -1195,18 +1158,11 @@ public class ParkingService : IParkingService
         }
     }
     public bool LicensePlateTicketIsExist(string licenseEnPlate)
-    {
-
-        return unitOfWork.ParkingTickets.Find(t => t.EnLicensePlate == licenseEnPlate && t.IsExited == false).Any();
-    }
+       => unitOfWork.ParkingTickets.Find(t => t.EnLicensePlate == licenseEnPlate && t.IsExited == false).Any();
     public TServiceResponse<Guid> CreateTicket(CreateParkingTicketModel request, string? StartImage)
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var groupId = GetGroupIdByEnLicensePlate(request.EnLicensePlate ?? "__-_-___");
             long barcode = RandomNumberGenerator.GenerateLongRandomNumber();
             while (unitOfWork.ParkingTickets.Find(x => x.BarcodeId == barcode).Any())
@@ -1243,9 +1199,10 @@ public class ParkingService : IParkingService
                 DriverDescription = request.DriverDescription,
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
+                DeviceId = Settings.Default.Application_DeviceId,
+                IP = LogHelper.GetLocalIPAddress()
             };
             unitOfWork.ParkingTickets.Add(ticket);
-            //unitOfWork.Commit();
 
             unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(s => s.IsOccupied, true));
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, true));
@@ -1344,6 +1301,7 @@ public class ParkingService : IParkingService
                 DiscountPercent = s.DiscountPercent,
                 DurationMinutes = s.DurationMinutes,
                 EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                StartImage = s.StartImage,
                 ExitImage = s.ExitImage,
                 IsExited = s.IsExited,
                 IsPaid = s.IsPaid,
@@ -1457,6 +1415,7 @@ public class ParkingService : IParkingService
                 DiscountPercent = s.DiscountPercent,
                 DurationMinutes = s.DurationMinutes,
                 EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                StartImage = s.StartImage,
                 ExitImage = s.ExitImage,
                 IsExited = s.IsExited,
                 IsPaid = s.IsPaid,
@@ -1549,7 +1508,9 @@ public class ParkingService : IParkingService
                 VehicleManufacturerName = t.VehicleManufacturerName,
                 VehicleModel = t.VehicleModel,
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
-                TraceNo = t.TraceNo
+                TraceNo = t.TraceNo,
+                DeviceId = Settings.Default.Application_DeviceId,
+                IP = t.IP
             }).FirstOrDefault();
             if (ticket != null && ticket.IsExited == false)
             {
@@ -1664,7 +1625,9 @@ public class ParkingService : IParkingService
                 VehicleManufacturerName = t.VehicleManufacturerName,
                 VehicleModel = t.VehicleModel,
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
-                TraceNo = t.TraceNo
+                TraceNo = t.TraceNo,
+                DeviceId = Settings.Default.Application_DeviceId,
+                IP = t.IP
             }).FirstOrDefaultAsync();
             if (ticket != null && ticket.IsExited == false)
             {
@@ -1802,7 +1765,7 @@ public class ParkingService : IParkingService
             {
                 return 0;
             }
-            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId && l.StartDate < DateTime.Now && l.EndDate > DateTime.Now).FirstOrDefaultAsync();
+            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId /*&& l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now*/).FirstOrDefaultAsync();
             if (licensePlateGroup == null)
             {
                 return 0;
@@ -1995,10 +1958,8 @@ public class ParkingService : IParkingService
 
     public bool IsSeizedLicensePlate(string licenseEnPlate)
     {
-
         try
         {
-
             var plate = unitOfWork.SeizedLicensePlates.Find(s => s.EnLicensePlate == licenseEnPlate).Any();
             return plate;
         }
@@ -2041,7 +2002,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
             var licensePlate = unitOfWork.LicensePlates.Find(g => g.EnLicensePlate == enLicensePlate).FirstOrDefault();
             if (licensePlate != null)
             {
@@ -2072,6 +2032,7 @@ public class ParkingService : IParkingService
                                                 .SetProperty(product => product.PaidDate, product => request.PaidDate)
                                                 .SetProperty(product => product.RRN, product => request.RRN)
                                                 .SetProperty(product => product.TraceNo, product => request.TraceNo)
+                                                .SetProperty(product => product.DeviceId, product => Settings.Default.Application_DeviceId)
                                                 .SetProperty(product => product.MerchantNumber, product => request.MerchantNumber)
                                                 .SetProperty(product => product.ExitGate, product => request.ExitGate)
                                                 .SetProperty(product => product.ExitImage, product => request.ExitImage)
@@ -2143,7 +2104,8 @@ public class ParkingService : IParkingService
                 IsGuest = s.IsGuest,
                 IsActive = s.IsActive,
                 LicensePlateGroupId = s.LicensePlateGroupId,
-                VehicleSegmentId = s.VehicleSegmentId
+                VehicleSegmentId = s.VehicleSegmentId,
+                EnLicensePlate = s.EnLicensePlate
             }).FirstOrDefault();
         }
         catch (Exception ex)
@@ -2157,10 +2119,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
             if (card != null)
             {
@@ -2180,7 +2138,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
             if (card != null)
             {
                 return unitOfWork.LicensePlateGroups.Find(s => s.Id == card.LicensePlateGroupId).FirstOrDefault();
@@ -2199,7 +2157,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var group = unitOfWork.LicensePlateGroups.Find(s => s.Id == groupId).FirstOrDefault();
+            var group = unitOfWork.LicensePlateGroups.FirstOrDefault(s => s.Id == groupId);
             if (group == null)
             {
                 return false;
@@ -2261,7 +2219,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
             {
@@ -2283,12 +2241,10 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
-            {
                 return true;
-            }
             return false;
         }
         catch (Exception ex)
@@ -2303,12 +2259,10 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
 
             if (card != null)
-            {
                 return card.PercentDiscount;
-            }
             return 0;
         }
         catch (Exception ex)
@@ -2398,7 +2352,7 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var cardInfo = unitOfWork.Cards.Find(c => c.CardSerialNo == request.CardSerialNo).FirstOrDefault();
+            var cardInfo = unitOfWork.Cards.FirstOrDefault(c => c.CardSerialNo == request.CardSerialNo);
             if (cardInfo == null)
             {
                 Card card = new Card
@@ -2418,14 +2372,17 @@ public class ParkingService : IParkingService
                     PercentDiscount = request.PercentDiscount,
                     LicensePlateGroupId = request.LicensePlateGroupId,
                     VehicleSegmentId = request.VehicleSegmentId,
-                    EnLicensePlate = request.EnLicensePlate
+                    EnLicensePlate = request.EnLicensePlate,
                 };
                 unitOfWork.Cards.Add(card);
                 return true;
             }
             else
             {
-                var card = unitOfWork.Cards.GetById(cardInfo.Id);
+                Card? card = unitOfWork.Cards.GetById(cardInfo.Id);
+                if (card is null)
+                    return false;
+
                 card.ActiveDate = request.ActiveDate;
                 card.CardSerialNo = request.CardSerialNo;
                 card.Credit = request.Credit;
@@ -2441,6 +2398,7 @@ public class ParkingService : IParkingService
                 card.PercentDiscount = request.PercentDiscount;
                 card.LicensePlateGroupId = request.LicensePlateGroupId;
                 card.VehicleSegmentId = request.VehicleSegmentId;
+                card.EnLicensePlate = request.EnLicensePlate;
                 unitOfWork.Cards.Update(card);
                 return true;
             }
@@ -2468,7 +2426,6 @@ public class ParkingService : IParkingService
                 Type = request.Type
             };
             unitOfWork.CardCreditHistories.Add(cardCreditHistory);
-            //unitOfWork.Commit();
             return true;
         }
         catch (Exception ex)
@@ -2539,7 +2496,6 @@ public class ParkingService : IParkingService
             var ticket = unitOfWork.ParkingTickets.Find(c => c.CardUid == cardSerialNo && c.IsExited == false).Select(c => new { Id = c.Id, IsPaid = c.IsPaid }).FirstOrDefault();
             if (ticket != null) return ticket.Id;
             else return null;
-
         }
         catch (Exception ex)
         {

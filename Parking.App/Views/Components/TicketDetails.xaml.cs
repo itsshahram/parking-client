@@ -14,8 +14,8 @@ namespace Parking.App.Views.Components
 
         public void StartSequence(int seconds)
         {
-            StartProgressAnimation(seconds); 
-            StartCollapseTimer(seconds);    
+            StartProgressAnimation(seconds);
+            StartCollapseTimer(seconds);
         }
         private void StartCollapseTimer(int seconds)
         {
@@ -33,12 +33,11 @@ namespace Parking.App.Views.Components
         }
         private void CollapseTimer_Tick(object? sender, EventArgs e)
         {
-            MainBorder.Visibility = Visibility.Collapsed; 
-            _collapseTimer.Stop(); 
+            MainBorder.Visibility = Visibility.Collapsed;
+            _collapseTimer.Stop();
         }
         private void StartProgressAnimation(int seconds)
         {
-
             if (_progressTimer != null)
             {
                 _progressTimer.Stop();
@@ -50,7 +49,7 @@ namespace Parking.App.Views.Components
 
             _progressTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(seconds*10) 
+                Interval = TimeSpan.FromMilliseconds(seconds * 10)
             };
             _progressTimer.Tick += (sender, e) =>
             {

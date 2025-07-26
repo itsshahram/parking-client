@@ -2,6 +2,7 @@
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic.Logging;
 using Parking.App.Utilities;
 using Parking.Domain.Contracts.Base;
@@ -15,6 +16,7 @@ using Serilog.Sinks.Elasticsearch;
 using System;
 using System.Net;
 using System.Windows.Forms;
+using Log = Serilog.Log;
 
 namespace Parking.App;
 
@@ -98,10 +100,6 @@ public partial class App : Application
 
                 services.AddScoped<UsersListPage>();
                 services.AddScoped<UsersListPageViewModel>();
-
-
-
-
             }
             else
             {
@@ -142,12 +140,11 @@ public partial class App : Application
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
-
-
         if (Settings.Default.Application_Logging)
         {
             if (Settings.Default.Application_Logging_In_Elastic)
             {
+                string password = Settings.Default.Application_Logs_Elastic_Pass;
                 Serilog.Log.Logger = new LoggerConfiguration()
                        .Enrich.FromLogContext()
                        .Enrich.WithMachineName()
@@ -157,7 +154,10 @@ public partial class App : Application
                        {
                            AutoRegisterTemplate = true,
                            IndexFormat = "logs-{0:yyyy.MM.dd}",
-                           MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information
+                           MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information,
+                           ModifyConnectionSettings = x =>
+           x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username, password)
+
                        })
                        .WriteTo.File("logs/log-.txt",
                             rollingInterval: RollingInterval.Day,
@@ -172,7 +172,7 @@ public partial class App : Application
             {
                 if (Settings.Default.Application_Logging_In_Elastic)
                 {
-                    Serilog.Log.Logger = new LoggerConfiguration()
+                    Log.Logger = new LoggerConfiguration()
                         .Enrich.FromLogContext()
                         .Enrich.WithMachineName()
                         .WriteTo.File("logs/log-.txt",
@@ -184,32 +184,34 @@ public partial class App : Application
                              restrictedToMinimumLevel: LogEventLevel.Error)
                         .CreateLogger();
                 }
-
             }
-
         }
         else
         {
-            Serilog.Log.Logger = new LoggerConfiguration()
-                .Enrich.WithMachineName()
-                .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
-                .Enrich.WithProperty("Username", TokenStore.Username ?? "Unknown Username")
-                .Enrich.WithProperty("MachineName", Settings.Default.Application_GatePCName)
-                .Enrich.FromLogContext()
-                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri($"{Settings.Default.Application_Logs_Elastic_Server}"))
-                {
-                    AutoRegisterTemplate = true,
-                    IndexFormat = "logs-{0:yyyy.MM.dd}",
-                    MinimumLogEventLevel = Serilog.Events.LogEventLevel.Information
-                })
-                .MinimumLevel.Error()
-                .CreateLogger();
+            if (Settings.Default.Application_Logging_In_Elastic)
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Is(LogEventLevel.Information)
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                    .MinimumLevel.Override("System", LogEventLevel.Warning)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Logger(lc => lc
+                      .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
+                      {
+                          AutoRegisterTemplate = true,
+                          IndexFormat = "parking_",
+                          ModifyConnectionSettings = x =>
+                              x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username, Settings.Default.Application_Logs_Elastic_Pass)
+                      }))
+                    .CreateLogger();
+            }
+
         }
 
 
-        Serilog.Log.Information("Info: Application Started.");
-        Serilog.Log.Error("Error: Application Started.");
-        Serilog.Log.Warning("Warning: Application Started.");
+        Log.Information("Info: Application Started.");
+        Log.Error("Error: Application Started.");
+        Log.Warning("Warning: Application Started.");
 
 
         if (Settings.Default.Application_DbActiveStatus)
@@ -253,8 +255,6 @@ public partial class App : Application
                 //_host.Services.UseScheduler(s => s.Schedule<BackgroundTask>().EverySeconds(Settings.Default.Application_Sync_Interval_CountOfTake));
 
 
-
-
                 _host.Start();
                 var login = _host.Services.GetRequiredService<LoginWindow>();
 
@@ -267,9 +267,6 @@ public partial class App : Application
                 //}
 
                 //base.OnStartup(e);
-
-
-
             }
             catch (Exception ex)
             {

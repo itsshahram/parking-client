@@ -113,9 +113,6 @@
     <Setting Name="Application_ServerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Application_Logging" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -126,13 +123,10 @@
       <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="Application_ApiServerAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://localhost:7168/api</Value>
+      <Value Profile="(Default)">http://188.213.66.252:8090/api</Value>
     </Setting>
     <Setting Name="Application_Sync_Interval_CountOfTake" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
-    </Setting>
-    <Setting Name="Application_Sync_Enable" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Sync_Interval_Second" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
@@ -141,16 +135,25 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Logs_Elastic_Server" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://localhost:9200</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Application_Logs_Elastic_Username" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Application_Logs_Elastic_Password" Type="System.String" Scope="User">
+    <Setting Name="Application_Logs_Elastic_Pass" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_Sync_Enable" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Application_DeviceId" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ExitGate</Value>
     </Setting>
   </Settings>
 </SettingsFile>

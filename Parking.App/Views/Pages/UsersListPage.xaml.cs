@@ -1,5 +1,5 @@
 ﻿using Parking.App.Models.Dto.User;
-using Parking.Domain.Entities.User;
+using System.ComponentModel;
 using Button = Wpf.Ui.Controls.Button;
 
 
@@ -20,8 +20,32 @@ namespace Parking.App.Views.Pages
             var item = _userService.GetAllUsersAsync().Result;
             
             ViewModel.Items = new ObservableCollection<UserListItemModel>(item);
+            foreach (var user in ViewModel.Items)
+            {
+                user.PropertyChanged += User_PropertyChanged;
+            }
             InitializeComponent();
         }
+        private async void User_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(UserListItemModel.IsActive))
+            {
+                var user = sender as UserListItemModel;
+                if (user != null)
+                {
+                    try
+                    {
+                        await _userService.ChangeStaus(user.Id, user.IsActive);
+                        ShowMessage("موفقیت", $"وضعیت کاربر {user.UserName} بروزرسانی شد.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowMessage("خطا", $"خطا در بروزرسانی وضعیت کاربر: {ex.Message}");
+                    }
+                }
+            }
+        }
+
 
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {

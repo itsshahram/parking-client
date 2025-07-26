@@ -1,13 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.VisualBasic.ApplicationServices;
-using Parking.App.Models.Dto.User;
+﻿using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZXing;
+using Parking.Domain.General;
 
 namespace Parking.App.Services;
 
@@ -28,7 +21,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
 
             user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
             unitOfWork.Users.Update(user);
-            //_unitOfWork.Complete();
+
             return true;
         }
         catch (Exception ex)
@@ -47,7 +40,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                 return false;
 
             _unitOfWork.Users.Delete(user);
-            //_unitOfWork.Complete();
+
             return true;
         }
         catch (Exception ex)
@@ -75,15 +68,13 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         List<UserListItemModel> result = new List<UserListItemModel>();
         try
         {
-            var users = _unitOfWork.Users.GetAll().ToList();
-            var roles = _unitOfWork.Roles.GetAll().ToList();
-            
+            var users = _unitOfWork.Users.ToList();
+            var roles = _unitOfWork.Roles.ToList();
+
             foreach (var item in users)
             {
-                //var __roleManager = App.GetService<RoleManager<ApplicationRole>>();
-                //var __usermanager = App.GetService<UserManager<ApplicationUser>>();
                 var userRole = _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", item.Id);
-                 var role = _unitOfWork.Roles.GetById(userRole.FirstOrDefault().RoleId);
+                var role = _unitOfWork.Roles.GetById(userRole.FirstOrDefault().RoleId);
 
                 result.Add(new UserListItemModel
                 {
@@ -96,7 +87,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                     PhoneNumberConfirmed = item.PhoneNumberConfirmed,
                     RegisterDate = item.RegisterDate,
                     UserName = item.UserName,
-                    RoleFaName = role?.FaName, 
+                    RoleFaName = role?.FaName,
                     RoleEnName = role?.Name,
                 });
             }
@@ -113,7 +104,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         try
         {
             var userRole = _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", userId);
-            if(userRole == null || !userRole.Any())
+            if (userRole == null || !userRole.Any())
                 return string.Empty;
 
             var role = _unitOfWork.Roles.GetById(userRole.FirstOrDefault().RoleId);
@@ -125,7 +116,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return "";
         }
     }
-    public ApplicationUser GetUserById(Guid id)
+    public ApplicationUser? GetUserById(Guid id)
     {
         try
         {
@@ -138,7 +129,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         }
     }
 
-    public ApplicationUser GetUserByUsername(string username)
+    public ApplicationUser? GetUserByUsername(string username)
     {
         try
         {
@@ -151,21 +142,33 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         }
     }
 
-    public bool Login(string username, string password)
+    public LoginStatus Login(string username, string password)
     {
         try
         {
-            var user = _unitOfWork.Users.FirstOrDefault(u => u.UserName == username && u.IsActive == true);
+            ApplicationUser? user = new();
+            if (username.IsMobile())
+                user = unitOfWork.Users.FirstOrDefault(x => x.PhoneNumber == x.UserName);
+            else
+                user = _unitOfWork.Users.FirstOrDefault(u => u.UserName == username);
             if (user == null)
-                return false;
+                return LoginStatus.NotFound;
+            //check format is mobile
+
+
+            if (!user.IsActive)
+                return LoginStatus.NotActice;
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-            return result == PasswordVerificationResult.Success;
+            if (result == PasswordVerificationResult.Success)
+                return LoginStatus.Success;
+
+            return LoginStatus.NotFound;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error logging in user with username: {Username}", username);
-            return false;
+            return LoginStatus.Failed;
         }
     }
 
@@ -211,5 +214,16 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         }
     }
 
+    public async Task<bool> ChangeStaus(Guid id, bool status)
+    {
+        var existingUser = await _usermanager.FindByIdAsync(id.ToString());
+        if (existingUser == null)
+            return false;
 
+        existingUser.IsActive = status;
+
+        await _usermanager.UpdateAsync(existingUser);
+
+        return true;
+    }
 }

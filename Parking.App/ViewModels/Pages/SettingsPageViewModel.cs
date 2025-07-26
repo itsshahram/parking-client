@@ -39,8 +39,7 @@ public partial class SettingsPageViewModel : ObservableObject
             Content = "تنظیمات کاربری",
             Icon = new SymbolIcon { Symbol = SymbolRegular.PersonSettings20 },
             TargetPageType = typeof(Views.Pages.SettingsPageChilds.AccountsSettingsPage)
-        }
-         ,
+        },
         new NavigationViewItem()
         {
             Content = "تنظیمات همگام سازی",
@@ -58,6 +57,5 @@ public partial class SettingsPageViewModel : ObservableObject
         //    Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowExit20 },
         //    TargetPageType = typeof(Views.Pages.SettingsPage)
         //}
-
     };
 }

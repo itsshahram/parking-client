@@ -1,4 +1,5 @@
 ﻿
+using Wpf.Ui.Violeta.Controls;
 using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
@@ -15,9 +16,9 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
 
             InitializeComponent();
             var vehicleSegmentsList = _parkingService.GetVehicleSegments().Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa }).ToList();
-            foreach (var item in vehicleSegmentsList.OrderBy(v=>v.Tag))
+            foreach (var item in vehicleSegmentsList.OrderBy(v => v.Tag))
                 VehicleSegmentComboBox.Items.Add(item);
-            if (Settings.Default.Application_DefaultVehicleSegmentPrice >0)
+            if (Settings.Default.Application_DefaultVehicleSegmentPrice > 0)
             {
                 VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault(v => (int)v.Tag == Settings.Default.Application_DefaultVehicleSegmentPrice));
             }
@@ -26,7 +27,14 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 if (ElasticBox != null)
                     ElasticBox.Visibility = Visibility.Visible;
             }
-            
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var publishDate = (BuildDateAttribute)Assembly
+                                .GetExecutingAssembly()
+                                .GetCustomAttributes(typeof(BuildDateAttribute), false)
+                                .FirstOrDefault();
+            AppVersionText.Text = version;
+            PublishDateText.Text = publishDate?.Date.ToString() ?? "Unknown";
+
         }
         private void Change_Click(object sender, RoutedEventArgs e)
         {
@@ -57,7 +65,18 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private void GateTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Settings.Default.Application_GatePCName = ((TextBox)sender).Text;
-            Settings.Default.Save(); 
+            Settings.Default.Save();
+        }
+
+        private void DeviceId_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+            {
+                System.Windows.MessageBox.Show("تنها مدیر پارکینگ می‌تواند این فیلد را تغییر دهد.");
+                return;
+            }
+            Settings.Default.Application_DeviceId = ((TextBox)sender).Text;
+            Settings.Default.Save();
         }
 
         private void elasticConfigBtn_Click(object sender, RoutedEventArgs e)
@@ -67,7 +86,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
 
         private void ElasticToggleSwitch_Checked(object sender, RoutedEventArgs e)
         {
-            if(ElasticBox!=null)
+            if (ElasticBox != null)
                 ElasticBox.Visibility = Visibility.Visible;
         }
 

@@ -7,12 +7,16 @@ namespace Parking.Domain.Contracts.Base;
 public interface IRepository<T> where T : class
 {
     IQueryable<T> GetAll();
+    List<T> ToList();
+    Task<List<T>> ToListAsync();
     T? GetById(Guid id);
     Task<T?> GetByIdAsync(Guid id);
     T? GetById(int id);
     Task<T?> GetByIdAsync(int id);
     T? GetById(long id);
     Task<T?> GetByIdAsync(long id);
+    T? FirstOrDefault();
+    Task<T?> FirstOrDefaultAsync();
     T? FirstOrDefault(Expression<Func<T, bool>> predicate);
     Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
     TResult? FirstOrDefault<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector);
@@ -28,7 +32,7 @@ public interface IRepository<T> where T : class
     Task<int> ExecuteDeleteAsync(Expression<Func<T, bool>> filter);
     Task<int> CommitAsync();
     int Commit();
-    
+
 }
 
 

@@ -1,10 +1,7 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
-using Parking.Domain.Entities.User;
+using Parking.App.Models.Dto.Card;
 using static Parking.App.ANPR.SATPA_API;
-
-
-
 
 
 namespace Parking.App.Views.Pages
@@ -13,6 +10,7 @@ namespace Parking.App.Views.Pages
     /// Interaction logic for MainPage.xaml
     /// </summary>
     public partial class MainPage : Page
+
     {
         private readonly IParkingService _parkingService;
         private readonly ILogger<MainPage> _logger;
@@ -58,7 +56,6 @@ namespace Parking.App.Views.Pages
                 nfc.CardUidReceived -= OnCardUidReceivedSlot;
                 nfc = null;
             }
-
         }
         private async void LoadData()
         {
@@ -70,7 +67,6 @@ namespace Parking.App.Views.Pages
             {
                 InitializeCamera();
             });
-
         }
         private void InitializeRefreshDataTimer()
         {
@@ -108,8 +104,6 @@ namespace Parking.App.Views.Pages
             {
                 _logger.LogError(ex.Message, ex);
             }
-
-
         }
 
         // Then for the event handler
@@ -245,13 +239,14 @@ namespace Parking.App.Views.Pages
 
                     try
                     {
+
                         PictureBox pb = new PictureBox();
                         satpa_object = new SATPA(0, "cam1", pb, License.per_camera);
                         float cnf = ((float)Settings.Default.Camera_ANPR_Cnf) / 100;
 
                         SLPRPropertyGrid propSettings = new SLPRPropertyGrid();
                         propSettings.detect_persian_plate = 1;
-                        propSettings.num_valid_chars = new int[] { 8, 5 };
+                        propSettings.num_valid_chars = [8, 5];
                         propSettings.n_frm_skip_on_success = Settings.Default.Camera_ANPR_FrameSkip;
                         propSettings.vlc_net_cache_time = Settings.Default.Camera_ANPR_VlcCache;
                         propSettings.plate_type = Settings.Default.Camera_ANPR_PlateType;
@@ -259,7 +254,6 @@ namespace Parking.App.Views.Pages
                         propSettings.diff_thresh = Settings.Default.Camera_ANPR_LightParameter;
                         propSettings.plate_buf_size = Settings.Default.Camera_ANPR_PlateCountInBuffer;
                         propSettings.min_cnf = (cnf > 1) ? 1 : cnf;
-
 
                         satpa_object.satpa_settings = propSettings;
                         satpa_object.url = Settings.Default.Camera_MainCameraUrl;
@@ -422,9 +416,7 @@ namespace Parking.App.Views.Pages
                                 plateCharsCombo.SelectedValue = plate[1].ToLower().ConvertEnCharToFaCharIndex();
                                 rightNumbersNumberTextBox.Text = plate[2].Substring(0, 3);
                                 irNumberTextBox.Text = plate[2].Substring(3, 2);
-
                             });
-
                             CheckPlate();
                         }
 
@@ -455,11 +447,8 @@ namespace Parking.App.Views.Pages
                         });
                         LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
                     }
-
-
                 }
             }
-
         }
 
         private void CheckPlate()
@@ -553,27 +542,23 @@ namespace Parking.App.Views.Pages
 
             await _client.StartFrameReaderAsync(inputSource, OutputImageFormat.Bmp, LocalCancellationTokenSource.Token).ConfigureAwait(false);
 
-
         }
         private VideoStreamClient _client;
         private CancellationTokenSource _cancellationTokenSource;
 
         private async void OnNewImageReceived(byte[] imageData)
         {
-            await Task.Run(async () =>
+            if (App.GlobalCancellationTokenSource.IsCancellationRequested)
+                return;
+
+            // Convert image on background thread
+            var imageSource = await Task.Run(() => imageData.ToImageSource()).ConfigureAwait(false);
+
+            // Update UI on dispatcher
+            await Dispatcher.InvokeAsync(() =>
             {
-                if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
-                {
-                    await this.Dispatcher.InvokeAsync(() =>
-                     {
-                         ViewModel.CurrentFrame = imageData.ToImageSource();
-                     });
-
-
-                }
-            }).ConfigureAwait(false);
-
-            //imageBox.Source = imageData.ToImageSource();
+                ViewModel.CurrentFrame = imageSource;
+            });
         }
 
 
@@ -581,15 +566,14 @@ namespace Parking.App.Views.Pages
 
         #region کارت ریدر
         private long _cardSerialNo = 0;
-        private NFC nfc = new NFC();
+        private NFC? nfc = null;
         private void InitializeCardReader()
         {
             if (Settings.Default.Application_EntryCardRequirement)
             {
-
+                nfc = new NFC();
                 try
                 {
-
                     nfc.Init(0, false);
                     nfc.CardUidReceived += OnCardUidReceivedSlot;
                 }
@@ -636,6 +620,14 @@ namespace Parking.App.Views.Pages
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(Settings.Default.Application_DeviceId))
+                {
+                    ShowMessage("خطا", "لطفا برای استفاده از خدمات قبض لطفا شناسه دستگاه را در بخش تنظیمات اپلیکیشن پر کنید");
+                    return false;
+                }
+
+
+
                 //چک کردن پلاک
                 var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
                 if (plateTicketId != null)
@@ -656,6 +648,19 @@ namespace Parking.App.Views.Pages
                 }
                 if (Settings.Default.Application_EntryCardRequirement)
                 {
+                    CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
+                    if (card is null)
+                    {
+                        ShowMessage("خطا", "کارت یافت نشد");
+                        return false;
+                    }
+
+                    if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate)
+                    {
+                        ShowMessage("خطا", "پلاک ثبت شده با پلاک کارت مطابقت ندارد");
+                        return false;
+                    }
+
                     //چک کردن اکتیو بودن کارت
                     if (!_parkingService.CardActiveStatus(_cardSerialNo))
                     {
@@ -731,7 +736,7 @@ namespace Parking.App.Views.Pages
                     return false;
                 }
 
-                //تخصیص فضای پارک
+                //تخصیص فضای پارک 
                 var parkingSpace = _parkingService.GetOneFreeSpaceId();
                 if (parkingSpace.SpaceId == null)
                 {
@@ -750,22 +755,18 @@ namespace Parking.App.Views.Pages
                         startTime = CreateDateTiem ?? DateTime.Now;
                     }
                 }
+
                 var plate = LatestValidEnPlate.ParsePlate();
                 var FaPlate = LatestValidEnPlate;
                 if (plate.IsIranianPlate)
-                {
                     FaPlate = "ایران" + plate.IranCode.Replace("IR", "") + "_" + plate.RightThreeDigits + plate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate.LeftTwoDigits}";
-                }
+
 
 
                 if (Settings.Default.Application_GatePCName?.Length < 3)
-                {
-                    EntranceGate = System.Environment.MachineName;
-                }
+                    EntranceGate = Environment.MachineName;
                 else
-                {
                     EntranceGate = Settings.Default.Application_GatePCName ?? "Unknown Gate";
-                }
 
                 CreateParkingTicketModel ticketModel = new CreateParkingTicketModel()
                 {
@@ -786,7 +787,6 @@ namespace Parking.App.Views.Pages
                 var ticketInfo = _parkingService.CreateTicket(ticketModel, LatestValidCarImage);
                 if (ticketInfo.Succeeded)
                 {
-
                     if (Settings.Default.Application_PrintInvoiceAfterEntry)
                     {
                         var ticket = _parkingService.GetTicketDetails(ticketInfo.Result);
@@ -904,8 +904,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
-
-        private async void PlateTextBox_GotFocus(object sender, RoutedEventArgs e)
+        private void PlateTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             try
             {

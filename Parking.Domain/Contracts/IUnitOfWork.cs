@@ -3,11 +3,6 @@ using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.User;
 using Parking.Domain.Entities.Vehicles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parking.Domain.Contracts;
 public interface IUnitOfWork  //:IDisposable

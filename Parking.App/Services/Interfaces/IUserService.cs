@@ -1,16 +1,12 @@
 ﻿using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Parking.Domain.General;
 
 namespace Parking.App.Services.Interfaces;
 
 public interface IUserService
 {
-    bool Login(string username, string password);
+    LoginStatus Login(string username, string password);
     bool Register(string username, string password);
     List<ApplicationUser> GetAllUsers();
     Task<List<UserListItemModel>> GetAllUsersAsync();
@@ -20,5 +16,7 @@ public interface IUserService
     bool UpdateUser(ApplicationUser user);
     bool DeleteUser(Guid id);
     bool ChangePassword(Guid id, string newPassword);
+    Task<bool> ChangeStaus(Guid id, bool status);
+
 
 }
