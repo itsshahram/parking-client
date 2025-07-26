@@ -601,7 +601,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Application_EntryCardRequirement {
             get {
                 return ((bool)(this["Application_EntryCardRequirement"]));
@@ -625,7 +625,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("NULL")]
+        [global::System.Configuration.DefaultSettingValueAttribute("ExitGate")]
         public string Application_DeviceId {
             get {
                 return ((string)(this["Application_DeviceId"]));

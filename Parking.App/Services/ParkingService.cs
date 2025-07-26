@@ -1199,6 +1199,7 @@ public class ParkingService : IParkingService
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
                 DeviceId = Settings.Default.Application_DeviceId,
+                IP = LogHelper.GetLocalIPAddress()
             };
             unitOfWork.ParkingTickets.Add(ticket);
 
@@ -1508,6 +1509,7 @@ public class ParkingService : IParkingService
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
                 TraceNo = t.TraceNo,
                 DeviceId = Settings.Default.Application_DeviceId,
+                IP = t.IP
             }).FirstOrDefault();
             if (ticket != null && ticket.IsExited == false)
             {
@@ -1624,6 +1626,7 @@ public class ParkingService : IParkingService
                 TotalAmountWithDiscount = t.TotalAmountWithDiscount,
                 TraceNo = t.TraceNo,
                 DeviceId = Settings.Default.Application_DeviceId,
+                IP = t.IP
             }).FirstOrDefaultAsync();
             if (ticket != null && ticket.IsExited == false)
             {
@@ -1998,7 +2001,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
             var licensePlate = unitOfWork.LicensePlates.Find(g => g.EnLicensePlate == enLicensePlate).FirstOrDefault();
             if (licensePlate != null)
             {
@@ -2029,6 +2031,7 @@ public class ParkingService : IParkingService
                                                 .SetProperty(product => product.PaidDate, product => request.PaidDate)
                                                 .SetProperty(product => product.RRN, product => request.RRN)
                                                 .SetProperty(product => product.TraceNo, product => request.TraceNo)
+                                                .SetProperty(product => product.DeviceId, product => Settings.Default.Application_DeviceId)
                                                 .SetProperty(product => product.MerchantNumber, product => request.MerchantNumber)
                                                 .SetProperty(product => product.ExitGate, product => request.ExitGate)
                                                 .SetProperty(product => product.ExitImage, product => request.ExitImage)
@@ -2115,10 +2118,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
             if (card != null)
             {
@@ -2138,7 +2137,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var card = unitOfWork.Cards.Find(s => s.CardSerialNo == cardSerialNo).FirstOrDefault();
+            var card = unitOfWork.Cards.FirstOrDefault(s => s.CardSerialNo == cardSerialNo);
             if (card != null)
             {
                 return unitOfWork.LicensePlateGroups.Find(s => s.Id == card.LicensePlateGroupId).FirstOrDefault();
@@ -2157,7 +2156,7 @@ public class ParkingService : IParkingService
         try
         {
 
-            var group = unitOfWork.LicensePlateGroups.Find(s => s.Id == groupId).FirstOrDefault();
+            var group = unitOfWork.LicensePlateGroups.FirstOrDefault(s => s.Id == groupId);
             if (group == null)
             {
                 return false;

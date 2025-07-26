@@ -1418,7 +1418,12 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
+            var localUnsyncedTickets = unitOfWork
+                .ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
+                .ToList();
+
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()
@@ -1491,7 +1496,11 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            var localUnsyncedTickets = unitOfWork.ParkingTickets.Find(p => p.TicketStatus == TicketStatus.Unsynced).Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
+            var localUnsyncedTickets = unitOfWork
+                .ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
+                .ToList();
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()

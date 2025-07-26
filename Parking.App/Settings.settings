@@ -147,13 +147,13 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Sync_Enable" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Application_DeviceId" Type="System.String" Scope="User">
-      <Value Profile="(Default)">NULL</Value>
+      <Value Profile="(Default)">ExitGate</Value>
     </Setting>
   </Settings>
 </SettingsFile>

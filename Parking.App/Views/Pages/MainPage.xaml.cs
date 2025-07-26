@@ -624,12 +624,7 @@ namespace Parking.App.Views.Pages
                     ShowMessage("خطا", "لطفا برای استفاده از خدمات قبض لطفا شناسه دستگاه را در بخش تنظیمات اپلیکیشن پر کنید");
                     return false;
                 }
-                CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
-                if (card is null)
-                {
-                    ShowMessage("خطا", "کارت یافت نشد");
-                    return false;
-                }
+
 
 
                 //چک کردن پلاک
@@ -652,6 +647,19 @@ namespace Parking.App.Views.Pages
                 }
                 if (Settings.Default.Application_EntryCardRequirement)
                 {
+                    CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
+                    if (card is null)
+                    {
+                        ShowMessage("خطا", "کارت یافت نشد");
+                        return false;
+                    }
+
+                    if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate)
+                    {
+                        ShowMessage("خطا", "پلاک ثبت شده با پلاک کارت مطابقت ندارد");
+                        return false;
+                    }
+
                     //چک کردن اکتیو بودن کارت
                     if (!_parkingService.CardActiveStatus(_cardSerialNo))
                     {
@@ -752,11 +760,7 @@ namespace Parking.App.Views.Pages
                 if (plate.IsIranianPlate)
                     FaPlate = "ایران" + plate.IranCode.Replace("IR", "") + "_" + plate.RightThreeDigits + plate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate.LeftTwoDigits}";
 
-                if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate)
-                {
-                    ShowMessage("خطا", "پلاک ثبت شده با پلاک کارت مطابقت ندارد");
-                    return false;
-                }
+
 
                 if (Settings.Default.Application_GatePCName?.Length < 3)
                     EntranceGate = Environment.MachineName;

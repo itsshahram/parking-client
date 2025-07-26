@@ -40,7 +40,7 @@ public static class LogHelper
     //public static readonly LogLevel DetectPlate = (LogLevel)60;
     public static readonly LogEventLevel DetectPlate = (LogEventLevel)60;
     public static readonly LogEventLevel UserEvent = (LogEventLevel)60;
-    private static string GetLocalIPAddress()
+    public static string GetLocalIPAddress()
     {
         try
         {

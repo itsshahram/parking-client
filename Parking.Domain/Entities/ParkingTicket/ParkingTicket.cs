@@ -58,4 +58,5 @@ public class ParkingTicket
     public Guid? ExitRegistrarUserId { get; set; }
     public TicketStatus TicketStatus { get; set; }
     public required string DeviceId { get; set; }
+    public required string IP { get; set; }
 }
