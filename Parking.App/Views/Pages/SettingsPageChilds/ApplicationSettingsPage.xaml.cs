@@ -27,6 +27,13 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 if (ElasticBox != null)
                     ElasticBox.Visibility = Visibility.Visible;
             }
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var publishDate = (BuildDateAttribute)Assembly
+                                .GetExecutingAssembly()
+                                .GetCustomAttributes(typeof(BuildDateAttribute), false)
+                                .FirstOrDefault();
+            AppVersionText.Text = version;
+            PublishDateText.Text = publishDate?.Date.ToString() ?? "Unknown";
 
         }
         private void Change_Click(object sender, RoutedEventArgs e)

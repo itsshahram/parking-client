@@ -188,20 +188,24 @@ public partial class App : Application
         }
         else
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Is(LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .Enrich.FromLogContext()
-                .WriteTo.Logger(lc => lc
-                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
-                    {
-                        AutoRegisterTemplate = true,
-                        IndexFormat = "parking_",
-                        ModifyConnectionSettings = x =>
-                            x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username, Settings.Default.Application_Logs_Elastic_Pass)
-                    }))
-                .CreateLogger();
+            if (Settings.Default.Application_Logging_In_Elastic)
+            {
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Is(LogEventLevel.Information)
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                    .MinimumLevel.Override("System", LogEventLevel.Warning)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Logger(lc => lc
+                      .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
+                      {
+                          AutoRegisterTemplate = true,
+                          IndexFormat = "parking_",
+                          ModifyConnectionSettings = x =>
+                              x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username, Settings.Default.Application_Logs_Elastic_Pass)
+                      }))
+                    .CreateLogger();
+            }
+
         }
 
 

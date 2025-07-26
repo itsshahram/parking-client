@@ -70,7 +70,7 @@ public partial class MainWindowViewModel : ObservableObject
             });
         }
 
-        if(PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AddCards"))
+        if(PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AddCards") && Settings.Default.Application_EntryCardRequirement)
         {
             _menuItems.Add(new NavigationViewItem()
             {

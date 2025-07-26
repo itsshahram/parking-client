@@ -12,7 +12,7 @@ namespace Parking.App {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -145,7 +145,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Camera_MainCameraEnable {
             get {
                 return ((bool)(this["Camera_MainCameraEnable"]));
@@ -157,7 +157,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("rtsp://21.55.66.253:8080/h264.sdp")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Camera_MainCameraUrl {
             get {
                 return ((string)(this["Camera_MainCameraUrl"]));
@@ -541,7 +541,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Application_Logging_In_Elastic {
             get {
                 return ((bool)(this["Application_Logging_In_Elastic"]));
@@ -553,7 +553,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://172.16.51.20:9200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Application_Logs_Elastic_Server {
             get {
                 return ((string)(this["Application_Logs_Elastic_Server"]));
@@ -565,7 +565,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("elastic")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Application_Logs_Elastic_Username {
             get {
                 return ((string)(this["Application_Logs_Elastic_Username"]));
@@ -577,7 +577,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("changeme")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Application_Logs_Elastic_Pass {
             get {
                 return ((string)(this["Application_Logs_Elastic_Pass"]));

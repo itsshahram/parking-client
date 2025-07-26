@@ -85,7 +85,10 @@ namespace Parking.App.Views.Windows
         }
         private async void Login()
         {
+
             ExitBtn.IsEnabled = false;
+            LoginBtn.IsEnabled = false;
+            LoginProgressBar.Visibility = Visibility.Visible;
             if (CheckUsers())
             {
                 if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
@@ -215,6 +218,8 @@ namespace Parking.App.Views.Windows
 
             }
             ExitBtn.IsEnabled = true;
+            LoginBtn.IsEnabled = true;
+            LoginProgressBar.Visibility = Visibility.Collapsed;
         }
         private bool CheckUsers() => _userManager.Users.Any();
         private async Task<bool> StartSyncJobs()

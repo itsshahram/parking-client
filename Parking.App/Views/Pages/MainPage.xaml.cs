@@ -566,11 +566,12 @@ namespace Parking.App.Views.Pages
 
         #region کارت ریدر
         private long _cardSerialNo = 0;
-        private NFC nfc = new NFC();
+        private NFC? nfc = null;
         private void InitializeCardReader()
         {
             if (Settings.Default.Application_EntryCardRequirement)
             {
+                nfc = new NFC();
                 try
                 {
                     nfc.Init(0, false);

@@ -964,6 +964,7 @@ public class ParkingService : IParkingService
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
+                    ticket.DurationMinutes = (int)varTime.TotalMinutes;
 
                     unitOfWork.ParkingTickets.ExecuteUpdate(p => p.Id == ticketId, update => update
                     .SetProperty(p => p.DurationMinutes, (int)varTime.TotalMinutes)

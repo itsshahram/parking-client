@@ -33,10 +33,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Camera_MainCameraEnable" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Camera_MainCameraUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">rtsp://21.55.66.253:8080/h264.sdp</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Camera_MainCameraUser" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -132,16 +132,16 @@
       <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="Application_Logging_In_Elastic" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_Logs_Elastic_Server" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://172.16.51.20:9200</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Application_Logs_Elastic_Username" Type="System.String" Scope="User">
-      <Value Profile="(Default)">elastic</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Application_Logs_Elastic_Pass" Type="System.String" Scope="User">
-      <Value Profile="(Default)">changeme</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
