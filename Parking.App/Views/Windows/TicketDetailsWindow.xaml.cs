@@ -43,14 +43,14 @@ namespace Parking.App.Views.Windows
                         ExtraColumn.Width = new GridLength(0);
                         ExtraImages.Visibility = Visibility.Collapsed;
                     }
-
-                    SetTicketData(ticketId);
-
                     if (currentImage != null)
                     {
                         currentImg.Source = currentImage;
                         ExitImage = currentImage.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
                     }
+                    SetTicketData(ticketId);
+
+
                     if (extraimages != null)
                     {
 
@@ -122,6 +122,13 @@ namespace Parking.App.Views.Windows
                 ViewModel.Item = ticket;
                 SetPlate(ViewModel.Item?.EnLicensePlate ?? "--_-_---_IR--");
                 ViewModel.Title = ticket.LicensePlate;
+
+                var entryimage = await _parkingService.GetTicketImages(ticketId);
+                await this.Dispatcher.InvokeAsync(() => EntryImage.Source = entryimage.StartImage);
+                if (entryimage.ExitImage != null)
+                {
+                    await this.Dispatcher.InvokeAsync(() => currentImg.Source = entryimage.ExitImage);
+                }
                 LoadImages(ticketId);
                 CheckSeizedPlate();
                 this.Topmost = true;
@@ -418,11 +425,7 @@ namespace Parking.App.Views.Windows
         {
             try
             {
-                if (TokenStore.ServerStatus)
-                {
-                    var entryimage = await _parkingService.GetTicketImage(ticketId);
-                    await this.Dispatcher.InvokeAsync(() => EntryImage.Source = entryimage);
-                }
+
 
                 var extraImages = await _parkingService.GetTicketExtraImageSourcesAsync(ticketId, true);
                 if (extraImages != null)

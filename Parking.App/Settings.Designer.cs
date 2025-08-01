@@ -505,7 +505,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://188.213.66.252:8090/api")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:7168/api")]
         public string Application_ApiServerAddress {
             get {
                 return ((string)(this["Application_ApiServerAddress"]));
@@ -590,12 +590,12 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool PlateCheckInExitGate {
+        public bool Application_PlateCheckInExitGate {
             get {
-                return ((bool)(this["PlateCheckInExitGate"]));
+                return ((bool)(this["Application_PlateCheckInExitGate"]));
             }
             set {
-                this["PlateCheckInExitGate"] = value;
+                this["Application_PlateCheckInExitGate"] = value;
             }
         }
         
@@ -632,6 +632,18 @@ namespace Parking.App {
             }
             set {
                 this["Application_DeviceId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Application_EnableSyncImage {
+            get {
+                return ((bool)(this["Application_EnableSyncImage"]));
+            }
+            set {
+                this["Application_EnableSyncImage"] = value;
             }
         }
     }

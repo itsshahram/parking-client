@@ -123,7 +123,7 @@
       <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="Application_ApiServerAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://188.213.66.252:8090/api</Value>
+      <Value Profile="(Default)">https://localhost:7168/api</Value>
     </Setting>
     <Setting Name="Application_Sync_Interval_CountOfTake" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
@@ -143,7 +143,7 @@
     <Setting Name="Application_Logs_Elastic_Pass" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
+    <Setting Name="Application_PlateCheckInExitGate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
@@ -154,6 +154,9 @@
     </Setting>
     <Setting Name="Application_DeviceId" Type="System.String" Scope="User">
       <Value Profile="(Default)">ExitGate</Value>
+    </Setting>
+    <Setting Name="Application_EnableSyncImage" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

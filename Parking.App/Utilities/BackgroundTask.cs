@@ -49,33 +49,37 @@ public class BackgroundTask : IInvocable
                 _logger.LogError("Error in Receive Seized LicensePlate From Server", ex.Message);
                 SetAppIcon(TaskStatus.Error);
             }
-            try
+            if (Settings.Default.Application_EnableSyncImage)
             {
-                await _synchronizationService.SyncTicketImageAsync();
+                try
+                {
+                    await _synchronizationService.SyncTicketImageAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error in Sync Ticket Image", ex.Message);
+                    SetAppIcon(TaskStatus.Error);
+                }
+                try
+                {
+                    _synchronizationService.SyncTicketExitImage();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error in Sync Ticket Exit Image", ex.Message);
+                    SetAppIcon(TaskStatus.Error);
+                }
+                try
+                {
+                    await _synchronizationService.SyncTicketExtraImagesAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error in Sync Ticket Extra Images", ex.Message);
+                    SetAppIcon(TaskStatus.Error);
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error in Sync Ticket Image", ex.Message);
-                SetAppIcon(TaskStatus.Error);
-            }
-            try
-            {
-                _synchronizationService.SyncTicketExitImage();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error in Sync Ticket Exit Image", ex.Message);
-                SetAppIcon(TaskStatus.Error);
-            }
-            try
-            {
-                await _synchronizationService.SyncTicketExtraImagesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error in Sync Ticket Extra Images", ex.Message);
-                SetAppIcon(TaskStatus.Error);
-            }
+
             SetAppIcon(TaskStatus.Success);
             TokenStore.ServerStatus = true;
         }

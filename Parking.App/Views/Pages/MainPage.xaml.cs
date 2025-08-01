@@ -548,17 +548,16 @@ namespace Parking.App.Views.Pages
 
         private async void OnNewImageReceived(byte[] imageData)
         {
-            if (App.GlobalCancellationTokenSource.IsCancellationRequested)
-                return;
-
-            // Convert image on background thread
-            var imageSource = await Task.Run(() => imageData.ToImageSource()).ConfigureAwait(false);
-
-            // Update UI on dispatcher
-            await Dispatcher.InvokeAsync(() =>
+            await Task.Run(async () =>
             {
-                ViewModel.CurrentFrame = imageSource;
-            });
+                if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
+                {
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        ViewModel.CurrentFrame = imageData.ToImageSource();
+                    });
+                }
+            }).ConfigureAwait(false);
         }
 
 
@@ -679,7 +678,7 @@ namespace Parking.App.Views.Pages
                                 if (cardTicketId != null)
                                 {
                                     //چک کردن پلاک ثبتی کارت با پلاک عکس
-                                    if (Settings.Default.PlateCheckInExitGate)
+                                    if (Settings.Default.Application_PlateCheckInExitGate)
                                     {
                                         var ticket = _parkingService.GetActiveTicketByCard(_cardSerialNo);
                                         if (ticket?.EnLicensePlate != LatestValidEnPlate)
@@ -784,6 +783,8 @@ namespace Parking.App.Views.Pages
                     VehicleManufacturerName = VehicleSegmentName ?? "نامشخص",
                     CreatorUserId = TokenStore.UserId,
                 };
+                if (ViewModel.CurrentFrame != null)
+                    LatestValidCarImage = ViewModel.CurrentFrame.ResizeAndCompressBitmap(1024, 768, 65, 65, 50);
                 var ticketInfo = _parkingService.CreateTicket(ticketModel, LatestValidCarImage);
                 if (ticketInfo.Succeeded)
                 {

@@ -40,6 +40,7 @@ namespace Parking.App.Views.Pages
             ViewModel.TotalCards = _parkingService.GetCardsCount();
             ViewModel.TotalSpaces = _parkingService.GetSpacesCount();
             ViewModel.OccupiedSpaces = _parkingService.GetSpacesCount() - _parkingService.GetFreeSpacesCount();
+            ViewModel.TotalDiscountedCards = _parkingService.GetDiscountedCardsCount();
         }
     }
 }

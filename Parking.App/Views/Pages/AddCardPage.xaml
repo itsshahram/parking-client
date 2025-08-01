@@ -99,7 +99,8 @@
                                 <ui:TextBox MinWidth="80" 
                                             x:Name="ValidityPeriodTextBox"
                                         PlaceholderText="3650" 
-                                        Text="{Binding ValidityPeriod, Mode=TwoWay}" />
+                                        Text="{Binding ValidityPeriod, Mode=TwoWay}" 
+                                            TextChanged="TextBox_TextChanged" />
                                 <TextBlock Text="روز"  VerticalAlignment="Center"/>
                             </StackPanel>
                             <TextBlock DockPanel.Dock="Left" Margin="5"  Text="مدت اعتبار" VerticalAlignment="Center"/>

@@ -14,6 +14,10 @@ namespace Parking.App.Views.Pages
         {
             _parkingService = App.GetService<IParkingService>();
             _logger = App.GetService<ILogger<AddCardPage>>();
+
+            this.DataContext = ViewModel;
+            InitializeComponent();
+            var vehiclecount = _parkingService.GetVehicleSegments().Count;
             if (Settings.Default.Application_DefaultVehicleSegmentPrice != null)
             {
                 var SelectedSegment = _parkingService.GetVehicleSegmentById(Settings.Default.Application_DefaultVehicleSegmentPrice);
@@ -22,10 +26,12 @@ namespace Parking.App.Views.Pages
                     ViewModel.SelectedSegment = SelectedSegment;
                 }
             }
+            //else if (_parkingService.GetVehicleSegments().Count > 0)
+            //{
+            //    VehicleSegmentsComboBox.SelectedIndex = 0;
+            //}
 
             ViewModel.IsActive = true;
-            this.DataContext = ViewModel;
-            InitializeComponent();
             InitializeCardReader();
             #region لود کردن لیست حروف پلاک
             var plateChars = LicensePlateHelper.GetChars();
@@ -79,7 +85,7 @@ namespace Parking.App.Views.Pages
             {
                 if (_parkingService.IsCardInUse((long)ViewModel.CardSerialNo))
                 {
-                    ShowMessage("خطا", "کارت پر میباشت، لطفا در گیت خروجی نسبت به خالی کردن کارت اقام فرمایید");
+                    ShowMessage("خطا", "کارت پر میباشت، لطفا در گیت خروجی نسبت به خالی کردن کارت اقدام فرمایید");
                     return false;
                 }
                 CardModel card = new CardModel()
@@ -255,6 +261,11 @@ namespace Parking.App.Views.Pages
         private void PlateAssignmentToggle_Unchecked(object sender, RoutedEventArgs e)
         {
             PlateBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.ValidityPeriod = ValidityPeriodTextBox.Text.IsNumeric() ? int.Parse(ValidityPeriodTextBox.Text) : 0;
         }
     }
 }

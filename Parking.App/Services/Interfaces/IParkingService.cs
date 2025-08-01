@@ -30,7 +30,7 @@ public interface IParkingService
     int GetFreeSpacesCount();
     int GetSpacesCount();
     (Guid? SpaceId, Guid? SectionId) GetOneFreeSpaceId();
-    Task<ImageSource> GetTicketImage(Guid ticketId);
+    Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId);
     List<TicketsListViewModel> GetLatestTickets(TicketType type, int take);
     Task<List<TicketsListViewModel>> GetLatestTicketsAsync(TicketType type, int take);
     TicketsListViewModel? GetTicketDetails(Guid ticketId);
@@ -75,6 +75,7 @@ public interface IParkingService
     bool AddCard(CardModel request);
     bool AddCardCreditHistory(CardCreditHistoryModel request);
     int GetCardsCount();
+    int GetDiscountedCardsCount();
     bool IsCardInUse(long cardSerialNo);
     Guid? GetNotExitedTicketIdByCardSerialNo(long cardSerialNo);
 

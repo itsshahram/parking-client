@@ -35,6 +35,8 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             AppVersionText.Text = version;
             PublishDateText.Text = publishDate?.Date.ToString() ?? "Unknown";
 
+            APIServerAddressTextBox.Text = Settings.Default.Application_ApiServerAddress;
+
         }
         private void Change_Click(object sender, RoutedEventArgs e)
         {
@@ -94,6 +96,21 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         {
             if (ElasticBox != null)
                 ElasticBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void APIServerAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+            {
+                System.Windows.MessageBox.Show("تنها مدیر پارکینگ می‌تواند این فیلد را تغییر دهد.");
+                return;
+            }
+            if(((TextBox)sender).Text!=null && ((TextBox)sender).Text.Length > 5)
+            {
+                Settings.Default.Application_ApiServerAddress = ((TextBox)sender).Text;
+                Settings.Default.Save();
+            }
+
         }
     }
 }

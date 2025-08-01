@@ -41,7 +41,7 @@
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
-                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=PlateCheckInExitGate, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_PlateCheckInExitGate, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="بررسی یکسان بودن پلاک کارت با تصویر" />
                 </DockPanel>
             </StackPanel>
@@ -70,6 +70,7 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                         <ui:TextBox  MinWidth="200" 
+                                     FlowDirection="LeftToRight"
                                      Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_MissingCardPrice, Mode=TwoWay}" 
                                      TextChanged="TextBox_TextChanged"/>
                         <TextBlock DockPanel.Dock="Left" Margin="5"  Text="ريال" VerticalAlignment="Center"/>
@@ -83,7 +84,10 @@
                 <DockPanel>
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GatePCName, Mode=TwoWay}" TextChanged="GateTextBox_TextChanged"  MinWidth="200"/>
+                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GatePCName, Mode=TwoWay}" 
+                                    TextChanged="GateTextBox_TextChanged"  
+                                    FlowDirection="LeftToRight"
+                                    MinWidth="200"/>
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام سیستم"  VerticalAlignment="Center"/>
                 </DockPanel>
@@ -93,7 +97,9 @@
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                        <ui:TextBox Text="{Binding Application_DeviceId, Mode=TwoWay, Source={x:Static Properties:Settings.Default}}" TextChanged="DeviceId_TextChanged"  MinWidth="200"/>
+                        <ui:TextBox Text="{Binding Application_DeviceId, Mode=TwoWay, Source={x:Static Properties:Settings.Default}}"
+                                    FlowDirection="LeftToRight"
+                                    TextChanged="DeviceId_TextChanged"  MinWidth="200"/>
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="شناسه دستگاه"  VerticalAlignment="Center"/>
                 </DockPanel>
@@ -104,6 +110,28 @@
                 <DockPanel>
                     <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Sync_Enable, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی همگام سازی با سرور" />
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_EnableSyncImage, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی دخیره سازی عکس روی سرور" />
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox x:Name="APIServerAddressTextBox" 
+                                    Text="{Binding Application_ServerAddress, Mode=TwoWay, Source={x:Static Properties:Settings.Default}}" 
+                                    FlowDirection="LeftToRight"
+                                    TextChanged="APIServerAddressTextBox_TextChanged"  
+                                    MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="آدرس سرور همگام سازی"  VerticalAlignment="Center"/>
                 </DockPanel>
             </StackPanel>
         </Border>

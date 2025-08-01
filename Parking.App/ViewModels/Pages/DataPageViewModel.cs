@@ -12,6 +12,7 @@ public class DataPageViewModel : INotifyPropertyChanged
 {
     private string _parkingName;
     private int _totalCards;
+    private int _totalDiscountedCards;
     private int _totalSpaces;
     private int _occupiedSpaces;
 
@@ -36,6 +37,18 @@ public class DataPageViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(TotalCards));
         }
     }
+
+    // تعداد کارت‌های تعریف‌شده
+    public int TotalDiscountedCards
+    {
+        get => _totalDiscountedCards;
+        set
+        {
+            _totalDiscountedCards = value;
+            OnPropertyChanged(nameof(TotalDiscountedCards));
+        }
+    }
+
 
     // تعداد کل فضای تعریف‌شده
     public int TotalSpaces

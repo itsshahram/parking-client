@@ -11,6 +11,8 @@ using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Windows.Interop;
+using ZXing;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -332,54 +334,113 @@ public class ParkingService : IParkingService
             return (null, null);
         }
     }
-    public async Task<ImageSource> GetTicketImage(Guid ticketId)
+    public async Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId)
     {
         try
         {
-            var ticketImage = await unitOfWork.ParkingTicketImages.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+            var ticketImage = await unitOfWork.ParkingTickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            (ImageSource? StartImage, ImageSource? ExitImage) result =  (null, null);
             if (ticketImage != null)
             {
-                try
+                if (ticketImage.StartImage !=null)
                 {
-                    //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                    try
+                    {
+                        if (string.IsNullOrEmpty(ticketImage.StartImage))
+                        {
+                            result.StartImage = null;
+                        }
+                        else if (IsValidUrl(ticketImage.StartImage))
+                        {
+                            client = _httpClientFactory.CreateClient();
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                            var response = await client.GetAsync(new Uri(ticketImage.StartImage));
+                            response.EnsureSuccessStatusCode();
+                            var stream = await response.Content.ReadAsStreamAsync();
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = stream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            result.StartImage = bitmap;
+                        }
 
-                    //var response = await client.GetAsync(ticketImage.EntryImageAddress);
-                    var response = await client.GetAsync(new Uri(ticketImage.EntryImageAddress));
-                    response.EnsureSuccessStatusCode();
-
-                    var stream = await response.Content.ReadAsStreamAsync();
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = stream;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-
-                    return bitmap;
-
+                        else if (IsBase64(ticketImage.StartImage))
+                        {
+                            result.StartImage = ImageHelper.Base64ToImageSource(ticketImage.StartImage);
+                        }
+                        else
+                        {
+                            result.StartImage = null;
+                        }
+                            
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        result.StartImage = null;
+                    }
                 }
-                catch (HttpRequestException ex)
+                else
                 {
-                    _logger.LogError(ex.Message, ex);
-                    return null;
+                    result.StartImage = null;
                 }
-                catch (Exception ex)
+
+                //ExitImage ===================
+
+                if (ticketImage.ExitImage != null)
                 {
-                    _logger.LogError(ex.Message, ex);
-                    return null;
+                    try
+                    {
+                        if (string.IsNullOrEmpty(ticketImage.ExitImage))
+                        {
+                            result.ExitImage = null;
+                        }
+                        else if (IsValidUrl(ticketImage.ExitImage))
+                        {
+                            client = _httpClientFactory.CreateClient();
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                            var response = await client.GetAsync(new Uri(ticketImage.ExitImage));
+                            response.EnsureSuccessStatusCode();
+                            var stream = await response.Content.ReadAsStreamAsync();
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = stream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            result.ExitImage = bitmap;
+                        }
+
+                        else if (IsBase64(ticketImage.ExitImage))
+                        {
+                            result.ExitImage = ImageHelper.Base64ToImageSource(ticketImage.ExitImage);
+                        }
+                        else
+                        {
+                            result.ExitImage = null;
+                        }
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        result.ExitImage = null;
+                    }
                 }
+                else
+                {
+                    result.ExitImage = null;
+                }
+                return result;
             }
-            else
-            {
-                return null;
-            }
-
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return null;
+            return (null,null);
         }
     }
     public List<TicketsListViewModel> GetLatestTickets(TicketType type, int take)
@@ -2774,4 +2835,16 @@ public class ParkingService : IParkingService
         return Regex.IsMatch(input, pattern) || (input.Length % 4 == 0 && Convert.TryFromBase64String(input, new Span<byte>(new byte[input.Length]), out _));
     }
 
+    public int GetDiscountedCardsCount()
+    {
+        try
+        {
+            return unitOfWork.Cards.Find(c=>c.PercentDiscount>0).Count();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return 0;
+        }
+    }
 }

@@ -32,6 +32,14 @@
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
+                    <TextBlock DockPanel.Dock="Right" Margin="5"  Text="{Binding TotalDiscountedCards}" VerticalAlignment="Center"/>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="تعداد کارت های تخفیف دار تعریف شده" VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
                     <TextBlock DockPanel.Dock="Right" Margin="5"  Text="{Binding TotalSpaces}" VerticalAlignment="Center"/>
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فضای تعریف شده" VerticalAlignment="Center"/>
                 </DockPanel>
