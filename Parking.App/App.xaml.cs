@@ -170,20 +170,17 @@ public partial class App : Application
             }
             else
             {
-                if (Settings.Default.Application_Logging_In_Elastic)
-                {
-                    Log.Logger = new LoggerConfiguration()
-                        .Enrich.FromLogContext()
-                        .Enrich.WithMachineName()
-                        .WriteTo.File("logs/log-.txt",
-                             rollingInterval: RollingInterval.Day,
-                             retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
-                             fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
-                             rollOnFileSizeLimit: true,
-                             outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
-                             restrictedToMinimumLevel: LogEventLevel.Error)
-                        .CreateLogger();
-                }
+                Serilog.Log.Logger = new LoggerConfiguration()
+                    .Enrich.FromLogContext()
+                    .Enrich.WithMachineName()
+                    .WriteTo.File("logs/log-.txt",
+                         rollingInterval: RollingInterval.Day,
+                         retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
+                         fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
+                         rollOnFileSizeLimit: true,
+                         outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                         restrictedToMinimumLevel: LogEventLevel.Error)
+                    .CreateLogger();
             }
         }
         else
