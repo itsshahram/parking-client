@@ -1,4 +1,5 @@
-﻿using Parking.App.Models;
+﻿using Microsoft.Identity.Client;
+using Parking.App.Models;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingTicket;
 using Parking.App.Models.Dto.Parking.ParkingTicketExtraImage;
@@ -11,6 +12,7 @@ using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.User;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
+using System.Linq;
 
 
 
@@ -1395,14 +1397,17 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         {
                             Console.Write(ex.Message);
                         }
-
                     }
-
-
                 }
-
-
             }
+
+
+            if (result != null && result.Data != null)
+            {
+                await unitOfWork.VehicleSegments.ExecuteDeleteAsync(x =>
+                !result.Data.Select(y => y.Id).Contains(x.Id));
+            }
+
             return new TServiceResponse<bool>(true, "عملیات موفق", true);
         }
         catch (Exception ex)
@@ -1582,7 +1587,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
             var tickets = unitOfWork.ParkingTickets
-                .Find(p => p.StartImage.Length>10 && !p.StartImage.StartsWith("http") && p.TicketStatus == TicketStatus.Synced)
+                .Find(p => p.StartImage.Length > 10 && !p.StartImage.StartsWith("http") && p.TicketStatus == TicketStatus.Synced)
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .Select(p => new { p.Id }).ToList();
             foreach (var item in tickets)
