@@ -17,7 +17,7 @@ namespace Parking.App.Helpers
             try
             {
                 using var ping = new Ping();
-                var reply = ping.Send(host, 1000);
+                var reply = ping.Send(host, 3000);
                 return reply?.Status == IPStatus.Success;
             }
             catch
