@@ -1,7 +1,7 @@
-﻿
-using Microsoft.VisualBasic.ApplicationServices;
-using Parking.App.Models.GeneralServiceResponse;
+﻿using Parking.App.Models.GeneralServiceResponse;
 using Parking.Domain.Entities.User;
+
+using static Parking.App.Helpers.InternetChecker;
 
 
 namespace Parking.App.Views.Windows
@@ -93,6 +93,12 @@ namespace Parking.App.Views.Windows
             {
                 if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
                 {
+                    if (!IsInternetAvailable())
+                    {
+                        Settings.Default.Application_Sync_Enable = false;
+                        Settings.Default.Save();
+                    }
+                  
                     var username = usernameBox.Text;
                     var pasword = passwordBox.Password;
                     var result = _userService?.Login(username, pasword);
