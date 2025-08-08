@@ -99,7 +99,9 @@ namespace Parking.App.Views.Pages
                     OwnerFirstName = ViewModel.OwnerFirstName,
                     OwnerLastName = ViewModel.OwnerLastName,
                     VehicleSegmentId = ViewModel.SelectedSegment.Id,
-                    EnLicensePlate = ViewModel.EnLicensePlate,
+                    EnLicensePlate = ViewModel.EnLicensePlate, 
+                    OwnerNationalCode = ViewModel.OwnerNationalCode, 
+                    OwnerPhoneNumber = ViewModel.OwnerPhoneNumber, 
                 };
                 var result = _parkingService.AddCard(card);
                 if (result)

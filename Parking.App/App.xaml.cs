@@ -100,6 +100,7 @@ public partial class App : Application
 
                 services.AddScoped<UsersListPage>();
                 services.AddScoped<UsersListPageViewModel>();
+                services.AddScoped<AddCardHistoryPageViewModel>();
             }
             else
             {

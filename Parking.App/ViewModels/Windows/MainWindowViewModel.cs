@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Parking.App.Views.Pages.CardsPageChilds;
 using System.Collections.ObjectModel;
 using Wpf.Ui.Controls;
 
@@ -75,8 +76,17 @@ public partial class MainWindowViewModel : ObservableObject
             _menuItems.Add(new NavigationViewItem()
             {
                 Content = "کارت",
-                Icon = new SymbolIcon { Symbol = SymbolRegular.Info24 },
+                Icon = new SymbolIcon { Symbol = SymbolRegular.ContactCardGroup24 },
                 TargetPageType = typeof(Views.Pages.AddCardPage)
+            });
+        }
+        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AddCards") && Settings.Default.Application_EntryCardRequirement)
+        {
+            _menuItems.Add(new NavigationViewItem()
+            {
+                Content = "تاریخچه کارت",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.ContactCardGroup24 },
+                TargetPageType = typeof(AddCardHistoryPage)
             });
         }
         if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))

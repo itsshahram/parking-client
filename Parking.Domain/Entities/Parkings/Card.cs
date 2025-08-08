@@ -10,6 +10,7 @@ public class Card
     public string? OwnerLastName { get; set; }
     public string? OwnerNationalCode { get; set; }
     public string? OwnerAddress { get; set; }
+    public string? OwnerPhoneNumber { get; set; }
 
     public DateTime ActiveDate { get; set; }
 

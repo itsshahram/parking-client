@@ -27,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ParkingTicketImage> ParkingTicketImages { get; private set; }
     public IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; private set; }
     public IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices { get; private set; }
+    public IRepository<AddCardItem> AddCardItems { get; private set; }
     public UnitOfWork(ApplicationDbContext context,
         IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices,
         IRepository<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices,
@@ -43,7 +44,8 @@ public class UnitOfWork : IUnitOfWork
         IRepository<ParkingLot> ParkingLots,
         IRepository<ApplicationUser> Users,
         IRepository<ApplicationRole> Roles,
-        IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages)
+        IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages,
+        IRepository<AddCardItem> addCardItems)
     {
 
         this.Roles = Roles;
@@ -63,6 +65,7 @@ public class UnitOfWork : IUnitOfWork
         this.ParkingVehicleSegmentVariablePrices = ParkingVehicleSegmentVariablePrices;
         this.ParkingTicketExtraImages = ParkingTicketExtraImages;
         _context = context;
+        AddCardItems = addCardItems;
     }
     public async Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class
     {

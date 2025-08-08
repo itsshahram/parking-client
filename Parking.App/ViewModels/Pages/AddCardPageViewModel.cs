@@ -51,6 +51,16 @@ public class AddCardPageViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(OwnerNationalCode));
         }
     }
+    private string? _ownerPhoneNumber { get; set; }
+    public string? OwnerPhoneNumber
+    {
+        get => _ownerPhoneNumber;
+        set
+        {
+            _ownerPhoneNumber = value;
+            OnPropertyChanged(nameof(OwnerPhoneNumber));
+        }
+    }
     private string? _ownerAddress { get; set; }
     public string? OwnerAddress
     {

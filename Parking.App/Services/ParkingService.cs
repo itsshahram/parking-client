@@ -1,4 +1,5 @@
-﻿using Parking.App.Models.Dto.Card;
+﻿using Azure.Core;
+using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -339,10 +340,10 @@ public class ParkingService : IParkingService
         try
         {
             var ticketImage = await unitOfWork.ParkingTickets.FirstOrDefaultAsync(t => t.Id == ticketId);
-            (ImageSource? StartImage, ImageSource? ExitImage) result =  (null, null);
+            (ImageSource? StartImage, ImageSource? ExitImage) result = (null, null);
             if (ticketImage != null)
             {
-                if (ticketImage.StartImage !=null)
+                if (ticketImage.StartImage != null)
                 {
                     try
                     {
@@ -374,7 +375,7 @@ public class ParkingService : IParkingService
                         {
                             result.StartImage = null;
                         }
-                            
+
                     }
                     catch (Exception ex)
                     {
@@ -421,7 +422,7 @@ public class ParkingService : IParkingService
                         {
                             result.ExitImage = null;
                         }
-                        
+
                     }
                     catch (Exception ex)
                     {
@@ -440,7 +441,7 @@ public class ParkingService : IParkingService
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return (null,null);
+            return (null, null);
         }
     }
     public List<TicketsListViewModel> GetLatestTickets(TicketType type, int take)
@@ -2429,6 +2430,7 @@ public class ParkingService : IParkingService
                     OwnerFirstName = request.OwnerFirstName,
                     OwnerLastName = request.OwnerLastName,
                     OwnerNationalCode = request.OwnerNationalCode,
+                    OwnerPhoneNumber = request.OwnerPhoneNumber,
                     OwnerPic = request.OwnerPic,
                     PercentDiscount = request.PercentDiscount,
                     LicensePlateGroupId = request.LicensePlateGroupId,
@@ -2436,6 +2438,20 @@ public class ParkingService : IParkingService
                     EnLicensePlate = request.EnLicensePlate,
                 };
                 unitOfWork.Cards.Add(card);
+
+                var carditemresult = CreateAddCardHistory(new AddCardItemModel
+                {
+                    EnLicensePlate = card.EnLicensePlate,
+                    ActiveDate = card.ActiveDate,
+                    CreateDate = DateTime.Now,
+                    DeactiveDate = card.DeactiveDate,
+                    OwnerFullName = card.OwnerFirstName + " " + card.OwnerLastName,
+                    Description = $"کد ملی: {card.OwnerNationalCode} _ شماره همراه: {card.OwnerPhoneNumber} ",
+                    PercentDiscount = card.PercentDiscount,
+                    VehicleSegmentId = card.VehicleSegmentId,
+                    CardUid = (long)card.CardSerialNo
+                });
+
                 return true;
             }
             else
@@ -2460,7 +2476,23 @@ public class ParkingService : IParkingService
                 card.LicensePlateGroupId = request.LicensePlateGroupId;
                 card.VehicleSegmentId = request.VehicleSegmentId;
                 card.EnLicensePlate = request.EnLicensePlate;
+                card.OwnerPhoneNumber = request.OwnerPhoneNumber;
+
                 unitOfWork.Cards.Update(card);
+
+                var carditemresult = CreateAddCardHistory(new AddCardItemModel
+                {
+                    EnLicensePlate = card.EnLicensePlate,
+                    ActiveDate = card.ActiveDate,
+                    CreateDate = DateTime.Now,
+                    DeactiveDate = card.DeactiveDate,
+                    OwnerFullName = card.OwnerFirstName + " " + card.OwnerLastName,
+                    Description = $"کد ملی: {card.OwnerNationalCode} _ شماره همراه: {card.OwnerPhoneNumber}",
+                    PercentDiscount = card.PercentDiscount,
+                    VehicleSegmentId = card.VehicleSegmentId,
+                    CardUid = (long)card.CardSerialNo 
+                });
+
                 return true;
             }
 
@@ -2839,12 +2871,99 @@ public class ParkingService : IParkingService
     {
         try
         {
-            return unitOfWork.Cards.Find(c=>c.PercentDiscount>0).Count();
+            return unitOfWork.Cards.Find(c => c.PercentDiscount > 0).Count();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
             return 0;
+        }
+    }
+
+    public (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request)
+    {
+        try
+        {
+            AddCardItem CardItem = new AddCardItem();
+            CardItem.OwnerFullName = request.OwnerFullName;
+            CardItem.EnLicensePlate = request.EnLicensePlate;
+            CardItem.PercentDiscount = request.PercentDiscount;
+            CardItem.Description = request.Description;
+            CardItem.ActiveDate = request.ActiveDate;
+            CardItem.DeactiveDate = request.DeactiveDate;
+            CardItem.VehicleSegmentId = request.VehicleSegmentId;
+            CardItem.CreateDate = request.CreateDate;
+            CardItem.CardUid = request.CardUid;
+
+            unitOfWork.AddCardItems.Add(CardItem);
+            unitOfWork.AddCardItems.Commit();
+            return (true, "ثبت در تاریخچه با موفقیت انجام شد");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return (false, "خطا در ثبت تاریخچه");
+        }
+    }
+
+    public (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize)
+    {
+        try
+        {
+            List<AddCardItemModel> Result = new List<AddCardItemModel>();
+            var result = unitOfWork.AddCardItems.GetAll()
+                .Select(a => new AddCardItemModel
+                {
+                    Id = a.Id,
+                    ActiveDate = a.ActiveDate,
+                    CreateDate = a.CreateDate,
+                    DeactiveDate = a.DeactiveDate,
+                    Description = a.Description,
+                    EnLicensePlate = a.EnLicensePlate,
+                    OwnerFullName = a.OwnerFullName,
+                    PercentDiscount = a.PercentDiscount,
+                    VehicleSegmentId = a.VehicleSegmentId,
+                    CardUid = a.CardUid
+                });
+
+            if (FullName != null)
+            {
+                result = result.Where(r => r.OwnerFullName.Contains(FullName));
+            }
+            if (Description != null)
+            {
+                result = result.Where(r => r.Description.Contains(Description));
+            }
+            if (EnLicensePlate != null)
+            {
+                result = result.Where(r => r.EnLicensePlate == EnLicensePlate);
+            }
+            if (PercentDiscount != null)
+            {
+                result = result.Where(r => r.PercentDiscount == PercentDiscount);
+            }
+            if (StartCreateDate != null)
+            {
+                result = result.Where(r => r.CreateDate >= StartCreateDate);
+            }
+            if (EndCreateDate != null)
+            {
+                EndCreateDate = EndCreateDate.Value.AddDays(1);
+                result = result.Where(r => r.CreateDate <= EndCreateDate);
+            }
+            if (CardUid != null)
+            {
+                result = result.Where(r => r.CardUid == CardUid);
+            }
+
+            return (result.Skip((Page - 1) * PageSize).Take(PageSize).ToList(), result.Count(), "جستجو در تاریخچه");
+
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return (new List<AddCardItemModel>(), 0, "خطا در جستجو در تاریخچه");
         }
     }
 }

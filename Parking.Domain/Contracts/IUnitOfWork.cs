@@ -23,6 +23,8 @@ public interface IUnitOfWork  //:IDisposable
     IRepository<CardCreditHistory> CardCreditHistories { get; }
     IRepository<ParkingTicketImage> ParkingTicketImages { get; }
     IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; }
+    IRepository<AddCardItem> AddCardItems { get; }
+
     Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class;
     List<T> ExecuteRawQuery<T>(string sql, params object[] parameters) where T : class;
 

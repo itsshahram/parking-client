@@ -42,6 +42,7 @@ namespace Parking.App.Views.Pages
             entryEndYearTextBox.Text = nowTime[0];
             entryEndMountTextBox.Text = nowTime[1];
             entryEndDayTextBox.Text = nowTime[2];
+
             entryEndHourTextBox.Text = DateTime.Now.Hour.ToString();
             entryEndMinutesTextBox.Text = DateTime.Now.Minute.ToString();
 

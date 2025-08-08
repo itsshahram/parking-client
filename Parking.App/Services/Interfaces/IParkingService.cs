@@ -79,6 +79,10 @@ public interface IParkingService
     bool IsCardInUse(long cardSerialNo);
     Guid? GetNotExitedTicketIdByCardSerialNo(long cardSerialNo);
 
+
+    (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request);
+    (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName,long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
+
     #endregion
     #region ExtraImages
     bool AddTicketExtraImage(Guid TicketId, string Image, string Name, bool ShowInPage);
