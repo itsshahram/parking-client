@@ -1335,10 +1335,10 @@ public class ParkingService : IParkingService
                 tickets = tickets.Where(t => t.IsExited == request.IsExited);
             if (request.IsPaid != null)
                 tickets = tickets.Where(t => t.IsPaid == request.IsPaid);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime >= request.StartStartTime);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime <= request.EndStartTime);
+            if (request.EntryFrom != null)
+                tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
+            if (request.EntryTo != null)
+                tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
             if (request.BarcodeId != null)
                 tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
             if (request.LicensePlate != null && request.LicensePlate.Length > 1)
@@ -1393,12 +1393,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
-            //var sergments = unitOfWork.VehicleSegments.GetAll().ToList();
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var tickets = unitOfWork.ParkingTickets.GetAll()
                                                  .Select(s => new TicketsListViewModel
                                                  {
@@ -1427,6 +1421,8 @@ public class ParkingService : IParkingService
                                                      ParkingLotId = s.ParkingLotId,
                                                      TraceNo = s.TraceNo,
                                                      RRN = s.RRN,
+                                                     EntranceGate = s.EntranceGate,
+                                                     ExitGate = s.ExitGate
                                                  });
 
             if (request.ParkingId != null)
@@ -1449,10 +1445,28 @@ public class ParkingService : IParkingService
                 tickets = tickets.Where(t => t.IsExited == request.IsExited);
             if (request.IsPaid != null)
                 tickets = tickets.Where(t => t.IsPaid == request.IsPaid);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime >= request.StartStartTime);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime <= request.EndStartTime);
+
+            if (request.EntryFrom != null)
+                tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
+
+            if (request.EntryTo != null)
+                tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
+
+            if (request.ExitFrom != null)
+                tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
+
+            if (request.ExitTo != null)
+                tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
+
+            if (!string.IsNullOrEmpty(request.GateType))
+            {
+                if (request.GateType == "EntranceGate")
+                    tickets = tickets.Where(t => t.EntranceGate != null && t.EntranceGate != "");
+                else if (request.GateType == "ExitGate")
+                    tickets = tickets.Where(t => t.ExitGate != null && t.ExitGate != "");
+            }
+
+
             if (request.BarcodeId != null)
                 tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
             if (request.LicensePlate != null && request.LicensePlate.Length > 1)
@@ -1496,7 +1510,6 @@ public class ParkingService : IParkingService
             }).ToListAsync();
 
             return t;
-
         }
         catch (Exception ex)
         {
@@ -2490,7 +2503,7 @@ public class ParkingService : IParkingService
                     Description = $"کد ملی: {card.OwnerNationalCode} _ شماره همراه: {card.OwnerPhoneNumber}",
                     PercentDiscount = card.PercentDiscount,
                     VehicleSegmentId = card.VehicleSegmentId,
-                    CardUid = (long)card.CardSerialNo 
+                    CardUid = (long)card.CardSerialNo
                 });
 
                 return true;
