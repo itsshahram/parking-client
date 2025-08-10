@@ -10,16 +10,51 @@ namespace Parking.App.Views.Pages
     {
         private readonly ILogger<TicketHistoryPage>? _logger;
         private readonly IParkingService? _parkingService;
+        private GetTicketListRequestModel ViewModel { get; set; }
         public TicketHistoryPage()
         {
+            InitializeComponent();
+
             _logger = App.GetService<ILogger<TicketHistoryPage>>();
             _parkingService = App.GetService<IParkingService>();
-            InitializeComponent();
+            ViewModel = new GetTicketListRequestModel();
+            DataContext = ViewModel;
+
+            LoadData();
+
             var window = Window.GetWindow(this);
             if (window != null)
                 window.WindowState = WindowState.Minimized;
 
             SetDefaultParameter();
+        }
+
+        private void LoadData()
+        {
+            var tickets = _parkingService.GetTicketList(ViewModel);
+            ViewModel.Items = new ObservableCollection<TicketsListViewModel>(tickets.Data);
+            ViewModel.CurrentPage = 1;
+            ViewModel.ItemsPerPage = 10;
+            ViewModel.TotalCount = tickets.TotalCount;
+            ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
+        }
+
+        private void PaginationControl_PageChanged(object sender, int newPage)
+        {
+            GetTicketListRequestModel request = FillParameters();
+            ViewModel.CurrentPage = newPage;
+            request.CurrentPage = newPage;
+            var tickets = _parkingService.GetTicketList(request);
+            resultCount.Text = tickets.TotalCount.ToString("N0");
+            ViewModel.ItemsPerPage = 10;
+            ViewModel.TotalCount = tickets.TotalCount;
+            ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
+        }
+
+
+        private void PaginationControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            SearchBtn_Click(sender, e);
         }
 
         private void SetDefaultParameter()
@@ -167,6 +202,7 @@ namespace Parking.App.Views.Pages
             }
 
         }
+
         private async void SearchBtn_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -174,83 +210,11 @@ namespace Parking.App.Views.Pages
                 progressBar.IsIndeterminate = true;
 
                 CheckParameter();
-                GetTicketListRequestModel request = new GetTicketListRequestModel();
-                DateTime entryFrom = DateConvertor.ShamsiToDateTime(
-                    int.Parse(entryStartYearTextBox.Text.ToString()),
-                    int.Parse(entryStartMountTextBox.Text.ToString()),
-                    int.Parse(entryStartDayTextBox.Text.ToString()),
-                    int.Parse(entryStartHourTextBox.Text.ToString()),
-                    int.Parse(entryStartMinutesTextBox.Text.ToString())
-                    );
-                request.EntryFrom = entryFrom;
-
-                DateTime entryTo = DateConvertor.ShamsiToDateTime(
-                    int.Parse(entryEndYearTextBox.Text.ToString()),
-                    int.Parse(entryEndMountTextBox.Text.ToString()),
-                    int.Parse(entryEndDayTextBox.Text.ToString()),
-                    int.Parse(entryEndHourTextBox.Text.ToString()),
-                    int.Parse(entryEndMinutesTextBox.Text.ToString())
-                    );
-
-                request.EntryTo = entryTo;
-
-                DateTime exitFrom = DateConvertor.ShamsiToDateTime(
-                    int.Parse(exitStartYearTextBox.Text.ToString()),
-                    int.Parse(exitStartMountTextBox.Text.ToString()),
-                    int.Parse(exitStartDayTextBox.Text.ToString()),
-                    int.Parse(exitStartHourTextBox.Text.ToString()),
-                    int.Parse(exitStartMinutesTextBox.Text.ToString())
-                    );
-                request.ExitFrom = exitFrom;
-
-                DateTime exitTo = DateConvertor.ShamsiToDateTime(
-                    int.Parse(exitEndYearTextBox.Text.ToString()),
-                    int.Parse(exitEndMountTextBox.Text.ToString()),
-                    int.Parse(exitEndDayTextBox.Text.ToString()),
-                    int.Parse(exitEndHourTextBox.Text.ToString()),
-                    int.Parse(exitEndMinutesTextBox.Text.ToString()));
-
-                request.ExitTo = exitTo;
-
-                bool? paymentStatus = null;
-                if (isPaid.SelectedItem is ComboBoxItem selectedItem && bool.TryParse(selectedItem.Tag?.ToString(), out bool result))
-                    paymentStatus = result;
-                request.IsPaid = paymentStatus;
-                request.PaidType = Payment_Type.Text == "همه" ? null : (Payment_Type.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-                request.GateType = GateType.Text == "همه" ? null : (GateType.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-
-                string plate = "";
-                if (leftNumbersNumberTextBox.Text != null)
-                {
-                    if (leftNumbersNumberTextBox.Text.Length > 0)
-                    {
-                        plate += $"{leftNumbersNumberTextBox.Text}";
-                    }
-                }
-                var plateChar = plateCharacter.Text;
-                if (plateChar?.Length > 0)
-                {
-                    plate += $"_{plateChar?.ConvertFaCharToEnCharIndex()}";
-                    if (rightNumbersNumberTextBox.Text != null)
-                    {
-                        plate += $"_{rightNumbersNumberTextBox.Text}";
-                        if (irNumberTextBox.Text != null && irNumberTextBox.Text.Length == 2)
-                            plate += $"_IR{irNumberTextBox.Text}";
-                    }
-                }
-                request.LicensePlate = plate;
-                if (vehicleSegmentList.SelectedItem != null)
-                {
-                    request.VehicleSegmentId = (vehicleSegmentList.SelectedItem as VehicleSegmentModel).Id;
-                    if (request.VehicleSegmentId == 0)
-                    {
-                        request.VehicleSegmentId = null;
-                    }
-                }
+                GetTicketListRequestModel request = FillParameters();
 
                 var tickets = await _parkingService.GetTicketListAsync(request);
-                resultCount.Text = tickets.Count.ToString("N0");
-                ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets);
+                resultCount.Text = tickets.TotalCount.ToString("N0");
+                ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
                 progressBar.IsIndeterminate = false;
 
             }
@@ -267,6 +231,86 @@ namespace Parking.App.Views.Pages
                 return;
             }
         }
+
+        private GetTicketListRequestModel FillParameters()
+        {
+            GetTicketListRequestModel request = new GetTicketListRequestModel();
+            DateTime entryFrom = DateConvertor.ShamsiToDateTime(
+                int.Parse(entryStartYearTextBox.Text.ToString()),
+                int.Parse(entryStartMountTextBox.Text.ToString()),
+                int.Parse(entryStartDayTextBox.Text.ToString()),
+                int.Parse(entryStartHourTextBox.Text.ToString()),
+                int.Parse(entryStartMinutesTextBox.Text.ToString())
+                );
+            request.EntryFrom = entryFrom;
+
+            DateTime entryTo = DateConvertor.ShamsiToDateTime(
+                int.Parse(entryEndYearTextBox.Text.ToString()),
+                int.Parse(entryEndMountTextBox.Text.ToString()),
+                int.Parse(entryEndDayTextBox.Text.ToString()),
+                int.Parse(entryEndHourTextBox.Text.ToString()),
+                int.Parse(entryEndMinutesTextBox.Text.ToString())
+                );
+
+            request.EntryTo = entryTo;
+
+            DateTime exitFrom = DateConvertor.ShamsiToDateTime(
+                int.Parse(exitStartYearTextBox.Text.ToString()),
+                int.Parse(exitStartMountTextBox.Text.ToString()),
+                int.Parse(exitStartDayTextBox.Text.ToString()),
+                int.Parse(exitStartHourTextBox.Text.ToString()),
+                int.Parse(exitStartMinutesTextBox.Text.ToString())
+                );
+            request.ExitFrom = exitFrom;
+
+            DateTime exitTo = DateConvertor.ShamsiToDateTime(
+                int.Parse(exitEndYearTextBox.Text.ToString()),
+                int.Parse(exitEndMountTextBox.Text.ToString()),
+                int.Parse(exitEndDayTextBox.Text.ToString()),
+                int.Parse(exitEndHourTextBox.Text.ToString()),
+                int.Parse(exitEndMinutesTextBox.Text.ToString()));
+
+            request.ExitTo = exitTo;
+
+            bool? paymentStatus = null;
+            if (isPaid.SelectedItem is ComboBoxItem selectedItem && bool.TryParse(selectedItem.Tag?.ToString(), out bool result))
+                paymentStatus = result;
+            request.IsPaid = paymentStatus;
+            request.PaidType = Payment_Type.Text == "همه" ? null : (Payment_Type.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            request.GateType = GateType.Text == "همه" ? null : (GateType.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+
+            string plate = "";
+            if (leftNumbersNumberTextBox.Text != null)
+            {
+                if (leftNumbersNumberTextBox.Text.Length > 0)
+                {
+                    plate += $"{leftNumbersNumberTextBox.Text}";
+                }
+            }
+            var plateChar = plateCharacter.Text;
+            if (plateChar?.Length > 0)
+            {
+                plate += $"_{plateChar?.ConvertFaCharToEnCharIndex()}";
+                if (rightNumbersNumberTextBox.Text != null)
+                {
+                    plate += $"_{rightNumbersNumberTextBox.Text}";
+                    if (irNumberTextBox.Text != null && irNumberTextBox.Text.Length == 2)
+                        plate += $"_IR{irNumberTextBox.Text}";
+                }
+            }
+            request.LicensePlate = plate;
+            if (vehicleSegmentList.SelectedItem != null)
+            {
+                request.VehicleSegmentId = (vehicleSegmentList.SelectedItem as VehicleSegmentModel).Id;
+                if (request.VehicleSegmentId == 0)
+                {
+                    request.VehicleSegmentId = null;
+                }
+            }
+
+            return request;
+        }
+
         private async void TicketsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (ticketsDataGrid.SelectedItem is TicketsListViewModel selectedItem)

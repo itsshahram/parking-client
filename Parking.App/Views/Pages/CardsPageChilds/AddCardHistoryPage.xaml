@@ -90,10 +90,10 @@
         </Border>
         <ProgressBar x:Name="progressBar" Margin="10 0"/>
 
-        
+
         <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" >
-                <TextBlock Text="0" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                <TextBlock  Text="{Binding TotalCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
                 <TextBlock Text="عدد" />
             </StackPanel>
             <TextBlock Text="نتایج" FontWeight="Bold" DockPanel.Dock="Left"/>
@@ -153,33 +153,37 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding CreateDate}" Header="تاریخ ایجاد">
+                    <DataGridTextColumn Binding="{Binding ShamsiCreateDate}" Header="تاریخ ایجاد">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="TextAlignment" Value="Center" />
                                 <Setter Property="Padding" Value="5" />
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding ActiveDate}" Header="تاریخ شروع">
+                    <DataGridTextColumn Binding="{Binding ShamsiActiveDate}" Header="تاریخ شروع">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="TextAlignment" Value="Center" />
                                 <Setter Property="Padding" Value="5" />
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding DeactiveDate}" Header="تاریخ پایان">
+                    <DataGridTextColumn Binding="{Binding ShamsiDeactiveDate}" Header="تاریخ پایان">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="TextAlignment" Value="Center" />
                                 <Setter Property="Padding" Value="5" />
+                                <Setter Property="FlowDirection" Value="LeftToRight"/>
+
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>

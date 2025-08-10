@@ -116,8 +116,22 @@ public class AddCardHistoryPageViewModel : INotifyPropertyChanged
             }
         }
     }
-    public int totalCount;
-    public int TotalPages => (int)Math.Ceiling((double)totalCount / _itemsPerPage);
+    private int _totalCount;
+    public int TotalCount
+    {
+        get => _totalCount;
+        set
+        {
+            if (_totalCount != value)
+            {
+                _totalCount = value;
+                OnPropertyChanged(nameof(TotalCount));
+                OnPropertyChanged(nameof(TotalPages));
+            }
+        }
+    }
+
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / _itemsPerPage);
 
     public ObservableCollection<AddCardItemModel> Items
     {

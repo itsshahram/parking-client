@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Parking.App.Models.Dto.Card;
+﻿using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -12,8 +11,6 @@ using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Windows.Interop;
-using ZXing;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -1275,11 +1272,10 @@ public class ParkingService : IParkingService
         {
             _logger.LogError(ex.Message, ex);
             return new TServiceResponse<Guid>() { Succeeded = false, Message = "خطا در ثبت اطلاعات" };
-
         }
     }
 
-    public List<TicketsListViewModel> GetTicketList(GetTicketListRequestModel request)
+    public (List<TicketsListViewModel> Data, int TotalCount) GetTicketList(GetTicketListRequestModel request)
     {
         try
         {
@@ -1344,6 +1340,7 @@ public class ParkingService : IParkingService
             if (request.LicensePlate != null && request.LicensePlate.Length > 1)
                 tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
 
+            int TotalCount = tickets.Count();
             var t = tickets.Select(s => new TicketsListViewModel
             {
                 Id = s.Id,
@@ -1379,17 +1376,18 @@ public class ParkingService : IParkingService
                 RRN = s.RRN,
                 PaidDate = s.PaidDate,
                 TraceNo = s.TraceNo,
-            }).ToList();
+            }).Skip((request.CurrentPage - 1) * request.ItemsPerPage)
+              .Take(request.ItemsPerPage).ToList();
 
-            return t;
+            return (t, TotalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<TicketsListViewModel>();
+            return (new List<TicketsListViewModel>(), 0);
         }
     }
-    public async Task<List<TicketsListViewModel>> GetTicketListAsync(GetTicketListRequestModel request)
+    public async Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListAsync(GetTicketListRequestModel request)
     {
         try
         {
@@ -1466,11 +1464,13 @@ public class ParkingService : IParkingService
                     tickets = tickets.Where(t => t.ExitGate != null && t.ExitGate != "");
             }
 
-
             if (request.BarcodeId != null)
                 tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
             if (request.LicensePlate != null && request.LicensePlate.Length > 1)
                 tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
+
+
+            int TotalCount = tickets.Count();
 
             var t = await tickets.Select(s => new TicketsListViewModel
             {
@@ -1507,14 +1507,15 @@ public class ParkingService : IParkingService
                 RRN = s.RRN,
                 PaidDate = s.PaidDate,
                 TraceNo = s.TraceNo,
-            }).ToListAsync();
+            }).Skip((request.CurrentPage - 1) * request.ItemsPerPage)
+              .Take(request.ItemsPerPage).ToListAsync();
 
-            return t;
+            return (t, TotalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<TicketsListViewModel>();
+            return (new List<TicketsListViewModel>(), 0);
         }
     }
     public bool ExitRequest(Guid ticketId)
@@ -2924,6 +2925,7 @@ public class ParkingService : IParkingService
         try
         {
             List<AddCardItemModel> Result = new List<AddCardItemModel>();
+
             var result = unitOfWork.AddCardItems.GetAll()
                 .Select(a => new AddCardItemModel
                 {

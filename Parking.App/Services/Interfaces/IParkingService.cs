@@ -2,20 +2,9 @@
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
-using Parking.App.Models.Dto.Vehicle.LicensePlate;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
-using Parking.App.Models.Tickets;
-using Parking.App.Models;
 using Parking.Domain.Entities.Vehicles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using Parking.App.Helpers;
 
 namespace Parking.App.Services.Interfaces;
 
@@ -41,8 +30,8 @@ public interface IParkingService
     Guid? GetActiveLicensePlateTicketId(string licenseEnPlate);
     bool LicensePlateTicketIsExist(string licenseEnPlate);
     TServiceResponse<Guid> CreateTicket(CreateParkingTicketModel request, string? StartImage);
-    List<TicketsListViewModel> GetTicketList(GetTicketListRequestModel request);
-    Task<List<TicketsListViewModel>> GetTicketListAsync(GetTicketListRequestModel request);
+    (List<TicketsListViewModel> Data, int TotalCount) GetTicketList(GetTicketListRequestModel request);
+    Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListAsync(GetTicketListRequestModel request);
     bool ExitRequest(Guid ticketId);
     void PaymentAmountCalculation(Guid ticketId);
     Task PaymentAmountCalculationAsync(Guid ticketId);
@@ -81,7 +70,7 @@ public interface IParkingService
 
 
     (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request);
-    (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName,long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
+    (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
 
     #endregion
     #region ExtraImages

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Parking.App.Models.Dto.Card;
+﻿namespace Parking.App.Models.Dto.Card;
 
 public class AddCardItemModel
 {
@@ -18,4 +12,11 @@ public class AddCardItemModel
     public int PercentDiscount { get; set; }
     public int? VehicleSegmentId { get; set; }
     public DateTime CreateDate { get; set; }
+
+    public string? ShamsiCreateDate { get => CreateDate.ToShamsi(); }
+    public string? ShamsiActiveDate { get => ActiveDate.ToShamsi(); }
+    public string? ShamsiDeactiveDate
+    {
+        get => DeactiveDate.ToShamsi();
+    }
 }

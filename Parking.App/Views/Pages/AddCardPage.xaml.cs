@@ -26,10 +26,6 @@ namespace Parking.App.Views.Pages
                     ViewModel.SelectedSegment = SelectedSegment;
                 }
             }
-            //else if (_parkingService.GetVehicleSegments().Count > 0)
-            //{
-            //    VehicleSegmentsComboBox.SelectedIndex = 0;
-            //}
 
             ViewModel.IsActive = true;
             InitializeCardReader();

@@ -197,11 +197,20 @@
             </StackPanel>
             <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" >
-                    <TextBlock Text="0" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="{Binding TotalCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
                     <TextBlock Text="عدد" />
                 </StackPanel>
                 <TextBlock Text="نتایج" FontWeight="Bold" DockPanel.Dock="Left"/>
             </DockPanel>
+            <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
+                <components:PaginationControl 
+                FlowDirection="LeftToRight"
+                        CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
+                        TotalPages="{Binding TotalPages}"
+                        PageChanged="PaginationControl_PageChanged"
+                                     DockPanel.Dock="Left" Loaded="PaginationControl_Loaded"/>
+            </DockPanel>
+
         </StackPanel>
         <ScrollViewer CanContentScroll="True" 
                       IsManipulationEnabled="True"
@@ -307,11 +316,9 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-
                 </DataGrid.Columns>
             </DataGrid>
         </ScrollViewer>
-
 
     </DockPanel>
 </Page>
