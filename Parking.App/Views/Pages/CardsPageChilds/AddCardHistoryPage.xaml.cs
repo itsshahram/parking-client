@@ -46,7 +46,7 @@ public partial class AddCardHistoryPage : Page
         var yesterdayTime = DateTime.Now.AddDays(-90).ToShamsi().Split(" / ");
         StartYearTextBox.Text = yesterdayTime[0];
         StartMountTextBox.Text = yesterdayTime[1];
-        StartDayTextBox.Text = yesterdayTime[2];
+
 
         var nowTime = DateTime.Now.ToShamsi().Split(" / ");
         EndYearTextBox.Text = nowTime[0];
@@ -87,7 +87,6 @@ public partial class AddCardHistoryPage : Page
         ViewModel.TotalCount = totalCount;
         resultCount.Text = totalCount.ToString();
         HistoryDataGrid.ItemsSource = ViewModel.Items;
-
     }
 
 
@@ -149,7 +148,7 @@ public partial class AddCardHistoryPage : Page
         // Update UI controls
         resultCount.Text = totalCount.ToString();
         HistoryDataGrid.ItemsSource = ViewModel.Items;
-
+       
     }
 
     private void EndTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)

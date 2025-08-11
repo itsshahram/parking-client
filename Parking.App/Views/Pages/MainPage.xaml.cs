@@ -28,13 +28,35 @@ namespace Parking.App.Views.Pages
 
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
-
-
+            this.PreviewKeyDown += Window_PreviewKeyDown;
 
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Console.WriteLine("پنجره در حال بسته شدن است.");
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            Key key = e.Key == Key.System ? e.SystemKey : e.Key;
+            ModifierKeys modifiers = Keyboard.Modifiers;
+
+            if (IsShortcutMatched(key, modifiers))
+            {
+                e.Handled = true;
+                ResetForm();
+            }
+        }
+
+        private bool IsShortcutMatched(Key pressedKey, ModifierKeys pressedModifiers)
+        {
+            string pressedShortcutText = pressedModifiers == ModifierKeys.None
+                ? $"{pressedKey}"
+                : $"{pressedModifiers} + {pressedKey}";
+
+            string savedShortcutText = Settings.Default.Application_MainPage_ReloadShortcut;
+
+            return pressedShortcutText == savedShortcutText;
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -453,7 +475,6 @@ namespace Parking.App.Views.Pages
 
         private void CheckPlate()
         {
-
             this.Dispatcher.Invoke(() =>
             {
                 if (irNumberTextBox.Text != null && rightNumbersNumberTextBox.Text != null && leftNumbersNumberTextBox.Text != null)
@@ -872,11 +893,12 @@ namespace Parking.App.Views.Pages
                         }
 
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         _logger.LogError("Error05", ex);
                         return false;
                     }
- 
+
                 }
                 catch (Exception ex)
                 {
