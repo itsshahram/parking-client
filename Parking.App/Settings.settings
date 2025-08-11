@@ -158,5 +158,8 @@
     <Setting Name="Application_EnableSyncImage" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="Application_MainPage_ReloadShortcut" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
