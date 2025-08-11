@@ -725,45 +725,41 @@ public class ParkingService : IParkingService
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var ticket = unitOfWork.ParkingTickets.Find(s => s.Id == ticketId)
-.OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
-{
-    Id = s.Id,
-    EndTime = s.EndTime,
-    LicensePlate = s.LicensePlate,
-    ParkingSpaceID = s.ParkingSpaceID,
-    StartTime = s.StartTime,
-    VehicleManufacturerName = s.VehicleManufacturerName,
-    VehicleSegmentId = s.VehicleSegmentId,
-    StartRelativeTimeString = s.StartTime.ToRelativeDate(),
-    StartTimeString = s.StartTime.ToLongShamsiString(),
-    StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-    EndTimeString = s.EndTime.ToLongShamsiString(),
-    Discount = s.Discount,
-    DiscountPercent = s.DiscountPercent,
-    DurationMinutes = s.DurationMinutes,
-    EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
-    IsExited = s.IsExited,
-    IsPaid = s.IsPaid,
-    PaidAmount = s.PaidAmount,
-    PaidCreditCard = s.PaidCreditCard,
-    PaidType = s.PaidType,
-    RefId = s.RefId,
-    TotalAmount = s.TotalAmount,
-    EnLicensePlate = s.EnLicensePlate,
-    ParkingLotId = s.ParkingLotId,
-    MerchantNumber = s.MerchantNumber,
-    TraceNo = s.TraceNo,
-    PaidDate = s.PaidDate,
-    RRN = s.RRN,
-    LicensePlateGroupId = s.LicensePlateGroupId,
-    Description = s.Description,
-    CardUid = s.CardUid
-}).FirstOrDefault();
+                                                  .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
+                                                  {
+                                                      Id = s.Id,
+                                                      EndTime = s.EndTime,
+                                                      LicensePlate = s.LicensePlate,
+                                                      ParkingSpaceID = s.ParkingSpaceID,
+                                                      StartTime = s.StartTime,
+                                                      VehicleManufacturerName = s.VehicleManufacturerName,
+                                                      VehicleSegmentId = s.VehicleSegmentId,
+                                                      StartRelativeTimeString = s.StartTime.ToRelativeDate(),
+                                                      StartTimeString = s.StartTime.ToLongShamsiString(),
+                                                      StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
+                                                      EndTimeString = s.EndTime.ToLongShamsiString(),
+                                                      Discount = s.Discount,
+                                                      DiscountPercent = s.DiscountPercent,
+                                                      DurationMinutes = s.DurationMinutes,
+                                                      EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                                                      IsExited = s.IsExited,
+                                                      IsPaid = s.IsPaid,
+                                                      PaidAmount = s.PaidAmount,
+                                                      PaidCreditCard = s.PaidCreditCard,
+                                                      PaidType = s.PaidType,
+                                                      RefId = s.RefId,
+                                                      TotalAmount = s.TotalAmount,
+                                                      EnLicensePlate = s.EnLicensePlate,
+                                                      ParkingLotId = s.ParkingLotId,
+                                                      MerchantNumber = s.MerchantNumber,
+                                                      TraceNo = s.TraceNo,
+                                                      PaidDate = s.PaidDate,
+                                                      RRN = s.RRN,
+                                                      LicensePlateGroupId = s.LicensePlateGroupId,
+                                                      Description = s.Description,
+                                                      CardUid = s.CardUid
+                                                   }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 var segment = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefault();

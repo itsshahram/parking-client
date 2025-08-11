@@ -7,17 +7,17 @@
              xmlns:local="clr-namespace:Parking.App.Views.Components"
              FontFamily="{StaticResource IranYekanFont}" 
              Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+             FlowDirection="RightToLeft"
              mc:Ignorable="d" >
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-        <ui:Button  Icon="{ui:SymbolIcon Symbol=ArrowPrevious24}" Click="FirstPage_Click" Margin="4,0"/>
-        <ui:Button   Icon="{ui:SymbolIcon Symbol=ChevronLeft24}" Click="PreviousPage_Click" Margin="4,0"/>
+        <ui:Button Icon="{ui:SymbolIcon Symbol=ChevronLeft24}" Click="NextPage_Click" Margin="4,0"/>
+        <ui:Button Icon="{ui:SymbolIcon Symbol=ArrowPrevious24}" Click="LastPage_Click" Margin="4,0"/>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
             <TextBlock Text="{Binding CurrentPage, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="4,0"/>
             <TextBlock Text="/" Margin="4,0"/>
             <TextBlock Text="{Binding TotalPages, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="4,0"/>
         </StackPanel>
-
-        <ui:Button Icon="{ui:SymbolIcon Symbol=ChevronRight24}" Click="NextPage_Click" Margin="4,0"/>
-        <ui:Button Icon="{ui:SymbolIcon Symbol=ArrowNext24}" Click="LastPage_Click" Margin="4,0"/>
+        <ui:Button  Icon="{ui:SymbolIcon Symbol=ArrowNext24}" Click="FirstPage_Click" Margin="4,0"/>
+        <ui:Button   Icon="{ui:SymbolIcon Symbol=ChevronRight24}" Click="PreviousPage_Click" Margin="4,0"/>
     </StackPanel>
 </UserControl>

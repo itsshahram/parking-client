@@ -16,9 +16,9 @@ public partial class AddCardHistoryPage : Page
         _parkingService = App.GetService<IParkingService>();
         ViewModel = new AddCardHistoryPageViewModel();
         DataContext = ViewModel;
-        LoadData();
         InitializeComponent();
         SetDefaultParameter();
+        LoadData();
     }
 
     public void LoadData()
@@ -28,13 +28,14 @@ public partial class AddCardHistoryPage : Page
             null,
             null,
             null,
-            null,
-            null,
+            ViewModel.StartTime,
+            ViewModel.EndTime,
             null,
             1,
             10);
 
         ViewModel.Items = new ObservableCollection<AddCardItemModel>(data);
+        HistoryDataGrid.ItemsSource = ViewModel.Items;
         ViewModel.CurrentPage = 1;
         ViewModel.ItemsPerPage = 10;
         ViewModel.TotalCount = totalCount;

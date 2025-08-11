@@ -213,6 +213,8 @@ namespace Parking.App.Views.Pages
                 GetTicketListRequestModel request = FillParameters();
 
                 var tickets = await _parkingService.GetTicketListAsync(request);
+                ViewModel.ItemsPerPage = 10;
+                ViewModel.TotalCount = tickets.TotalCount;
                 resultCount.Text = tickets.TotalCount.ToString("N0");
                 ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
                 progressBar.IsIndeterminate = false;
