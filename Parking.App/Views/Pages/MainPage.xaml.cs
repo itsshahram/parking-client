@@ -2,7 +2,6 @@
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
-using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using static Parking.App.ANPR.SATPA_API;
 
@@ -224,7 +223,8 @@ namespace Parking.App.Views.Pages
         {
             IRPlateBox.Visibility = Visibility.Collapsed;
             OtherPlateBox.Visibility = Visibility.Visible;
-            PlateTitle.Text = "پلاک منطقه، خلرجی و یا موتور";
+            PlateTitle.Text = "پلاک منطقه، خارجی و یا موتور";
+            RunPlateSort(true);
         }
 
         private void OtherPlateToggle_Unchecked(object sender, RoutedEventArgs e)
@@ -232,7 +232,17 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Visible;
             OtherPlateBox.Visibility = Visibility.Collapsed;
             PlateTitle.Text = "پلاک ایران";
+            RunPlateSort(false);
         }
+        private void RunPlateSort(bool isOtherPlate)
+        {
+            PlateType plateType = isOtherPlate ? PlateType.Other : PlateType.IranianPlate;
+
+            var vehicleSegments = _parkingService.GetVehicleSegments();
+
+            SortSegmentsByDetectedPlate(vehicleSegments, plateType);
+        }
+
 
         #endregion
 
@@ -244,7 +254,6 @@ namespace Parking.App.Views.Pages
         private string LatestValidCarImage { get; set; }
         private bool ContinueProcessing { get; set; } = true;
         private bool IsValidPlate { get; set; }
-
 
         SATPA satpa_object = null;
         satpa_EVENT_CALLBACK HandleANPREventsDelegate = null;
@@ -301,7 +310,6 @@ namespace Parking.App.Views.Pages
                             satpa_object.satpa_settings.repeat = false;
                             satpa_object.stop();
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -359,7 +367,6 @@ namespace Parking.App.Views.Pages
                                 {
                                     ViewModel.CurrentFrame = satpa_object?.get_frame().ConvertBitmapToBitmapSource();
                                 }));
-
                             }
                         }
                         else
@@ -430,13 +437,10 @@ namespace Parking.App.Views.Pages
                     plate new_plate = satpa_object.plte_buffer[i];
                     satpa_object.plte_buffer.RemoveAt(i);
 
-                    var vehicleSegments = _parkingService.GetVehicleSegments();
-
                     if (new_plate.splate_result.n_letter == 1 && new_plate.splate_result.n_char == 8)
                     {
                         IsIranPlate = true;
 
-                        SortSegmentsByDetectedPlate(vehicleSegments, PlateType.IranianPlate);
 
                         this.Dispatcher.Invoke(() =>
                         {
@@ -472,9 +476,6 @@ namespace Parking.App.Views.Pages
                     else if (new_plate.splate_result.n_letter == 0)
                     {
                         IsIranPlate = false;
-
-                        SortSegmentsByDetectedPlate(vehicleSegments, PlateType.Other);
-
                         LatestValidEnPlate = new_plate.result_en;
                         this.Dispatcher.Invoke(() =>
                         {
