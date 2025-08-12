@@ -1,7 +1,4 @@
-﻿
-using Parking.Domain.Entities.Parkings;
-using Parking.Domain.General;
-using System.ComponentModel;
+﻿using Parking.Domain.General;
 using System.ComponentModel.DataAnnotations;
 
 

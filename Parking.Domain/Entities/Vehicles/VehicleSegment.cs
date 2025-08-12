@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Parking.Domain.General;
+using System.ComponentModel.DataAnnotations;
 
 namespace Parking.Domain.Entities.Vehicles;
 
@@ -10,6 +11,7 @@ public class VehicleSegment
     public string? Description { get; set; }
     public string? Image { get; set; }
     public Guid? CreatorUserId { get; set; }
+    public PlateType PlateType { get; set; }
     public int ParkingLotId { get; set; }
     /// <summary>
     /// مبلغ ثابت ورودی پارکینگ.

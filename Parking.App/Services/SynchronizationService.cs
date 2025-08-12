@@ -1,18 +1,13 @@
-﻿using Microsoft.Identity.Client;
-using Parking.App.Models;
-using Parking.App.Models.Dto.Parking.ParkingLot;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
+﻿using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingTicketExtraImage;
 using Parking.App.Models.Dto.User;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
 using Parking.App.Models.Login;
 using Parking.Domain.Entities.Parkings;
-using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.User;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
-using System.Linq;
 
 
 
@@ -1202,6 +1197,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         segment.ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay;
                         segment.ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays;
                         segment.DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold;
+                        segment.PlateType = vehicleSegment.PlateType;
                         segment.Image = vehicleSegment.Image;
                         unitOfWork.VehicleSegments.Update(segment);
                         //unitOfWork.Commit();
@@ -1227,7 +1223,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold,
                             TaxPercentage = vehicleSegment.TaxPercentage,
                             ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay,
-                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays
+                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays,
+                            PlateType = vehicleSegment.PlateType,
                         };
 
                         unitOfWork.VehicleSegments.Add(vs);
@@ -1322,8 +1319,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         segment.ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays;
                         segment.DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold;
                         segment.Image = vehicleSegment.Image;
+                        segment.PlateType = vehicleSegment.PlateType;
                         unitOfWork.VehicleSegments.Update(segment);
-                        //await unitOfWork.CommitAsync(default);
 
                         foreach (var item in vehicleSegment.VehicleSegmentPrices)
                         {
@@ -1346,11 +1343,11 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold,
                             TaxPercentage = vehicleSegment.TaxPercentage,
                             ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay,
-                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays
+                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays,
+                            PlateType = vehicleSegment.PlateType
                         };
 
                         unitOfWork.VehicleSegments.Add(vs);
-                        //await unitOfWork.CommitAsync(default);
 
                         foreach (var item in vehicleSegment.VehicleSegmentPrices)
                         {
@@ -1358,7 +1355,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         }
                     }
                     var vehicleSegmentsResult = CreateVehicleSegmentsPrice(pricesList);
-
 
 
                     foreach (var variable in vehicleSegment.VehicleSegmentVariablePrices)
@@ -1376,7 +1372,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 variablePrice.Price = variable.Price;
 
                                 unitOfWork.ParkingVehicleSegmentVariablePrices.Update(variablePrice);
-                                //await unitOfWork.CommitAsync(default);
                             }
                             else
                             {
@@ -1390,7 +1385,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                     Price = variable.Price
                                 };
                                 unitOfWork.ParkingVehicleSegmentVariablePrices.Add(newVariablePrice);
-                                //await unitOfWork.CommitAsync(default);
                             }
                         }
                         catch (Exception ex)
@@ -1754,8 +1748,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             return false;
         }
     }
-
-
 
     public async Task SyncTicketExtraImagesAsync()
     {

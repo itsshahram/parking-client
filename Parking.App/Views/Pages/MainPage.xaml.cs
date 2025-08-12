@@ -1,6 +1,7 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
+using Parking.Domain.Entities.Vehicles;
 using static Parking.App.ANPR.SATPA_API;
 
 
@@ -28,7 +29,7 @@ namespace Parking.App.Views.Pages
 
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
-            this.PreviewKeyDown += Window_PreviewKeyDown;
+            this.PreviewKeyUp += Window_PreviewKeyUp;
 
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -36,7 +37,7 @@ namespace Parking.App.Views.Pages
             Console.WriteLine("پنجره در حال بسته شدن است.");
         }
 
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             Key key = e.Key == Key.System ? e.SystemKey : e.Key;
             ModifierKeys modifiers = Keyboard.Modifiers;
@@ -161,8 +162,15 @@ namespace Parking.App.Views.Pages
             #endregion
 
             #region لود کردن لیست تعرفه
-            var vehicleSegmentsList = _parkingService.GetVehicleSegments().Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa }).ToList();
-            foreach (var item in vehicleSegmentsList.OrderBy(v => v.Tag))
+            int defaultVehicleSegmentId = Settings.Default.Application_DefaultVehicleSegmentPrice;
+            var vehicleSegmentsList = _parkingService
+                .GetVehicleSegments()
+                .OrderByDescending(x => x.Id == defaultVehicleSegmentId)
+                .ThenBy(x => x.Id == defaultVehicleSegmentId)
+                .Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa })
+                .ToList();
+
+            foreach (var item in vehicleSegmentsList)
                 VehicleSegmentComboBox.Items.Add(item);
             #endregion
 
@@ -409,21 +417,59 @@ namespace Parking.App.Views.Pages
         }
         private void report(byte stream)
         {
+
             if (ContinueProcessing)
             {
+
                 for (int i = 0; i < satpa_object.plte_buffer.Count(); i++)
                 {
                     plate new_plate = satpa_object.plte_buffer[i];
                     satpa_object.plte_buffer.RemoveAt(i);
 
+                    var vehicleSegments = _parkingService.GetVehicleSegments();
+
                     if (new_plate.splate_result.n_letter == 1 && new_plate.splate_result.n_char == 8)
                     {
                         IsIranPlate = true;
+
+
+                        var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == Domain.General.PlateType.IranianPlate);
+
+                        this.Dispatcher.Invoke(() =>
+                        {
+
+                            var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == Domain.General.PlateType.IranianPlate || x.PlateType == Domain.General.PlateType.All)
+                                .Select(v => new ComboBoxItem
+                                {
+                                    Tag = v.Id,
+                                    Content = v.NameFa
+                                }).ToList();
+
+
+                            if (vehicleSegmentsList != null)
+                            {
+                                VehicleSegmentComboBox.Items.Clear();
+                                foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
+                                    VehicleSegmentComboBox.Items.Add(item);
+
+
+                                VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
+
+                                VehicleSegmentId = segment.Id;
+                                VehicleSegmentName = segment.NameFa;
+                                ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
+                                {
+                                    Content = segment.NameFa,
+                                    Tag = segment.Id
+                                };
+                            }
+                        });
 
                         this.Dispatcher.Invoke(() =>
                         {
                             IRPlateBox.Visibility = Visibility.Visible;
                             OtherPlateToggle.IsChecked = false;
+
                             //OtherPlateBox.Visibility = Visibility.Collapsed;
                         });
                         var plate = new_plate.splate_result.plate_english_string.Split("-");
@@ -453,6 +499,33 @@ namespace Parking.App.Views.Pages
                     else if (new_plate.splate_result.n_letter == 0)
                     {
                         IsIranPlate = false;
+
+                        var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == Domain.General.PlateType.Other)
+                            .Select(v => new ComboBoxItem
+                            {
+                                Tag = v.Id,
+                                Content = v.NameFa
+                            }).ToList();
+
+
+                        var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == Domain.General.PlateType.Other);
+
+                        if (vehicleSegmentsList != null)
+                        {
+                            VehicleSegmentComboBox.Items.Clear();
+                            foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
+                                VehicleSegmentComboBox.Items.Add(item);
+
+                            VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
+
+                            VehicleSegmentId = segment.Id;
+                            VehicleSegmentName = segment.NameFa;
+                            ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
+                            {
+                                Content = segment.NameFa,
+                                Tag = segment.Id
+                            };
+                        }
 
                         LatestValidEnPlate = new_plate.result_en;
                         this.Dispatcher.Invoke(() =>
@@ -488,6 +561,7 @@ namespace Parking.App.Views.Pages
 
             if (IsIranPlate)
             {
+
                 if (LatestValidEnPlate != null && LatestValidEnPlate.Length > 4)
                 {
 
@@ -502,6 +576,7 @@ namespace Parking.App.Views.Pages
 
                         });
                         IsValidPlate = true;
+
                     }
                     else
                     {
@@ -656,6 +731,12 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
+                    if (VehicleSegmentId is 0)
+                    {
+                        ShowMessage("نوع تعرفه", "نوع تعرفه اجباری است");
+                        return false;
+                    }
+
                     //چک کردن پلاک
                     var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
                     if (plateTicketId != null)
@@ -674,6 +755,8 @@ namespace Parking.App.Views.Pages
                             return false;
                         }
                     }
+
+
                     if (Settings.Default.Application_EntryCardRequirement)
                     {
                         CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
@@ -695,6 +778,8 @@ namespace Parking.App.Views.Pages
                             ShowMessage("خطا", "کارت نا معتبر میباشد. چنانچه کارت برای این پارکینگ است نسبت به ثبت آن اقدام فرمایید.");
                             return false;
                         }
+
+
                         //چک کردن خالی بودن کارت
                         if (Settings.Default.Application_EntryCardRequirement)
                         {
@@ -747,8 +832,6 @@ namespace Parking.App.Views.Pages
                             }
                         }
                     }
-
-
                 }
                 catch (Exception ex)
                 {
@@ -1086,6 +1169,7 @@ namespace Parking.App.Views.Pages
 
         private void leftNumbersNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+
             if (leftNumbersNumberTextBox.Text.Length == 2)
                 plateCharsCombo.Focus();
             CheckPlate();

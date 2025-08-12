@@ -25,7 +25,8 @@ public class ParkingService : IParkingService
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
-    private List<VehicleSegment> _vehicleSegmentsList;
+
+    public List<VehicleSegment> _vehicleSegmentsList;
     public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory)
     {
         //this.unitOfWork = unitOfWork;
@@ -759,7 +760,7 @@ public class ParkingService : IParkingService
                                                       LicensePlateGroupId = s.LicensePlateGroupId,
                                                       Description = s.Description,
                                                       CardUid = s.CardUid
-                                                   }).FirstOrDefault();
+                                                  }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 var segment = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefault();
@@ -2553,7 +2554,8 @@ public class ParkingService : IParkingService
                 DailyRate = v.DailyRate,
                 FreeEntranceMinutes = v.FreeEntranceMinutes,
                 ParkingEntranceFixedFee = v.ParkingEntranceFixedFee,
-                ParkingLotId = v.ParkingLotId
+                ParkingLotId = v.ParkingLotId,
+                PlateType = v.PlateType
             });
             return segmentsList.ToList();
         }
