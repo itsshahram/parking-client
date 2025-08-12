@@ -27,7 +27,8 @@ namespace Parking.App.Views.Pages
             this.DataContext = ViewModel;
             InitializeComponent();
             LoadData();
-
+            OtherPlateToggle.IsChecked = false;
+            OtherPlateToggle_Unchecked(OtherPlateToggle, new RoutedEventArgs());
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
