@@ -717,7 +717,7 @@ namespace Parking.App.Views.Pages
                 {
                     if (VehicleSegmentId is 0)
                     {
-                        ShowMessage("نوع تعرفه", "نوع تعرفه اجباری است");
+                        ShowMessage("نوع تعرفه", "انتخاب نوع تعرفه اجباری است");
                         return false;
                     }
 

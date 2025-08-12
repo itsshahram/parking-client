@@ -136,7 +136,7 @@
                         <TextBlock Margin="0 15 0 0" Visibility="Collapsed" x:Name="plateInfoText" VerticalAlignment="Center" HorizontalAlignment="Center" Text="لطفا پلاک را بدرستی وارد کرده و enter را فشار دهید"    TextWrapping="Wrap" />
                     </StackPanel>
                     <StackPanel Margin="0 5">
-                        <TextBlock Text="نوع خودرو" />
+                        <TextBlock Text="نوع تعرفه" />
                         <ComboBox x:Name="VehicleSegmentComboBox" 
                                   SelectedIndex="0"
                                   SelectedItem="{Binding SelectedVehicleSegmentItem, Mode=TwoWay}"
