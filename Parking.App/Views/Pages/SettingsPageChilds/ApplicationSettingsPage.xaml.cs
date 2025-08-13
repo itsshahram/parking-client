@@ -12,16 +12,18 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private readonly IParkingService _parkingService;
         public ApplicationSettingsPage()
         {
+
             _parkingService = App.GetService<IParkingService>();
 
             InitializeComponent();
+
             var vehicleSegmentsList = _parkingService.GetVehicleSegments().Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa }).ToList();
-            foreach (var item in vehicleSegmentsList.OrderBy(v => v.Tag))
+            vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = 0, Content = "انتخاب بدون پیش ‌فرض" });
+            foreach (var item in vehicleSegmentsList)
                 VehicleSegmentComboBox.Items.Add(item);
             if (Settings.Default.Application_DefaultVehicleSegmentPrice > 0)
-            {
                 VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault(v => (int)v.Tag == Settings.Default.Application_DefaultVehicleSegmentPrice));
-            }
+
             if (Settings.Default.Application_Logging_In_Elastic)
             {
                 if (ElasticBox != null)
@@ -169,7 +171,5 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 Settings.Default.Save();
             }
         }
-
-
     }
 }

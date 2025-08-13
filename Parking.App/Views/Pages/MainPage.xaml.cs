@@ -1,7 +1,8 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
-using Parking.Domain.Entities.Vehicles;
+using Parking.App.Models.Dto.Vehicle.VehicleSegment;
+using Parking.Domain.General;
 using static Parking.App.ANPR.SATPA_API;
 
 
@@ -26,7 +27,8 @@ namespace Parking.App.Views.Pages
             this.DataContext = ViewModel;
             InitializeComponent();
             LoadData();
-
+            OtherPlateToggle.IsChecked = false;
+            OtherPlateToggle_Unchecked(OtherPlateToggle, new RoutedEventArgs());
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
@@ -170,6 +172,8 @@ namespace Parking.App.Views.Pages
                 .Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa })
                 .ToList();
 
+            if (defaultVehicleSegmentId == 0)
+                vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = null, Content = "انتخاب کنید" });
             foreach (var item in vehicleSegmentsList)
                 VehicleSegmentComboBox.Items.Add(item);
             #endregion
@@ -220,7 +224,8 @@ namespace Parking.App.Views.Pages
         {
             IRPlateBox.Visibility = Visibility.Collapsed;
             OtherPlateBox.Visibility = Visibility.Visible;
-            PlateTitle.Text = "پلاک منطقه، خلرجی و یا موتور";
+            PlateTitle.Text = "پلاک منطقه، خارجی و یا موتور";
+            RunPlateSort(true);
         }
 
         private void OtherPlateToggle_Unchecked(object sender, RoutedEventArgs e)
@@ -228,7 +233,17 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Visible;
             OtherPlateBox.Visibility = Visibility.Collapsed;
             PlateTitle.Text = "پلاک ایران";
+            RunPlateSort(false);
         }
+        private void RunPlateSort(bool isOtherPlate)
+        {
+            PlateType plateType = isOtherPlate ? PlateType.Other : PlateType.IranianPlate;
+
+            var vehicleSegments = _parkingService.GetVehicleSegments();
+
+            SortSegmentsByDetectedPlate(vehicleSegments, plateType);
+        }
+
 
         #endregion
 
@@ -240,7 +255,6 @@ namespace Parking.App.Views.Pages
         private string LatestValidCarImage { get; set; }
         private bool ContinueProcessing { get; set; } = true;
         private bool IsValidPlate { get; set; }
-
 
         SATPA satpa_object = null;
         satpa_EVENT_CALLBACK HandleANPREventsDelegate = null;
@@ -297,7 +311,6 @@ namespace Parking.App.Views.Pages
                             satpa_object.satpa_settings.repeat = false;
                             satpa_object.stop();
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -355,7 +368,6 @@ namespace Parking.App.Views.Pages
                                 {
                                     ViewModel.CurrentFrame = satpa_object?.get_frame().ConvertBitmapToBitmapSource();
                                 }));
-
                             }
                         }
                         else
@@ -426,44 +438,10 @@ namespace Parking.App.Views.Pages
                     plate new_plate = satpa_object.plte_buffer[i];
                     satpa_object.plte_buffer.RemoveAt(i);
 
-                    var vehicleSegments = _parkingService.GetVehicleSegments();
-
                     if (new_plate.splate_result.n_letter == 1 && new_plate.splate_result.n_char == 8)
                     {
                         IsIranPlate = true;
 
-
-                        var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == Domain.General.PlateType.IranianPlate);
-
-                        this.Dispatcher.Invoke(() =>
-                        {
-
-                            var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == Domain.General.PlateType.IranianPlate || x.PlateType == Domain.General.PlateType.All)
-                                .Select(v => new ComboBoxItem
-                                {
-                                    Tag = v.Id,
-                                    Content = v.NameFa
-                                }).ToList();
-
-
-                            if (vehicleSegmentsList != null)
-                            {
-                                VehicleSegmentComboBox.Items.Clear();
-                                foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
-                                    VehicleSegmentComboBox.Items.Add(item);
-
-
-                                VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
-
-                                VehicleSegmentId = segment.Id;
-                                VehicleSegmentName = segment.NameFa;
-                                ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
-                                {
-                                    Content = segment.NameFa,
-                                    Tag = segment.Id
-                                };
-                            }
-                        });
 
                         this.Dispatcher.Invoke(() =>
                         {
@@ -499,34 +477,6 @@ namespace Parking.App.Views.Pages
                     else if (new_plate.splate_result.n_letter == 0)
                     {
                         IsIranPlate = false;
-
-                        var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == Domain.General.PlateType.Other)
-                            .Select(v => new ComboBoxItem
-                            {
-                                Tag = v.Id,
-                                Content = v.NameFa
-                            }).ToList();
-
-
-                        var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == Domain.General.PlateType.Other);
-
-                        if (vehicleSegmentsList != null)
-                        {
-                            VehicleSegmentComboBox.Items.Clear();
-                            foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
-                                VehicleSegmentComboBox.Items.Add(item);
-
-                            VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
-
-                            VehicleSegmentId = segment.Id;
-                            VehicleSegmentName = segment.NameFa;
-                            ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
-                            {
-                                Content = segment.NameFa,
-                                Tag = segment.Id
-                            };
-                        }
-
                         LatestValidEnPlate = new_plate.result_en;
                         this.Dispatcher.Invoke(() =>
                         {
@@ -544,6 +494,40 @@ namespace Parking.App.Views.Pages
                     }
                 }
             }
+        }
+
+        private void SortSegmentsByDetectedPlate(List<VehicleSegmentModel> vehicleSegments, PlateType plateType)
+        {
+            var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == plateType);
+
+            this.Dispatcher.Invoke(() =>
+            {
+
+                var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == plateType || x.PlateType == Domain.General.PlateType.All)
+                    .Select(v => new ComboBoxItem
+                    {
+                        Tag = v.Id,
+                        Content = v.NameFa
+                    }).ToList();
+
+
+                if (vehicleSegmentsList != null)
+                {
+                    VehicleSegmentComboBox.Items.Clear();
+                    foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
+                        VehicleSegmentComboBox.Items.Add(item);
+
+                    VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
+
+                    VehicleSegmentId = segment.Id;
+                    VehicleSegmentName = segment.NameFa;
+                    ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
+                    {
+                        Content = segment.NameFa,
+                        Tag = segment.Id
+                    };
+                }
+            });
         }
 
         private void CheckPlate()
@@ -733,7 +717,7 @@ namespace Parking.App.Views.Pages
                 {
                     if (VehicleSegmentId is 0)
                     {
-                        ShowMessage("نوع تعرفه", "نوع تعرفه اجباری است");
+                        ShowMessage("نوع تعرفه", "انتخاب نوع تعرفه اجباری است");
                         return false;
                     }
 
@@ -1102,7 +1086,7 @@ namespace Parking.App.Views.Pages
         private void VehicleSegmentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = VehicleSegmentComboBox.SelectedItem as ComboBoxItem;
-            if (selected != null)
+            if (selected != null && selected.Tag != null)
             {
                 VehicleSegmentId = (int)selected?.Tag;
                 VehicleSegmentName = (string)selected?.Content;
@@ -1111,7 +1095,6 @@ namespace Parking.App.Views.Pages
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-
             CheckPlate();
         }
 
@@ -1154,7 +1137,6 @@ namespace Parking.App.Views.Pages
                 if (minutesTextbox.Text == null)
                     ShowMessage("خطا", "دقیقه وارد نشده است");
             });
-
         }
 
 
