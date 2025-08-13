@@ -32,7 +32,6 @@ namespace Parking.App.Views.Pages
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
-
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -172,8 +171,6 @@ namespace Parking.App.Views.Pages
                 .Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa })
                 .ToList();
 
-            if (defaultVehicleSegmentId == 0)
-                vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = null, Content = "انتخاب کنید" });
             foreach (var item in vehicleSegmentsList)
                 VehicleSegmentComboBox.Items.Add(item);
             #endregion
@@ -514,6 +511,11 @@ namespace Parking.App.Views.Pages
                 if (vehicleSegmentsList != null)
                 {
                     VehicleSegmentComboBox.Items.Clear();
+                    int defaultVehicleSegmentId = Settings.Default.Application_DefaultVehicleSegmentPrice;
+
+                    if (defaultVehicleSegmentId == 0)
+                        vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = null, Content = "انتخاب کنید" });
+
                     foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
                         VehicleSegmentComboBox.Items.Add(item);
 
@@ -618,7 +620,6 @@ namespace Parking.App.Views.Pages
             _client = new VideoStreamClient();
 
             _client.NewImageReceived += OnNewImageReceived;
-
 
             await _client.StartFrameReaderAsync(inputSource, OutputImageFormat.Bmp, LocalCancellationTokenSource.Token).ConfigureAwait(false);
 
