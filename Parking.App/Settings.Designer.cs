@@ -658,5 +658,17 @@ namespace Parking.App {
                 this["Application_MainPage_ReloadShortcut"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public string Application_DetectLatinPlate {
+            get {
+                return ((string)(this["Application_DetectLatinPlate"]));
+            }
+            set {
+                this["Application_DetectLatinPlate"] = value;
+            }
+        }
     }
 }

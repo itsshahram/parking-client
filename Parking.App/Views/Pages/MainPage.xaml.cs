@@ -287,6 +287,7 @@ namespace Parking.App.Views.Pages
 
                         SLPRPropertyGrid propSettings = new SLPRPropertyGrid();
                         propSettings.detect_persian_plate = 1;
+                        propSettings.detect_english_plate = (byte)(Settings.Default.Application_DetectLatinPlate ? 1 : 0);
                         propSettings.num_valid_chars = [8, 5];
                         propSettings.n_frm_skip_on_success = Settings.Default.Camera_ANPR_FrameSkip;
                         propSettings.vlc_net_cache_time = Settings.Default.Camera_ANPR_VlcCache;
@@ -1121,7 +1122,6 @@ namespace Parking.App.Views.Pages
             catch (Exception ex)
             {
             }
-
         }
         private void CheckTime()
         {
@@ -1182,7 +1182,6 @@ namespace Parking.App.Views.Pages
             {
                 ShowMessage("خطا", "خطا در ایجاد قبض، لطفا مجددا تلاش کنید");
             }
-
         }
 
         private void MainPage_KeyUp(object sender, KeyEventArgs e)
