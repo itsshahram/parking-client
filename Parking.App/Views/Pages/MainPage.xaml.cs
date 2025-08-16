@@ -285,9 +285,10 @@ namespace Parking.App.Views.Pages
                         satpa_object = new SATPA(0, "cam1", pb, License.per_camera);
                         float cnf = ((float)Settings.Default.Camera_ANPR_Cnf) / 100;
 
+
                         SLPRPropertyGrid propSettings = new SLPRPropertyGrid();
                         propSettings.detect_persian_plate = 1;
-                        propSettings.detect_english_plate = (byte)(Settings.Default.Application_DetectLatinPlate ? 1 : 0);
+                        propSettings.detect_english_plate = (Settings.Default.Application_DetectLatinPlate ? byte.Parse("1") : byte.Parse("0"));
                         propSettings.num_valid_chars = [8, 5];
                         propSettings.n_frm_skip_on_success = Settings.Default.Camera_ANPR_FrameSkip;
                         propSettings.vlc_net_cache_time = Settings.Default.Camera_ANPR_VlcCache;

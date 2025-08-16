@@ -161,7 +161,7 @@
     <Setting Name="Application_MainPage_ReloadShortcut" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Application_DetectLatinPlate" Type="System.String" Scope="User">
+    <Setting Name="Application_DetectLatinPlate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

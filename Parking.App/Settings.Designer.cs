@@ -662,9 +662,9 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public string Application_DetectLatinPlate {
+        public bool Application_DetectLatinPlate {
             get {
-                return ((string)(this["Application_DetectLatinPlate"]));
+                return ((bool)(this["Application_DetectLatinPlate"]));
             }
             set {
                 this["Application_DetectLatinPlate"] = value;
