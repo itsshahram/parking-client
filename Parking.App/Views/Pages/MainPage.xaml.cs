@@ -219,6 +219,7 @@ namespace Parking.App.Views.Pages
 
         private void OtherPlateToggle_Checked(object sender, RoutedEventArgs e)
         {
+            ResetFormValues();
             IRPlateBox.Visibility = Visibility.Collapsed;
             OtherPlateBox.Visibility = Visibility.Visible;
             PlateTitle.Text = "پلاک منطقه، خارجی و یا موتور";
@@ -227,6 +228,7 @@ namespace Parking.App.Views.Pages
 
         private void OtherPlateToggle_Unchecked(object sender, RoutedEventArgs e)
         {
+            ResetFormValues();
             IRPlateBox.Visibility = Visibility.Visible;
             OtherPlateBox.Visibility = Visibility.Collapsed;
             PlateTitle.Text = "پلاک ایران";
@@ -1013,6 +1015,20 @@ namespace Parking.App.Views.Pages
 
             });
 
+        }
+
+        public void ResetFormValues()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                rightNumbersNumberTextBox.Text = string.Empty;
+                leftNumbersNumberTextBox.Text = string.Empty;
+                ViewModel.DriverDescription = string.Empty;
+                ViewModel.DriverPhoneNumber = string.Empty;
+                ViewModel.DriverFullName = string.Empty;
+                IsCustomTime = false;
+                plateCheck.Visibility = Visibility.Collapsed;
+            });
         }
 
         public void ResetForm()
