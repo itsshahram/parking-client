@@ -118,7 +118,7 @@
                                         VerticalContentAlignment="Center" />
                         </Grid>
                         <StackPanel Visibility="Collapsed" x:Name="OtherPlateBox" >
-                            <ui:TextBox Grid.Row="1" Grid.ColumnSpan="4"  x:Name="OtherPlateTextBox"  FontSize="20" PlaceholderText="_ _"   Margin="1 0"   FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            <ui:TextBox Grid.Row="1" Grid.ColumnSpan="4"  x:Name="OtherPlateTextBox" TextChanged="OtherPlateTextBox_TextChanged"  FontSize="20" PlaceholderText="_ _"   Margin="1 0"   FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
 
                         </StackPanel>
 

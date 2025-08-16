@@ -80,7 +80,8 @@
                         </StackPanel>
                         <WrapPanel HorizontalAlignment="Center">
                             <Border CornerRadius="8" 
-                             Background="White" 
+                                    x:Name="IRPlateBox"
+                             Background="White" Visibility="Collapsed"
                              BorderThickness="2" 
                              BorderBrush="Gray"
                              Margin="10 5"
@@ -128,6 +129,17 @@
                      Text="22" x:Name="plate_IRNumber"   Foreground="Black"  />
                                     </Border>
                                 </Grid>
+
+                            </Border>
+                            <Border CornerRadius="8" 
+               x:Name="OtherPlateBox"
+        Background="White" 
+        BorderThickness="2" 
+        BorderBrush="Gray"
+        Margin="10 5"
+        Width="400" Visibility="Collapsed"
+        Height="90">
+                                <TextBlock Text="36666666" x:Name="OtherPlateTextBox"  FontSize="40" Foreground="Black" VerticalAlignment="Center" FontWeight="ExtraBold" HorizontalAlignment="Center"/>
 
                             </Border>
                             <Border CornerRadius="8" 

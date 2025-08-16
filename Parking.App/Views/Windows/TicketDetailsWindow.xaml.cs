@@ -188,12 +188,32 @@ namespace Parking.App.Views.Windows
         private void SetPlate(string enLicensePlate)
         {
             var plate = enLicensePlate.ParsePlate();
-            plate_LeftNumber.Text = plate.LeftTwoDigits;
-            plate_RightNumber.Text = plate.RightThreeDigits;
-            plate_IRNumber.Text = plate.IranCode.Replace("IR", "");
-            plate_Char.Text = plate.Letter.ConvertEnCharToFaCharIndex();
+            if (plate.IsIranianPlate)
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.OtherPlateBox.Visibility = Visibility.Collapsed;
+                    this.IRPlateBox.Visibility = Visibility.Visible;
+                    
+                });
+                plate_LeftNumber.Text = plate.LeftTwoDigits;
+                plate_RightNumber.Text = plate.RightThreeDigits;
+                plate_IRNumber.Text = plate.IranCode.Replace("IR", "");
+                plate_Char.Text = plate.Letter.ConvertEnCharToFaCharIndex();
 
-            PlateCharName.Content = plate.Letter.ConvertToString();
+            }
+            else
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.IRPlateBox.Visibility = Visibility.Collapsed;
+                    this.OtherPlateBox.Visibility = Visibility.Visible;
+                    this.OtherPlateTextBox.Text = enLicensePlate;
+                });
+            }
+
+
+                PlateCharName.Content = plate.Letter.ConvertToString();
 
         }
         private void TicketDetailsWindow_KeyUp(object sender, KeyEventArgs e)

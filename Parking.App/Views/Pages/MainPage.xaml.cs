@@ -483,6 +483,7 @@ namespace Parking.App.Views.Pages
                             OtherPlateBox.Visibility = Visibility.Visible;
                             OtherPlateTextBox.Text = new_plate.result_en;
                             OtherPlateToggle.IsChecked = true;
+                            CheckPlate();
                         });
                         plateImageBox.Dispatcher.Invoke(() =>
                         {
@@ -523,12 +524,12 @@ namespace Parking.App.Views.Pages
 
                     VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
 
-                    VehicleSegmentId = segment.Id;
-                    VehicleSegmentName = segment.NameFa;
+                    VehicleSegmentId = VehicleSegmentComboBox.SelectedIndex;
+                    VehicleSegmentName = VehicleSegmentComboBox.Text;
                     ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
                     {
-                        Content = segment.NameFa,
-                        Tag = segment.Id
+                        Content = VehicleSegmentComboBox.SelectedIndex,
+                        Tag = VehicleSegmentComboBox.SelectedIndex
                     };
                 }
             });
@@ -538,7 +539,7 @@ namespace Parking.App.Views.Pages
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (irNumberTextBox.Text != null && rightNumbersNumberTextBox.Text != null && leftNumbersNumberTextBox.Text != null)
+                if (IsIranPlate && irNumberTextBox.Text != null && rightNumbersNumberTextBox.Text != null && leftNumbersNumberTextBox.Text != null)
                 {
                     var letter = plateCharsCombo.SelectedItem as string;
 
@@ -947,8 +948,6 @@ namespace Parking.App.Views.Pages
                                     _logger.LogError("Error07", ex);
                                     return false;
                                 }
-
-
                             }
                             else
                             {
@@ -1089,9 +1088,9 @@ namespace Parking.App.Views.Pages
         private void VehicleSegmentComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = VehicleSegmentComboBox.SelectedItem as ComboBoxItem;
-            if (selected != null && selected.Tag != null)
+            if (selected != null)
             {
-                VehicleSegmentId = (int)selected?.Tag;
+                VehicleSegmentId = (int?)selected?.Tag ?? 0;
                 VehicleSegmentName = (string)selected?.Content;
             }
         }
@@ -1288,6 +1287,11 @@ namespace Parking.App.Views.Pages
         }
         #endregion
 
+        private void OtherPlateTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            LatestValidEnPlate = OtherPlateTextBox.Text;
+            CheckPlate();
+        }
     }
 
 }
