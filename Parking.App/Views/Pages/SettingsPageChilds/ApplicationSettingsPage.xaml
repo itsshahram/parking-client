@@ -96,6 +96,20 @@
                 </DockPanel>
             </StackPanel>
         </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GatePCName, Mode=TwoWay}" 
+                                    TextChanged="GateTextBox_TextChanged"  
+                                    FlowDirection="LeftToRight"
+                                    MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نام سیستم"  VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
 
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">

@@ -1,8 +1,11 @@
-﻿using Nager.VideoStream;
+﻿using Microsoft.IdentityModel.Tokens;
+using Nager.VideoStream;
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.Domain.General;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static Parking.App.ANPR.SATPA_API;
 
 
@@ -32,6 +35,7 @@ namespace Parking.App.Views.Pages
             LocalCancellationTokenSource = new CancellationTokenSource();
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
+            this.PreviewKeyDown += MainWindow_PreviewKeyDown;
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -47,6 +51,25 @@ namespace Parking.App.Views.Pages
             {
                 e.Handled = true;
                 ResetForm();
+            }
+        }
+
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                var focused = Keyboard.FocusedElement;
+
+                if (focused == BarcodeTextBox)
+                {
+                    BTNSearchBarcode_Click(BarcodeTextBox, new RoutedEventArgs());
+                    e.Handled = true; 
+                }
+                else
+                {
+                    CreateTicket();
+                    e.Handled = true;
+                }
             }
         }
 
@@ -511,6 +534,7 @@ namespace Parking.App.Views.Pages
                         Tag = v.Id,
                         Content = v.NameFa
                     }).ToList();
+
 
 
                 if (vehicleSegmentsList != null)
@@ -1307,6 +1331,52 @@ namespace Parking.App.Views.Pages
         {
             LatestValidEnPlate = OtherPlateTextBox.Text;
             CheckPlate();
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private static readonly Regex _numericRegex = new Regex("[^0-9]+");
+
+        private void BarcodeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = _numericRegex.IsMatch(e.Text);
+        }
+
+        private void BarcodeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (_numericRegex.IsMatch(text))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void BTNSearchBarcode_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(BarcodeTextBox.Text))
+            {
+
+                long barcode = long.Parse(BarcodeTextBox.Text);
+
+                var ticketId = _parkingService.GetTicketIdByBarcode(barcode);
+                if (ticketId is null || ticketId == Guid.Empty)
+                {
+                    ShowMessage("قبض", "قبضی با این بارکد یافت نشد");
+                    return;
+                }
+
+                ShowTicketDetails(ticketId.Value);
+            }
+            return;
         }
     }
 

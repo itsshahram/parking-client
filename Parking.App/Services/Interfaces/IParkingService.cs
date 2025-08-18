@@ -83,7 +83,7 @@ public interface IParkingService
 
     List<ParkingTicketExtraImageSourceModel> GetTicketExtraImageSources(Guid TicketId, bool? ShowInBox);
     Task<List<ParkingTicketExtraImageSourceModel>> GetTicketExtraImageSourcesAsync(Guid TicketId, bool? ShowInBox);
-
+    Guid? GetTicketIdByBarcode(long barcode);
 
     #endregion
 }

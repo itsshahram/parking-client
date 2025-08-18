@@ -21,8 +21,6 @@
         <Grid FlowDirection="RightToLeft"  x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <!--<ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*" />-->
             </Grid.ColumnDefinitions>
             <ScrollViewer Grid.Column="0" Margin="5" VerticalScrollBarVisibility="Auto" >
                 <StackPanel Margin="0 5 5 5">
@@ -204,8 +202,11 @@
                         <ui:Button x:Name="CreateTicketBtn" Click="CreateTicketBtn_Click" HorizontalAlignment="Stretch" Height="80"  IsDefault="True" Appearance="Success" Padding="10 5 10 5"  Content="ثبت ورود" Icon="{ui:SymbolIcon Symbol=VehicleCarProfileLtrClock16}" FontSize="24"/>
 
                     </StackPanel>
+
+
                 </StackPanel>
             </ScrollViewer>
+            
             <ScrollViewer Grid.Column="1" Margin="5" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed"  x:Name="LatestEntriesColumn">
                 <StackPanel  Margin="0 5 10 5">
                     <TextBlock Text="آخرین ورود ها"/>
@@ -219,12 +220,29 @@
 
             <ScrollViewer Grid.Column="2" Margin="5" x:Name="LatestExitedColumn" CanContentScroll="True" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
                 <StackPanel Grid.Column="2" Margin="0 5 5 5">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="جستجو با بارکد"></TextBlock>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0" 
+                                    HorizontalAlignment="Stretch" 
+                                    x:Name="BarcodeTextBox" 
+                                    MinWidth="200"
+                                    PreviewTextInput="BarcodeTextBox_PreviewTextInput"
+                                    DataObject.Pasting="BarcodeTextBox_Pasting"
+                                    PreviewKeyDown="MainWindow_PreviewKeyDown"/>
+                            <ui:Button Grid.Column="1" x:Name="BTNSearchBarcode" Click="BTNSearchBarcode_Click" Icon="{ui:SymbolIcon Symbol=Search28}" Appearance="Success"/>
+
+                        </Grid>
+                    </StackPanel>
+
                     <TextBlock Text="آخرین خروج ها"/>
                     <components:TicketListView  ItemsSource="{Binding LatestExitedListItems}" />
                 </StackPanel>
             </ScrollViewer>
-
         </Grid> 
-
     </DockPanel>
 </Page>

@@ -2979,4 +2979,12 @@ public class ParkingService : IParkingService
             return (new List<AddCardItemModel>(), 0, "خطا در جستجو در تاریخچه");
         }
     }
+
+    public Guid? GetTicketIdByBarcode(long barcode)
+    {
+        var ticket = unitOfWork.ParkingTickets.Find(x => x.BarcodeId == barcode).FirstOrDefault();
+        if (ticket is null)
+            return Guid.Empty;
+        return ticket.Id;
+    }
 }
