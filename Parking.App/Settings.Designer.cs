@@ -671,5 +671,16 @@ namespace Parking.App {
             }
         }
         
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Appearance_ShowBarcodeSearchBox {
+            get {
+                return ((bool)(this["Appearance_ShowBarcodeSearchBox"]));
+            }
+            set {
+                this["Appearance_ShowBarcodeSearchBox"] = value;
+            }
+        }
     }
 }
