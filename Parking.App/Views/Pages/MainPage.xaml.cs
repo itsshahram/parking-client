@@ -33,6 +33,7 @@ namespace Parking.App.Views.Pages
             OtherPlateToggle.IsChecked = false;
             OtherPlateToggle_Unchecked(OtherPlateToggle, new RoutedEventArgs());
             LocalCancellationTokenSource = new CancellationTokenSource();
+            this.Loaded += BarcodePage_Loaded;
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
@@ -40,6 +41,14 @@ namespace Parking.App.Views.Pages
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Console.WriteLine("پنجره در حال بسته شدن است.");
+        }
+
+        private void BarcodePage_Loaded(object sender, RoutedEventArgs e)
+        {
+            BarcodeSearchBox.Visibility =
+                Settings.Default.Appearance_ShowBarcodeSearchBox
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
         }
 
         private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -63,7 +72,7 @@ namespace Parking.App.Views.Pages
                 if (focused == BarcodeTextBox)
                 {
                     BTNSearchBarcode_Click(BarcodeTextBox, new RoutedEventArgs());
-                    e.Handled = true; 
+                    e.Handled = true;
                 }
                 else
                 {

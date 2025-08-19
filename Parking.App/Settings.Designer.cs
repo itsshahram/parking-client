@@ -670,5 +670,6 @@ namespace Parking.App {
                 this["Application_DetectLatinPlate"] = value;
             }
         }
+        
     }
 }
