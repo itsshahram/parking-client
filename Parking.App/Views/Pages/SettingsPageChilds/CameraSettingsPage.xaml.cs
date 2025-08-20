@@ -87,6 +87,10 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         {
             Settings.Default.Save();
         }
+        private void Change_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.Save();
+        }
         private void Exit_TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Settings.Default.Save();
