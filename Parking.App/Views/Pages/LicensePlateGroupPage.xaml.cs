@@ -1,19 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-namespace Parking.App.Views.Pages
+﻿namespace Parking.App.Views.Pages
 {
     /// <summary>
     /// Interaction logic for LicensePlateGroupPage.xaml
@@ -29,8 +14,30 @@ namespace Parking.App.Views.Pages
             DataContext = ViewModel;
             _parkingService = App.GetService<IParkingService>();
             InitializeComponent();
-            var item = _parkingService.GetLicensePlateGroupList();
-            ViewModel.Items = new ObservableCollection<LicensePlateListItemViewModel>(item);
+            LoadData();
+        }
+
+        public void LoadData()
+        {
+            var (data, totalCount) = _parkingService.GetLicensePlateGroupList(1, 10);
+
+            ViewModel.Items = new ObservableCollection<LicensePlateListItemViewModel>(data);
+            PlateDataGrid.ItemsSource = ViewModel.Items;
+            ViewModel.CurrentPage = 1;
+            ViewModel.ItemsPerPage = 10;
+            ViewModel.TotalCount = totalCount;
+        }
+
+        private void Pagination_PageChanged(object sender, int newPage)
+        {
+            var (data, totalCount) = _parkingService.GetLicensePlateGroupList(newPage, 10);
+
+            ViewModel.Items = new ObservableCollection<LicensePlateListItemViewModel>(data);
+            ViewModel.CurrentPage = newPage;
+            ViewModel.ItemsPerPage = 10;
+            ViewModel.TotalCount = totalCount;
+            resultCount.Text = totalCount.ToString();
+            PlateDataGrid.ItemsSource = ViewModel.Items;
         }
     }
 }

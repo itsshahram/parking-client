@@ -1,4 +1,5 @@
-﻿using Parking.App.Models.Dto.Card;
+﻿using Azure.Core;
+using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -855,7 +856,6 @@ public class ParkingService : IParkingService
     {
         try
         {
-
             var ticket = await unitOfWork.ParkingTickets.Find(s => s.Id == ticketId)
                 .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
                 {
@@ -892,6 +892,8 @@ public class ParkingService : IParkingService
                     CardUid = s.CardUid,
                     EntranceGate = s.EntranceGate,
                     ExitGate = s.ExitGate,
+                    ExitImage = s.ExitImage,
+                    StartImage = s.StartImage
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
@@ -1979,14 +1981,18 @@ public class ParkingService : IParkingService
         }
     }
 
-    public List<LicensePlateListItemViewModel> GetLicensePlateGroupList()
+    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(int Page, int PageSize)
     {
         try
         {
 
-            var licensePlateGroupList = unitOfWork
+            var query = unitOfWork
                 .LicensePlateGroups
-                .GetAll()
+                .GetAll();
+
+
+            int TotalCount = query.Count();
+            var licensePlateGroupList = query
                 .Select(l => new LicensePlateGroupModel
                 {
                     Id = l.Id,
@@ -1997,7 +2003,8 @@ public class ParkingService : IParkingService
                     IsActive = l.IsActive,
                     Name = l.Name,
                     StartDate = l.StartDate
-                }).ToList();
+                }).Skip((Page - 1) * PageSize)
+              .Take(PageSize).ToList();
             List<LicensePlateListItemViewModel> list = new List<LicensePlateListItemViewModel>();
             foreach (var item in licensePlateGroupList)
             {
@@ -2020,12 +2027,12 @@ public class ParkingService : IParkingService
                 }
             }
 
-            return list;
+            return (list, TotalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<LicensePlateListItemViewModel>();
+            return (new List<LicensePlateListItemViewModel>(), 0);
         }
     }
 

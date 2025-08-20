@@ -41,7 +41,7 @@ public interface IParkingService
     string GetVehicleSegmentNameById(int Id);
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
-    List<LicensePlateListItemViewModel> GetLicensePlateGroupList();
+    (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(int Page, int PageSize);
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
     Guid? GetGroupIdByEnLicensePlate(string enLicensePlate);
