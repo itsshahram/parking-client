@@ -15,4 +15,6 @@ public class LicensePlate
     public string? EnLicensePlate { get; set; }
     public string? FaLicensePlate { get; set; }
     public Guid? GroupId { get; set; }
+    [ForeignKey("GroupId")]
+    public LicensePlateGroup? Group { get; set; }
 }

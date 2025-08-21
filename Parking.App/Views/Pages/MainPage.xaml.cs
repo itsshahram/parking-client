@@ -754,30 +754,7 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
-                    if (VehicleSegmentId is 0)
-                    {
-                        ShowMessage("نوع تعرفه", "انتخاب نوع تعرفه اجباری است");
-                        return false;
-                    }
 
-                    //چک کردن پلاک
-                    var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
-                    if (plateTicketId != null)
-                    {
-                        // ورودی=0   خروجی=1
-                        if (Settings.Default.Application_GateType.ToString().Contains("1"))
-                        {
-
-                            ShowTicketDetails(plateTicketId ?? new Guid());
-                            ResetForm();
-                            return false;
-                        }
-                        else
-                        {
-                            ShowMessage("خطا", "ورود این پلاک قبلا ثبت شده است، لطفا از گیت های خروجی نسبت به خارج کردن پلاک اقدام نمایید");
-                            return false;
-                        }
-                    }
 
 
                     if (Settings.Default.Application_EntryCardRequirement)
@@ -852,6 +829,33 @@ namespace Parking.App.Views.Pages
                             {
                                 VehicleSegmentName = cardSegment.NameFa;
                                 VehicleSegmentId = cardSegment.Id;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (VehicleSegmentId is 0)
+                        {
+                            ShowMessage("نوع تعرفه", "انتخاب نوع تعرفه اجباری است");
+                            return false;
+                        }
+
+                        //چک کردن پلاک
+                        var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
+                        if (plateTicketId != null)
+                        {
+                            // ورودی=0   خروجی=1
+                            if (Settings.Default.Application_GateType.ToString().Contains("1"))
+                            {
+
+                                ShowTicketDetails(plateTicketId ?? new Guid());
+                                ResetForm();
+                                return false;
+                            }
+                            else
+                            {
+                                ShowMessage("خطا", "ورود این پلاک قبلا ثبت شده است، لطفا از گیت های خروجی نسبت به خارج کردن پلاک اقدام نمایید");
+                                return false;
                             }
                         }
                     }

@@ -16,6 +16,37 @@
         <StackPanel  DockPanel.Dock="Top">
             <components:ParkingInfo />
             <TextBlock Text="گروه پلاک ها" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="20" Margin="10 10 10 0"/>
+
+            <StackPanel  DockPanel.Dock="Top"  Margin="10">
+                <Label Content="پلاک را وارد کنید" Margin="10 5 0 0"   HorizontalAlignment="Center" />
+                <Border Background="#20CECECE" FlowDirection="RightToLeft" Padding="5" Margin="5" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid x:Name="IRPlateBox"  FlowDirection="LeftToRight">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <ui:TextBox Grid.Row="0" x:Name="leftNumbersNumberTextBox"   FontSize="20" PlaceholderText="_ _" Grid.Column="0" MaxLength="2" MinWidth="70" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <ComboBox Grid.Row="0" x:Name="plateCharsCombo"  IsEditable="True" FontSize="20" SelectedIndex="0"
+                              Grid.Column="1">
+                            </ComboBox>
+                            <ui:TextBox Grid.Row="0"  x:Name="rightNumbersNumberTextBox"  FontSize="20" PlaceholderText="_ _ _" Grid.Column="2" MaxLength="3"  MinWidth="100" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <ui:TextBox Grid.Row="0"  x:Name="irNumberTextBox" MinWidth="70"   FontSize="20"   Grid.Column="3"  MaxLength="2"  FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                        </Grid>
+                        <ui:Button x:Name="btnSearch" Click="btnSearch_Click" Content="جستجو" Appearance="Primary" VerticalAlignment="Stretch" Margin="10 0" Padding="40 0"/>
+                        <ui:Button x:Name="ClearBtn" Click="ClearBtn_Click"  HorizontalAlignment="Center" IsDefault="True" Appearance="Secondary" Padding="5 5 5 5" Margin="10 0 10 0"  Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}" FontSize="24"/>
+
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
             <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" >
                     <TextBlock  Text="{Binding TotalCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>

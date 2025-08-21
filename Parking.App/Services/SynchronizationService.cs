@@ -1026,10 +1026,14 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             else
                             {
                                 licensePlate = unitOfWork.LicensePlates.GetById(subitem.Id);
-                                licensePlate.GroupId = subitem.GroupId;
-                                licensePlate.EnLicensePlate = subitem.EnLicensePlate;
-                                licensePlate.FaLicensePlate = subitem.FaLicensePlate;
-                                unitOfWork.LicensePlates.Update(licensePlate);
+                                if (licensePlate != null)
+                                {
+                                    licensePlate.GroupId = subitem.GroupId;
+                                    licensePlate.EnLicensePlate = subitem.EnLicensePlate;
+                                    licensePlate.FaLicensePlate = subitem.FaLicensePlate;
+                                    unitOfWork.LicensePlates.Update(licensePlate);
+                                }
+
                                 //await unitOfWork.CommitAsync(default);
                             }
                         }
@@ -1068,11 +1072,15 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             else
                             {
                                 licensePlate = unitOfWork.LicensePlates.GetById(subitem.Id);
-                                licensePlate.GroupId = subitem.GroupId;
-                                licensePlate.EnLicensePlate = subitem.EnLicensePlate;
-                                licensePlate.FaLicensePlate = subitem.FaLicensePlate;
-                                unitOfWork.LicensePlates.Update(licensePlate);
-                                //await unitOfWork.CommitAsync(default);
+                                if (licensePlate!=null)
+                                {
+                                    licensePlate.GroupId = subitem.GroupId;
+                                    licensePlate.EnLicensePlate = subitem.EnLicensePlate;
+                                    licensePlate.FaLicensePlate = subitem.FaLicensePlate;
+                                    unitOfWork.LicensePlates.Update(licensePlate);
+                                    //await unitOfWork.CommitAsync(default);
+
+                                }
                             }
                         }
                     }

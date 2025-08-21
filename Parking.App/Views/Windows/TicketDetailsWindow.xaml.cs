@@ -133,7 +133,7 @@ namespace Parking.App.Views.Windows
                 CheckSeizedPlate();
                 this.Topmost = true;
                 this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-
+                
                 //DataContext = ViewModel;
                 InitializeCloseTimer();
 

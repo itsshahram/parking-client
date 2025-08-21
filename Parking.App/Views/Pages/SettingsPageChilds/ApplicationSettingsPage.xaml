@@ -92,7 +92,7 @@
                             IsReadOnly="True" />
                     </StackPanel>
                     <!-- Label -->
-                    <TextBlock DockPanel.Dock="Left" Margin="5" Text="کلید میانبر" VerticalAlignment="Center"/>
+                    <TextBlock DockPanel.Dock="Left" Margin="5" Text="کلید میانبر پاک کردن پلاک خوانده شده" VerticalAlignment="Center"/>
                 </DockPanel>
             </StackPanel>
         </Border>
@@ -137,6 +137,14 @@
                 <DockPanel>
                     <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_EnableSyncImage, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی دخیره سازی عکس روی سرور" />
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Sync_EnableSyncLicensePlateGroup, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی همگام سازی گروه های پلاگ" />
                 </DockPanel>
             </StackPanel>
         </Border>

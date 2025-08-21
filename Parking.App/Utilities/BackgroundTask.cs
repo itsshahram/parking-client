@@ -33,7 +33,11 @@ public class BackgroundTask : IInvocable
             }
             try
             {
-                await _synchronizationService.ReceiveLicensePlateGroupFromServerAsync();
+                if (Settings.Default.Application_Sync_EnableSyncLicensePlateGroup)
+                {
+                    await _synchronizationService.ReceiveLicensePlateGroupFromServerAsync();
+                }
+               
             }
             catch (Exception ex)
             {
@@ -136,30 +140,37 @@ public class BackgroundTask : IInvocable
 
     private void SetAppIcon(TaskStatus ts)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        try
         {
-            switch (ts)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                case TaskStatus.Syncing:
-                    _mainWindow?.myNotifyTray.SetSyncingIcon();
-                    break;
+                switch (ts)
+                {
+                    case TaskStatus.Syncing:
+                        _mainWindow?.myNotifyTray.SetSyncingIcon();
+                        break;
 
-                case TaskStatus.Success:
-                    _mainWindow?.myNotifyTray.ResetIcon(); // ResetIcon می‌تواند به وضعیت عادی تغییر کند
-                    break;
+                    case TaskStatus.Success:
+                        _mainWindow?.myNotifyTray.ResetIcon(); // ResetIcon می‌تواند به وضعیت عادی تغییر کند
+                        break;
 
-                case TaskStatus.Error:
-                    _mainWindow?.myNotifyTray.SetErrorIcon("Error in establishing connection with the server");
-                    break;
+                    case TaskStatus.Error:
+                        _mainWindow?.myNotifyTray.SetErrorIcon("Error in establishing connection with the server");
+                        break;
 
-                case TaskStatus.Reset:
-                    _mainWindow?.myNotifyTray.ResetIcon(); // Reset به وضعیت پیش‌فرض برگردانده می‌شود
-                    break;
+                    case TaskStatus.Reset:
+                        _mainWindow?.myNotifyTray.ResetIcon(); // Reset به وضعیت پیش‌فرض برگردانده می‌شود
+                        break;
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(ts), ts, "Unknown TaskStatus");
-            }
-        });
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(ts), ts, "Unknown TaskStatus");
+                }
+            });
+        }   catch (Exception ex)
+        {
+            _logger.LogError("Error in Set App Icon", ex.Message);
+        }
+
     }
     private enum TaskStatus
     {

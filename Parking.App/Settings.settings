@@ -123,7 +123,7 @@
       <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="Application_ApiServerAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://localhost:7168/api</Value>
+      <Value Profile="(Default)">http://188.213.66.252:8090/api</Value>
     </Setting>
     <Setting Name="Application_Sync_Interval_CountOfTake" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
@@ -165,6 +165,9 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Appearance_ShowBarcodeSearchBox" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_Sync_EnableSyncLicensePlateGroup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

@@ -12,7 +12,7 @@ namespace Parking.App {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -505,7 +505,7 @@ namespace Parking.App {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:7168/api")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://188.213.66.252:8090/api")]
         public string Application_ApiServerAddress {
             get {
                 return ((string)(this["Application_ApiServerAddress"]));
@@ -680,6 +680,18 @@ namespace Parking.App {
             }
             set {
                 this["Appearance_ShowBarcodeSearchBox"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_Sync_EnableSyncLicensePlateGroup {
+            get {
+                return ((bool)(this["Application_Sync_EnableSyncLicensePlateGroup"]));
+            }
+            set {
+                this["Application_Sync_EnableSyncLicensePlateGroup"] = value;
             }
         }
     }

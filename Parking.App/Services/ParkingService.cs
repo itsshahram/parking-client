@@ -1023,6 +1023,18 @@ public class ParkingService : IParkingService
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
                     ticket.DurationMinutes = (int)varTime.TotalMinutes;
+                    if (ticket.LicensePlateGroupId != null)
+                    {
+                        try
+                        {
+                            ticket.LicensePlateGroupName = GetLicensePlateGroupById(ticket.LicensePlateGroupId ?? new Guid())?.Name ?? "--";
+                        } catch(Exception ex)
+                        {
+                            _logger.LogError("Error In Get License Plate Group Nam", ex);
+                        }
+                        
+                    }
+                    
 
                     unitOfWork.ParkingTickets.ExecuteUpdate(p => p.Id == ticketId, update => update
                     .SetProperty(p => p.DurationMinutes, (int)varTime.TotalMinutes)
@@ -1981,36 +1993,45 @@ public class ParkingService : IParkingService
         }
     }
 
-    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(int Page, int PageSize)
+    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize)
     {
         try
         {
+            var licensePlateGroupList = unitOfWork
+               .LicensePlateGroups
+               .GetAll()
+               .Select(l => new LicensePlateGroupModel
+               {
+                   Id = l.Id,
+                   DiscountPercent = l.DiscountPercent,
+                   CreatorUserId = l.CreatorUserId,
+                   Description = l.Description,
+                   EndDate = l.EndDate,
+                   IsActive = l.IsActive,
+                   Name = l.Name,
+                   StartDate = l.StartDate,
+                   LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
+                   {
+                       Id = ll.Id,
+                       EnLicensePlate = ll.EnLicensePlate,
+                       FaLicensePlate = ll.FaLicensePlate,
+                       GroupId = (Guid)ll.GroupId
+                   }).ToList()
+               });
 
-            var query = unitOfWork
-                .LicensePlateGroups
-                .GetAll();
+            if (EnLicensePlate != null)
+            {
 
+                licensePlateGroupList = licensePlateGroupList.Where(g => g.LicensePlates.Any(lp => lp.EnLicensePlate == EnLicensePlate));
+            }
 
-            int TotalCount = query.Count();
-            var licensePlateGroupList = query
-                .Select(l => new LicensePlateGroupModel
-                {
-                    Id = l.Id,
-                    DiscountPercent = l.DiscountPercent,
-                    CreatorUserId = l.CreatorUserId,
-                    Description = l.Description,
-                    EndDate = l.EndDate,
-                    IsActive = l.IsActive,
-                    Name = l.Name,
-                    StartDate = l.StartDate
-                }).Skip((Page - 1) * PageSize)
-              .Take(PageSize).ToList();
+            var x = licensePlateGroupList.ToList();
             List<LicensePlateListItemViewModel> list = new List<LicensePlateListItemViewModel>();
             foreach (var item in licensePlateGroupList)
             {
-                var licensePlates = unitOfWork.LicensePlates.Find(p => p.GroupId == item.Id).ToList();
 
-                foreach (var sub in licensePlates)
+
+                foreach (var sub in item?.LicensePlates)
                 {
                     list.Add(new LicensePlateListItemViewModel
                     {
@@ -2027,7 +2048,17 @@ public class ParkingService : IParkingService
                 }
             }
 
+
+            int TotalCount = list.Count();
+
+            list = list.Skip((Page - 1) * PageSize)
+                       .Take(PageSize)
+                       .ToList();
+
+
             return (list, TotalCount);
+
+
         }
         catch (Exception ex)
         {
