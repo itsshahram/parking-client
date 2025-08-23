@@ -23,14 +23,14 @@
     <!--Topmost="True"-->
     <DockPanel x:Name="MainPanel" >
 
-        <ui:TitleBar
+        <!--<ui:TitleBar
         x:Name="TitleBar" 
             DockPanel.Dock="Top"
         Title="جزئیات قبض">
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
             </ui:TitleBar.Icon>
-        </ui:TitleBar>
+        </ui:TitleBar>-->
         
         <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
@@ -50,6 +50,7 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
+                            <ColumnDefinition  Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -69,7 +70,23 @@
                         </StackPanel>
                         <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت (Space)" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
                         <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی (F1)" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
-                        <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1" HorizontalAlignment="Stretch"  Grid.Column="2" Margin="3" IsDefault="True" Appearance="Info" Padding="20 5 20 5" Content="چاپ رسید (F3)" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                        <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
+                                   Click="Print_Btn_Click"
+                                   HorizontalAlignment="Stretch" 
+                                   Grid.Column="2" 
+                                   Margin="3" 
+                                   IsDefault="True" 
+                                   Appearance="Info" 
+                                   Padding="20 5 20 5" Content="چاپ رسید (F3)" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                        <ui:Button x:Name="ExitBtn" VerticalAlignment="Stretch" Grid.Row="1" 
+                                   HorizontalAlignment="Stretch"  
+                                   Grid.Column="3" 
+                                   Margin="3" 
+                                   IsDefault="True" 
+                                   Appearance="Caution" 
+                                   Padding="20 5 20 5"  
+                                   Icon="{ui:SymbolIcon Symbol=Home24}" 
+                                   FontSize="24" Click="ExitBtn_Click"/>
                     </Grid>
 
                 </StackPanel>

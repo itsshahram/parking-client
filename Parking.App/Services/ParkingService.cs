@@ -857,7 +857,8 @@ public class ParkingService : IParkingService
         try
         {
             var ticket = await unitOfWork.ParkingTickets.Find(s => s.Id == ticketId)
-                .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
+                .OrderByDescending(s => s.StartTime)
+                .Select(s => new TicketsListViewModel
                 {
                     Id = s.Id,
                     EndTime = s.EndTime,
@@ -976,7 +977,7 @@ public class ParkingService : IParkingService
 
                     if (card != null)
                     {
-                        if (card.PercentDiscount > 0)
+                        if (card.PercentDiscount > 9)
                         {
                             discount = (short)card.PercentDiscount;
                         }
@@ -1219,7 +1220,7 @@ public class ParkingService : IParkingService
         try
         {
             //using (var uow = _unitOfWorkFactory.Create())
-            return unitOfWork.ParkingTickets.Find(s => s.EnLicensePlate == licenseEnPlate && s.IsExited == false).Select(s => (Guid?)s.Id).FirstOrDefault();
+            return unitOfWork.ParkingTickets.Find(s => s.EnLicensePlate == licenseEnPlate && s.IsExited == false).OrderByDescending(s=>s.StartTime).Select(s => (Guid?)s.Id).FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -1852,7 +1853,9 @@ public class ParkingService : IParkingService
             {
                 return 0;
             }
-            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId /*&& l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now*/).FirstOrDefaultAsync();
+            var licensePlateGroup = await unitOfWork.LicensePlateGroups
+                .Find(l => l.Id == licensePlate.GroupId && l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now)
+                .FirstOrDefaultAsync();
             if (licensePlateGroup == null)
             {
                 return 0;
@@ -2641,7 +2644,10 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var ticket = unitOfWork.ParkingTickets.Find(c => c.CardUid == cardSerialNo && c.IsExited == false).Select(c => new { Id = c.Id, IsPaid = c.IsPaid }).FirstOrDefault();
+            var ticket = unitOfWork.ParkingTickets.Find(c => c.CardUid == cardSerialNo && c.IsExited == false)
+                .OrderByDescending(c=>c.StartTime)
+                .Select(c => new { Id = c.Id, IsPaid = c.IsPaid })
+                .FirstOrDefault();
             if (ticket != null) return ticket.Id;
             else return null;
         }

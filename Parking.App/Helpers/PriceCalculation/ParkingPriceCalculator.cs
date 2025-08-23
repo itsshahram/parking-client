@@ -64,7 +64,7 @@ public class ParkingCostCalculator
                 TotalMinutes = totalTime.Minutes
             };
         }
-        if (totalMinutes <= 60 && entryFee > 0 && !hourlyRates.Any())
+        if (entryFee > 0 )
         {
             totalMinutes = totalMinutes - 60;
             if (totalMinutes < 0)
@@ -117,7 +117,8 @@ public class ParkingCostCalculator
             if (remainingMinutes > 1)
             {
                 var variableTimeRange = hourlyRates.FirstOrDefault(v => v.IsVariableEnable);
-                if (entryTime.TimeOfDay >= variableTimeRange?.TimeFrom.ToTimeSpan() && entryTime.TimeOfDay <= variableTimeRange?.TimeTo.ToTimeSpan())
+                if (entryTime.TimeOfDay >= variableTimeRange?.TimeFrom.ToTimeSpan()
+                    && entryTime.TimeOfDay <= variableTimeRange?.TimeTo.ToTimeSpan())
                 {
                     foreach (var segment in variablePriceList.OrderBy(v => v.Number))
                     {
@@ -165,7 +166,7 @@ public class ParkingCostCalculator
         decimal taxAmount = totalWithDiscount * (taxPercentage / 100);
         decimal payableAmount = totalWithDiscount + taxAmount;
 
-            if (thresholdHoursPerDay == 0)
+        if (thresholdHoursPerDay == 0)
             thresholdHoursPerDay = 1;
 
         return new ParkingPriceOutputModel
