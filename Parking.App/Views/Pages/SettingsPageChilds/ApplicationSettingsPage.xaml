@@ -18,14 +18,15 @@
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
                     <ComboBox DockPanel.Dock="Right" 
-                              SelectedIndex="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GateType, Mode=TwoWay}" 
-                              SelectionChanged="ComboBox_SelectionChanged"
-                              SelectedValuePath="Tag"
-                              MinWidth="200">
+                        SelectedValue="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GateType, Mode=TwoWay}" 
+                           SelectedValuePath="Tag"
+                           MinWidth="200"
+                           SelectionChanged="ComboBox_SelectionChanged">
                         <ComboBoxItem Content="ورودی" Tag="0"/>
                         <ComboBoxItem Content="خروجی" Tag="1"/>
                         <ComboBoxItem Content="هر دو" Tag="10"/>
                     </ComboBox>
+
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="نوع سیستم" VerticalAlignment="Center"/>
                 </DockPanel>
             </StackPanel>
