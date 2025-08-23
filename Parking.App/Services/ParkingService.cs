@@ -2116,7 +2116,12 @@ public class ParkingService : IParkingService
             var licensePlate = unitOfWork.LicensePlates.Find(g => g.EnLicensePlate == enLicensePlate).FirstOrDefault();
             if (licensePlate != null)
             {
-                return licensePlate.GroupId;
+                var group = unitOfWork.LicensePlateGroups.Find(g => g.Id == licensePlate.GroupId && g.StartDate < DateTime.Now && g.EndDate > DateTime.Now).FirstOrDefault();
+                if (group != null)
+                {
+                    return group.Id;
+                }
+                return null;
             }
             return null;
         }
