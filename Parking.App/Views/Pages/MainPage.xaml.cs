@@ -323,7 +323,7 @@ namespace Parking.App.Views.Pages
                         SLPRPropertyGrid propSettings = new SLPRPropertyGrid();
                         propSettings.detect_persian_plate = 1;
                         propSettings.detect_english_plate = (Settings.Default.Application_DetectLatinPlate ? byte.Parse("1") : byte.Parse("0"));
-                        propSettings.num_valid_chars = [8, 5];
+                        propSettings.num_valid_chars = new int[] { 8, 5 };
                         propSettings.n_frm_skip_on_success = Settings.Default.Camera_ANPR_FrameSkip;
                         propSettings.vlc_net_cache_time = Settings.Default.Camera_ANPR_VlcCache;
                         propSettings.plate_type = Settings.Default.Camera_ANPR_PlateType;
@@ -409,8 +409,8 @@ namespace Parking.App.Views.Pages
                         }
 
                     }
-                    var u = WM_USER;
-                    var x = WM_PLATE_DETECTED;
+                    //var u = WM_USER;
+                    //var x = WM_PLATE_DETECTED;
 
                     if (event_type == WM_PLATE_DETECTED)
                     {
@@ -463,71 +463,78 @@ namespace Parking.App.Views.Pages
         private void report(byte stream)
         {
 
-            if (ContinueProcessing)
+            for (int i = 0; i < satpa_object.plte_buffer.Count(); i++)
             {
+                plate new_plate = satpa_object.plte_buffer[i];
+                satpa_object.plte_buffer.RemoveAt(i);
 
-                for (int i = 0; i < satpa_object.plte_buffer.Count(); i++)
+
+                if (ContinueProcessing)
                 {
-                    plate new_plate = satpa_object.plte_buffer[i];
-                    satpa_object.plte_buffer.RemoveAt(i);
 
-                    if (new_plate.splate_result.n_letter == 1 && new_plate.splate_result.n_char == 8)
+                    if (new_plate.cnf >= ((float)Settings.Default.Camera_ANPR_Cnf / 100))
                     {
-                        IsIranPlate = true;
-
-
-                        this.Dispatcher.Invoke(() =>
+                        if (new_plate.splate_result.n_letter == 1 && new_plate.splate_result.n_char == 8)
                         {
-                            IRPlateBox.Visibility = Visibility.Visible;
-                            OtherPlateToggle.IsChecked = false;
+                            IsIranPlate = true;
 
-                            //OtherPlateBox.Visibility = Visibility.Collapsed;
-                        });
-                        var plate = new_plate.splate_result.plate_english_string.Split("-");
-                        LatestValidEnPlate = $"{plate[0]}_{plate[1].ToLower()}_{plate[2].Substring(0, 3)}_IR{plate[2].Substring(3, 2)}";
-                        //_LatestValidFaLicensePlate = "ایران" + plate[2].Substring(3, 2) + "_" + plate[2].Substring(0, 3) + plate[1].ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate[0]}";
 
-                        if (LatestCreatedTicketEnPlate != LatestValidEnPlate)
-                        {
                             this.Dispatcher.Invoke(() =>
                             {
-                                leftNumbersNumberTextBox.Text = plate[0];
-                                plateCharsCombo.SelectedValue = plate[1].ToLower().ConvertEnCharToFaCharIndex();
-                                rightNumbersNumberTextBox.Text = plate[2].Substring(0, 3);
-                                irNumberTextBox.Text = plate[2].Substring(3, 2);
+                                IRPlateBox.Visibility = Visibility.Visible;
+                                OtherPlateToggle.IsChecked = false;
+                                OtherPlateBox.Visibility = Visibility.Collapsed;
                             });
-                            CheckPlate();
-                        }
+                            var plate = new_plate.splate_result.plate_english_string.Split("-");
+                            LatestValidEnPlate = $"{plate[0]}_{plate[1].ToLower()}_{plate[2].Substring(0, 3)}_IR{plate[2].Substring(3, 2)}";
+                            //_LatestValidFaLicensePlate = "ایران" + plate[2].Substring(3, 2) + "_" + plate[2].Substring(0, 3) + plate[1].ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate[0]}";
 
-                        LogHelper.LogDetectedPlate(new_plate.plate_pic.BitmapToBase64(), new_plate.car_pic.ResizeAndCompressBitmap(800, 600, 65, 65, 50), LatestValidEnPlate, "License Plate Detected.", _logger);
-                        plateImageBox.Dispatcher.Invoke(() =>
+                            if (LatestCreatedTicketEnPlate != LatestValidEnPlate)
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    leftNumbersNumberTextBox.Text = plate[0];
+                                    plateCharsCombo.SelectedValue = plate[1].ToLower().ConvertEnCharToFaCharIndex();
+                                    rightNumbersNumberTextBox.Text = plate[2].Substring(0, 3);
+                                    irNumberTextBox.Text = plate[2].Substring(3, 2);
+                                    Keyboard.Focus(Application.Current.MainWindow);
+                                });
+                                CheckPlate();
+                                LogHelper.LogDetectedPlate(new_plate.plate_pic.BitmapToBase64(), new_plate.car_pic.ResizeAndCompressBitmap(800, 600, 65, 65, 50), LatestValidEnPlate, "License Plate Detected.", _logger);
+                                plateImageBox.Dispatcher.Invoke(() =>
+                                {
+                                    plateImageBox.ImageSource = new_plate.plate_pic.BitmapToImageSource();
+                                    plateBorder.Background = new SolidColorBrush(Colors.Green);
+                                });
+                                LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
+                            }
+
+                        }
+                        else if (new_plate.splate_result.n_letter == 0)
                         {
-                            plateImageBox.ImageSource = new_plate.plate_pic.BitmapToImageSource();
-                            plateBorder.Background = new SolidColorBrush(Colors.Green);
-                        });
-                        LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
+                            IsIranPlate = false;
+                            LatestValidEnPlate = new_plate.result_en;
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                IRPlateBox.Visibility = Visibility.Collapsed;
+                                OtherPlateBox.Visibility = Visibility.Visible;
+                                OtherPlateTextBox.Text = new_plate.result_en;
+                                OtherPlateToggle.IsChecked = true;
+                                CheckPlate();
+                            });
+                            plateImageBox.Dispatcher.Invoke(() =>
+                            {
+                                plateImageBox.ImageSource = new_plate.plate_pic.BitmapToImageSource();
+                                plateBorder.Background = new SolidColorBrush(Colors.Green);
+                            });
+                            LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
+                        }
                     }
-                    else if (new_plate.splate_result.n_letter == 0)
-                    {
-                        IsIranPlate = false;
-                        LatestValidEnPlate = new_plate.result_en;
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            IRPlateBox.Visibility = Visibility.Collapsed;
-                            OtherPlateBox.Visibility = Visibility.Visible;
-                            OtherPlateTextBox.Text = new_plate.result_en;
-                            OtherPlateToggle.IsChecked = true;
-                            CheckPlate();
-                        });
-                        plateImageBox.Dispatcher.Invoke(() =>
-                        {
-                            plateImageBox.ImageSource = new_plate.plate_pic.BitmapToImageSource();
-                            plateBorder.Background = new SolidColorBrush(Colors.Green);
-                        });
-                        LatestValidCarImage = new_plate.car_pic.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
-                    }
+
                 }
+
             }
+
         }
 
         private void SortSegmentsByDetectedPlate(List<VehicleSegmentModel> vehicleSegments, PlateType plateType)
@@ -956,6 +963,7 @@ namespace Parking.App.Views.Pages
                             var ticketInfo = _parkingService.CreateTicket(ticketModel, LatestValidCarImage);
                             if (ticketInfo.Succeeded)
                             {
+                                LatestCreatedTicketEnPlate = ticketModel.EnLicensePlate;
                                 if (Settings.Default.Application_PrintInvoiceAfterEntry)
                                 {
                                     var ticket = _parkingService.GetTicketDetails(ticketInfo.Result);
