@@ -1,10 +1,9 @@
 ﻿<Page x:Class="Parking.App.Views.Pages.TicketHistoryPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:local="clr-namespace:Parking.App.Views.Pages"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:components="clr-namespace:Parking.App.Views.Components"
       mc:Ignorable="d" 
       FontFamily="{StaticResource IranYekanFont}" 
@@ -163,10 +162,24 @@
                                 </ComboBox>
                             </StackPanel>
 
+
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="وضعیت خودرو" />
+                                <ComboBox x:Name="VehicleStatus"
+                                        SelectedIndex="0"
+                                        Width="200"
+                                        SelectionChanged="VehicleStatus_SelectionChanged">
+                                    <ComboBoxItem Content="همه" Tag="" />
+                                    <ComboBoxItem Content="وارد شده " Tag="0" />
+                                    <ComboBoxItem Content="خارج شده" Tag="1" />
+                                </ComboBox>
+                            </StackPanel>
+
                             <!-- دکمه پاک کردن -->
                             <StackPanel Margin="0 5">
                                 <TextBlock Text=" " />
                                 <ui:Button x:Name="ClearBtn"
+                   Click="ClearBtn_Click"
                    HorizontalAlignment="Center"
                    IsDefault="True"
                    Appearance="Secondary"

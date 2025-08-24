@@ -31,7 +31,8 @@ namespace Parking.App.Views.Pages
 
         private void LoadData()
         {
-            var tickets = _parkingService.GetTicketList(ViewModel);
+            GetTicketListRequestModel request = FillParameters();
+            var tickets = _parkingService.GetTicketList(request);
             ViewModel.Items = new ObservableCollection<TicketsListViewModel>(tickets.Data);
             ViewModel.CurrentPage = 1;
             ViewModel.ItemsPerPage = 10;
@@ -54,7 +55,6 @@ namespace Parking.App.Views.Pages
 
         private void PaginationControl_Loaded(object sender, RoutedEventArgs e)
         {
-            SearchBtn_Click(sender, e);
         }
 
         private void SetDefaultParameter()
@@ -95,52 +95,71 @@ namespace Parking.App.Views.Pages
         }
         private void CheckParameter()
         {
+            var allFields = new[]
+            {
+                   entryStartYearTextBox.Text,
+                   entryStartMountTextBox.Text,
+                   entryStartDayTextBox.Text,
+                   entryStartHourTextBox.Text,
+                   entryStartMinutesTextBox.Text,
+                   entryEndYearTextBox.Text,
+                   entryEndMountTextBox.Text,
+                   entryEndDayTextBox.Text,
+                   entryEndHourTextBox.Text,
+                   entryEndMinutesTextBox.Text
+                   };
+
+            // if all fields is empty do nothing
+            if (allFields.All(string.IsNullOrWhiteSpace))
+                return;
+
             Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
             ms.FlowDirection = System.Windows.FlowDirection.RightToLeft;
-            if (entryStartYearTextBox.Text == null || entryStartYearTextBox.Text.Length < 4)
+
+            if (!string.IsNullOrWhiteSpace(entryStartYearTextBox.Text) && entryStartYearTextBox.Text.Length < 4)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد سال را وارد نکرده اید)";
+                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد سال کمتر از 4 رقم است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryStartMountTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryStartMountTextBox.Text) && entryStartMountTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد ماه را وارد نکرده اید)";
+                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد ماه ناقص است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryStartDayTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryStartDayTextBox.Text) && entryStartDayTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد روز را وارد نکرده اید)";
+                ms.Content = "لطفا تاریخ ابتدا را چک کیند. (فیلد روز ناقص است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryStartHourTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryStartHourTextBox.Text) && entryStartHourTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا ساعت و دقیقه ابتدا را چک کنید";
+                ms.Content = "لطفا ساعت ابتدا را چک کنید (دو رقم وارد کنید)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryStartMinutesTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryStartMinutesTextBox.Text) && entryStartMinutesTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا ساعت و دقیقه ابتدا را چک کنید";
+                ms.Content = "لطفا دقیقه ابتدا را چک کنید (دو رقم وارد کنید)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
@@ -148,60 +167,58 @@ namespace Parking.App.Views.Pages
                 return;
             }
 
-
-            if (entryEndYearTextBox.Text == null || entryEndYearTextBox.Text.Length < 4)
+            if (!string.IsNullOrWhiteSpace(entryEndYearTextBox.Text) && entryEndYearTextBox.Text.Length < 4)
             {
-
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد سال را وارد نکرده اید(";
+                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد سال ناقص است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryEndMountTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryEndMountTextBox.Text) && entryEndMountTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد ماه را وارد نکرده اید)";
+                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد ماه ناقص است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryEndDayTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryEndDayTextBox.Text) && entryEndDayTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد روز را وارد نکرده اید)";
+                ms.Content = "لطفا تاریخ انتهایی را چک کیند. (فیلد روز ناقص است)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryEndHourTextBox.Text == null)
+            if (!string.IsNullOrWhiteSpace(entryEndHourTextBox.Text) && entryEndHourTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا ساعت و دقیقه انتهایی را چک کنید";
+                ms.Content = "لطفا ساعت انتهایی را چک کنید (دو رقم وارد کنید)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-            if (entryEndMinutesTextBox.Text == null || entryEndMinutesTextBox.Text.Length < 2)
+            if (!string.IsNullOrWhiteSpace(entryEndMinutesTextBox.Text) && entryEndMinutesTextBox.Text.Length < 2)
             {
                 ms.Title = "خطا";
-                ms.Content = "لطفا ساعت و دقیقه انتهایی را چک کنید";
+                ms.Content = "لطفا دقیقه انتهایی را چک کنید (دو رقم وارد کنید)";
                 ms.IsPrimaryButtonEnabled = false;
                 ms.IsSecondaryButtonEnabled = false;
                 ms.CloseButtonText = "متوجه شدم";
                 ms.ShowDialogAsync();
                 return;
             }
-
         }
+
 
         private async void SearchBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -213,10 +230,12 @@ namespace Parking.App.Views.Pages
                 GetTicketListRequestModel request = FillParameters();
 
                 var tickets = await _parkingService.GetTicketListAsync(request);
+                ViewModel.Items = new ObservableCollection<TicketsListViewModel>(tickets.Data);
+                ViewModel.CurrentPage = 1;
                 ViewModel.ItemsPerPage = 10;
                 ViewModel.TotalCount = tickets.TotalCount;
-                resultCount.Text = tickets.TotalCount.ToString("N0");
                 ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
+                resultCount.Text = tickets.TotalCount.ToString("N0");
                 progressBar.IsIndeterminate = false;
 
             }
@@ -237,78 +256,120 @@ namespace Parking.App.Views.Pages
         private GetTicketListRequestModel FillParameters()
         {
             GetTicketListRequestModel request = new GetTicketListRequestModel();
-            DateTime entryFrom = DateConvertor.ShamsiToDateTime(
-                int.Parse(entryStartYearTextBox.Text.ToString()),
-                int.Parse(entryStartMountTextBox.Text.ToString()),
-                int.Parse(entryStartDayTextBox.Text.ToString()),
-                int.Parse(entryStartHourTextBox.Text.ToString()),
-                int.Parse(entryStartMinutesTextBox.Text.ToString())
-                );
-            request.EntryFrom = entryFrom;
 
-            DateTime entryTo = DateConvertor.ShamsiToDateTime(
-                int.Parse(entryEndYearTextBox.Text.ToString()),
-                int.Parse(entryEndMountTextBox.Text.ToString()),
-                int.Parse(entryEndDayTextBox.Text.ToString()),
-                int.Parse(entryEndHourTextBox.Text.ToString()),
-                int.Parse(entryEndMinutesTextBox.Text.ToString())
-                );
-
-            request.EntryTo = entryTo;
-
-            DateTime exitFrom = DateConvertor.ShamsiToDateTime(
-                int.Parse(exitStartYearTextBox.Text.ToString()),
-                int.Parse(exitStartMountTextBox.Text.ToString()),
-                int.Parse(exitStartDayTextBox.Text.ToString()),
-                int.Parse(exitStartHourTextBox.Text.ToString()),
-                int.Parse(exitStartMinutesTextBox.Text.ToString())
-                );
-            request.ExitFrom = exitFrom;
-
-            DateTime exitTo = DateConvertor.ShamsiToDateTime(
-                int.Parse(exitEndYearTextBox.Text.ToString()),
-                int.Parse(exitEndMountTextBox.Text.ToString()),
-                int.Parse(exitEndDayTextBox.Text.ToString()),
-                int.Parse(exitEndHourTextBox.Text.ToString()),
-                int.Parse(exitEndMinutesTextBox.Text.ToString()));
-
-            request.ExitTo = exitTo;
-
-            bool? paymentStatus = null;
-            if (isPaid.SelectedItem is ComboBoxItem selectedItem && bool.TryParse(selectedItem.Tag?.ToString(), out bool result))
-                paymentStatus = result;
-            request.IsPaid = paymentStatus;
-            request.PaidType = Payment_Type.Text == "همه" ? null : (Payment_Type.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-            request.GateType = GateType.Text == "همه" ? null : (GateType.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-
-            string plate = "";
-            if (leftNumbersNumberTextBox.Text != null)
+            // ورود از
+            if (!string.IsNullOrWhiteSpace(entryStartYearTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryStartMountTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryStartDayTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryStartHourTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryStartMinutesTextBox.Text))
             {
-                if (leftNumbersNumberTextBox.Text.Length > 0)
-                {
-                    plate += $"{leftNumbersNumberTextBox.Text}";
-                }
+                request.EntryFrom = DateConvertor.ShamsiToDateTime(
+                    int.Parse(entryStartYearTextBox.Text),
+                    int.Parse(entryStartMountTextBox.Text),
+                    int.Parse(entryStartDayTextBox.Text),
+                    int.Parse(entryStartHourTextBox.Text),
+                    int.Parse(entryStartMinutesTextBox.Text));
             }
-            var plateChar = plateCharacter.Text;
-            if (plateChar?.Length > 0)
+
+            // ورود تا
+            if (!string.IsNullOrWhiteSpace(entryEndYearTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryEndMountTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryEndDayTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryEndHourTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(entryEndMinutesTextBox.Text))
             {
-                plate += $"_{plateChar?.ConvertFaCharToEnCharIndex()}";
-                if (rightNumbersNumberTextBox.Text != null)
+                request.EntryTo = DateConvertor.ShamsiToDateTime(
+                    int.Parse(entryEndYearTextBox.Text),
+                    int.Parse(entryEndMountTextBox.Text),
+                    int.Parse(entryEndDayTextBox.Text),
+                    int.Parse(entryEndHourTextBox.Text),
+                    int.Parse(entryEndMinutesTextBox.Text));
+            }
+
+            // خروج از
+            if (!string.IsNullOrWhiteSpace(exitStartYearTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitStartMountTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitStartDayTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitStartHourTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitStartMinutesTextBox.Text))
+            {
+                request.ExitFrom = DateConvertor.ShamsiToDateTime(
+                    int.Parse(exitStartYearTextBox.Text),
+                    int.Parse(exitStartMountTextBox.Text),
+                    int.Parse(exitStartDayTextBox.Text),
+                    int.Parse(exitStartHourTextBox.Text),
+                    int.Parse(exitStartMinutesTextBox.Text));
+            }
+
+            // خروج تا
+            if (!string.IsNullOrWhiteSpace(exitEndYearTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndMountTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndDayTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndHourTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndMinutesTextBox.Text))
+            {
+                request.ExitTo = DateConvertor.ShamsiToDateTime(
+                    int.Parse(exitEndYearTextBox.Text),
+                    int.Parse(exitEndMountTextBox.Text),
+                    int.Parse(exitEndDayTextBox.Text),
+                    int.Parse(exitEndHourTextBox.Text),
+                    int.Parse(exitEndMinutesTextBox.Text));
+            }
+
+            // وضعیت پرداخت
+            if (isPaid.SelectedItem is ComboBoxItem selectedItem &&
+                bool.TryParse(selectedItem.Tag?.ToString(), out bool result))
+            {
+                request.IsPaid = result;
+            }
+
+            // نوع پرداخت
+            request.PaidType = Payment_Type.Text == "همه"
+                ? null
+                : (Payment_Type.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+
+            // نوع درگاه
+            request.GateType = GateType.Text == "همه"
+                ? null
+                : (GateType.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+
+
+            var selectedVehicleStatus = VehicleStatus.SelectedItem as ComboBoxItem;
+
+            request.VehicleStatus = (selectedVehicleStatus != null && selectedVehicleStatus.Content.ToString() != "همه")
+                ? selectedVehicleStatus.Tag.ToString() switch
+                {
+                    "0" => Domain.General.VehicleStatus.Entered,
+                    "1" => Domain.General.VehicleStatus.Exited,
+                    _ => null
+                }
+                : null;
+
+            // پلاک
+            string plate = "";
+            if (!string.IsNullOrWhiteSpace(leftNumbersNumberTextBox.Text))
+                plate += leftNumbersNumberTextBox.Text;
+
+            if (!string.IsNullOrWhiteSpace(plateCharacter.Text))
+            {
+                plate += $"_{plateCharacter.Text.ConvertFaCharToEnCharIndex()}";
+
+                if (!string.IsNullOrWhiteSpace(rightNumbersNumberTextBox.Text))
                 {
                     plate += $"_{rightNumbersNumberTextBox.Text}";
-                    if (irNumberTextBox.Text != null && irNumberTextBox.Text.Length == 2)
+
+                    if (!string.IsNullOrWhiteSpace(irNumberTextBox.Text) && irNumberTextBox.Text.Length == 2)
                         plate += $"_IR{irNumberTextBox.Text}";
                 }
             }
-            request.LicensePlate = plate;
-            if (vehicleSegmentList.SelectedItem != null)
-            {
-                request.VehicleSegmentId = (vehicleSegmentList.SelectedItem as VehicleSegmentModel).Id;
-                if (request.VehicleSegmentId == 0)
-                {
-                    request.VehicleSegmentId = null;
-                }
-            }
+
+            if (!string.IsNullOrEmpty(plate))
+                request.LicensePlate = plate;
+
+            // سگمنت خودرو
+            if (vehicleSegmentList.SelectedItem is VehicleSegmentModel segment)
+                request.VehicleSegmentId = segment.Id == 0 ? null : segment.Id;
 
             return request;
         }
@@ -331,6 +392,53 @@ namespace Parking.App.Views.Pages
         private void GateType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+        private void ClearBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // تاریخ ورود از
+            entryStartYearTextBox.Text = "";
+            entryStartMountTextBox.Text = "";
+            entryStartDayTextBox.Text = "";
+            entryStartHourTextBox.Text = "";
+            entryStartMinutesTextBox.Text = "";
+
+            // تاریخ ورود تا
+            entryEndYearTextBox.Text = "";
+            entryEndMountTextBox.Text = "";
+            entryEndDayTextBox.Text = "";
+            entryEndHourTextBox.Text = "";
+            entryEndMinutesTextBox.Text = "";
+
+            // تاریخ خروج از
+            exitStartYearTextBox.Text = "";
+            exitStartMountTextBox.Text = "";
+            exitStartDayTextBox.Text = "";
+            exitStartHourTextBox.Text = "";
+            exitStartMinutesTextBox.Text = "";
+
+            // تاریخ خروج تا
+            exitEndYearTextBox.Text = "";
+            exitEndMountTextBox.Text = "";
+            exitEndDayTextBox.Text = "";
+            exitEndHourTextBox.Text = "";
+            exitEndMinutesTextBox.Text = "";
+
+            // پلاک
+            leftNumbersNumberTextBox.Text = "";
+            plateCharacter.Text = "";
+            rightNumbersNumberTextBox.Text = "";
+            irNumberTextBox.Text = "";
+
+            // ComboBoxes reset
+            vehicleSegmentList.SelectedIndex = 0;
+            GateType.SelectedIndex = 0;
+            Payment_Type.SelectedIndex = 0;
+            isPaid.SelectedIndex = 0;
+        }
+
+        private void VehicleStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
         }
     }
 }

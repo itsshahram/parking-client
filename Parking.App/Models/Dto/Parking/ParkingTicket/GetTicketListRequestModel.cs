@@ -25,15 +25,13 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
     private DateTime? _exitFrom;
     private DateTime? _exitTo;
     private TicketStatus? _ticketStatus;
+    private VehicleStatus? _vehicleStatus;
 
     private int _currentPage = 1;
     private int _itemsPerPage = 10;
     private int _totalCount;
 
     private ObservableCollection<TicketsListViewModel> _items;
-
-
-
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -306,6 +304,19 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
             {
                 _ticketStatus = value;
                 OnPropertyChanged(nameof(TicketStatus));
+            }
+        }
+    }
+
+    public VehicleStatus? VehicleStatus
+    {
+        get => _vehicleStatus;
+        set
+        {
+            if (_vehicleStatus != value)
+            {
+                _vehicleStatus = value;
+                OnPropertyChanged(nameof(VehicleStatus));
             }
         }
     }
