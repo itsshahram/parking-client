@@ -564,10 +564,15 @@ namespace Parking.App.Views.Pages
                     foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
                         VehicleSegmentComboBox.Items.Add(item);
 
-                    VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegmentsList.FirstOrDefault());
+                    var vehicleSegment = vehicleSegmentsList.FirstOrDefault();
+                    VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegment);
 
-                    VehicleSegmentId = VehicleSegmentComboBox.SelectedIndex;
+                    VehicleSegmentId = int.TryParse(vehicleSegment?.Tag?.ToString(), out var id)
+                        ? id
+                        : 0;
+
                     VehicleSegmentName = VehicleSegmentComboBox.Text;
+
                     ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
                     {
                         Content = VehicleSegmentComboBox.SelectedIndex,
