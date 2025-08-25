@@ -1,11 +1,9 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using Nager.VideoStream;
+﻿using Nager.VideoStream;
 using Parking.App.ANPR;
 using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.Domain.General;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using static Parking.App.ANPR.SATPA_API;
 
 

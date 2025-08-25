@@ -54,6 +54,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         Initialize();
     }
+
     public void Initialize()
     {
         var s = TokenStore.RoleName;
@@ -101,8 +102,28 @@ public partial class MainWindowViewModel : ObservableObject
                 Content = "خروج",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.SignOut24 },
                 Tag = "Logout",
-                TargetPageType = typeof(SettingsPage)
+                Command = new CommunityToolkit.Mvvm.Input.RelayCommand(HandleLogout)
             });
         }
     }
+    private void HandleLogout()
+    {
+        TokenStore.Clear();
+
+        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_encryptionKey.dat");
+        if (File.Exists(path)) File.Delete(path);
+
+
+        var loginWindow = new LoginWindow();
+
+        Application.Current.MainWindow = loginWindow;
+        loginWindow.Show();
+
+        foreach (Window w in Application.Current.Windows)
+        {
+            if (w != loginWindow)
+                w.Close();
+        }
+    }
+
 }

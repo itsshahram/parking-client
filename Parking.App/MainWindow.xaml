@@ -32,8 +32,7 @@
         IsBackButtonVisible="Visible"
         IsPaneToggleVisible="True" 
         MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
-        PaneDisplayMode="LeftFluent"
-        ItemInvoked="RootNavigation_OnItemInvoked">
+        PaneDisplayMode="LeftFluent">
                 <ui:NavigationView.ContentOverlay>
                     <Grid>
                         <ui:SnackbarPresenter x:Name="SnackbarPresenter" />
