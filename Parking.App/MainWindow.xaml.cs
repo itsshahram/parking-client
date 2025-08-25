@@ -9,7 +9,7 @@ namespace Parking.App;
 public partial class MainWindow : FluentWindow
 {
     public MainWindowViewModel ViewModel { get; }
-   
+
 
     public MainWindow()
     {
@@ -19,14 +19,13 @@ public partial class MainWindow : FluentWindow
         SystemThemeWatcher.Watch(this);
         Loaded += (_, _) => RootNavigation.Navigate(typeof(MainPage));
         this.Loaded += MainWindow_Loaded;
-
-
         scheduler = App.GetService<IScheduler>();
         StartBackgroundTask();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+
         //await Task.Run(() =>
         //{
         //    this.Dispatcher.Invoke(() =>
@@ -42,7 +41,7 @@ public partial class MainWindow : FluentWindow
     {
         BackgroundTask = new BackgroundTask(this);
 
-        
+
         scheduler.Schedule(() => BackgroundTask.Invoke())
                  .EverySeconds(Settings.Default.Application_Sync_Interval_Second);
     }
@@ -52,4 +51,28 @@ public partial class MainWindow : FluentWindow
         this.Hide();
     }
 
+    private void RootNavigation_OnItemInvoked(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is NavigationViewItem item)
+        {
+            if (item.Tag?.ToString() == "Logout")
+            {
+                TokenStore.Clear();
+
+                this.Hide();
+                string credentialsFilePath = AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat";
+                if (File.Exists(credentialsFilePath))
+                {
+
+                    TokenStore.Clear();
+                    File.Delete(credentialsFilePath);
+                }
+
+                var loginWindow = new LoginWindow();
+                loginWindow.Show();
+
+                this.Close();
+            }
+        }
+    }
 }

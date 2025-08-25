@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:Parking.App"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:components="clr-namespace:Parking.App.Views.Components" 
-        
         mc:Ignorable="d"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
@@ -18,7 +17,6 @@
         Closing="Window_Closing"
                   >
     <Grid>
-        
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -34,8 +32,8 @@
         IsBackButtonVisible="Visible"
         IsPaneToggleVisible="True" 
         MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
-        PaneDisplayMode="LeftFluent">
-
+        PaneDisplayMode="LeftFluent"
+        ItemInvoked="RootNavigation_OnItemInvoked">
                 <ui:NavigationView.ContentOverlay>
                     <Grid>
                         <ui:SnackbarPresenter x:Name="SnackbarPresenter" />

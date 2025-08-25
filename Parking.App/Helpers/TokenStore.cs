@@ -1,12 +1,4 @@
-﻿using Parking.App.Models.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Parking.App.Helpers;
-
+﻿namespace Parking.App.Helpers;
 
 public static class TokenStore
 {
@@ -66,6 +58,18 @@ public static class TokenStore
         set => _fullName = value;
     }
 
+    public static void Clear()
+    {
+        _serverStatus = false;
+        _bearerToken = null;
+        _baseUrl = null;
+        _parkingLotId = 0;
+        _userId = Guid.Empty;
+        _fullName = null;
+        _expirationDateTime = DateTime.MinValue;
+        _userName = null;
+        _roleName = null;
+    }
 }
 
 

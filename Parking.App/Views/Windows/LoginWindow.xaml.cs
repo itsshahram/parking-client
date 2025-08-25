@@ -17,6 +17,10 @@ namespace Parking.App.Views.Windows
         private readonly IParkingService? _parkingService;
         private readonly ILogger<LoginWindow> _logger;
 
+        private static string CredenatialsPath = AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat";
+        private static readonly byte[] CrendentialsKey = Encoding.UTF8.GetBytes("1234567890123456");
+        private static readonly byte[] Iv = Encoding.UTF8.GetBytes("1234567890123456");
+
         public LoginWindow()
         {
             InitializeComponent();
@@ -25,6 +29,21 @@ namespace Parking.App.Views.Windows
             _logger = App.GetService<ILogger<LoginWindow>>();
             _userService = App.GetService<IUserService>();
             _parkingService = App.GetService<IParkingService>();
+            Loaded += LoginWindow_Unloaded;
+
+        }
+
+        private void LoginWindow_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var credential = LoadCredentials();
+            if (credential != null)
+            {
+                usernameBox.Text = credential.Value.Username;
+                passwordBox.Text = credential.Value.Password;
+
+                Login();
+            }
+
         }
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
@@ -41,7 +60,6 @@ namespace Parking.App.Views.Windows
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in LoginBtn_Click");
-
             }
         }
 
@@ -89,6 +107,8 @@ namespace Parking.App.Views.Windows
             ExitBtn.IsEnabled = false;
             LoginBtn.IsEnabled = false;
             LoginProgressBar.Visibility = Visibility.Visible;
+            bool rememberMe = chkRemember.IsChecked.Value;
+
             if (CheckUsers())
             {
                 if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
@@ -98,10 +118,11 @@ namespace Parking.App.Views.Windows
                         Settings.Default.Application_Sync_Enable = false;
                         Settings.Default.Save();
                     }
-                  
+
                     var username = usernameBox.Text;
                     var pasword = passwordBox.Password;
                     var result = _userService?.Login(username, pasword);
+
 
                     if (result == Domain.General.LoginStatus.NotActice)
                     {
@@ -129,6 +150,9 @@ namespace Parking.App.Views.Windows
 
                     if (result == Domain.General.LoginStatus.Success && syncStatus)
                     {
+                        if (rememberMe is true)
+                            SaveCredentails(username, pasword);
+
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
                         if (parking.Succeeded)
@@ -142,7 +166,6 @@ namespace Parking.App.Views.Windows
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
                         SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
-
 
                         mainWindow?.Show();
                         this.Close();
@@ -168,11 +191,14 @@ namespace Parking.App.Views.Windows
                     var result = await _synchronizationService?.CheckTokenAsync(username, pasword);
                     if (result.Succeeded)
                     {
+
+                        if (rememberMe is true)
+                            SaveCredentails(username, pasword);
+
                         var syncResult = await StartSyncJobs();
 
                         if (syncResult)
                         {
-
                             var mainWindow = App.GetService<MainWindow>();
                             Application.Current.MainWindow = mainWindow;
                             SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
@@ -225,6 +251,7 @@ namespace Parking.App.Views.Windows
             }
             ExitBtn.IsEnabled = true;
             LoginBtn.IsEnabled = true;
+            passwordBox.Text = "";
             LoginProgressBar.Visibility = Visibility.Collapsed;
         }
         private bool CheckUsers() => _userManager.Users.Any();
@@ -353,6 +380,29 @@ namespace Parking.App.Views.Windows
                 JobState.Syncing => (System.Windows.Media.Brush)Application.Current.Resources["AccentTextFillColorTertiaryBrush"],
                 _ => System.Windows.Media.Brushes.Black
             };
+        }
+
+        public static void SaveCredentails(string Username, string Password)
+        {
+            string combined = $"{Username}: {Password}";
+
+            byte[] encrypted = AesEncryption.Encrypt(combined, CrendentialsKey, Iv);
+            File.WriteAllBytes(CredenatialsPath, encrypted);
+        }
+
+        public static (string Username, string Password)? LoadCredentials()
+        {
+            if (!File.Exists(CredenatialsPath))
+                return null;
+
+            byte[] encrypted = File.ReadAllBytes(CredenatialsPath);
+
+            string decrypted = AesEncryption.Decrypt(encrypted, CrendentialsKey, Iv);
+            string[] parts = decrypted.Split(":");
+            if (parts.Length == 2)
+                return (parts[0], parts[1]);
+
+            return null;
         }
 
         private enum JobState

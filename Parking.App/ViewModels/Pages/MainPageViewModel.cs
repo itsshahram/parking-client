@@ -1,9 +1,4 @@
-﻿
-
-using Parking.App.Models;
-using Parking.App.Models.Tickets;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace Parking.App.ViewModels.Pages;
 
