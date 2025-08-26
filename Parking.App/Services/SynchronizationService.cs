@@ -1072,7 +1072,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             else
                             {
                                 licensePlate = unitOfWork.LicensePlates.GetById(subitem.Id);
-                                if (licensePlate!=null)
+                                if (licensePlate != null)
                                 {
                                     licensePlate.GroupId = subitem.GroupId;
                                     licensePlate.EnLicensePlate = subitem.EnLicensePlate;
@@ -1425,9 +1425,16 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedTickets = unitOfWork
-                .ParkingTickets
-                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+
+            var query = unitOfWork.ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced);
+
+            bool syncAllDeviceTickets = Settings.Default.Application_Sync_AllDeviceTickets;
+
+            if (!syncAllDeviceTickets)
+                query = query.Where(p => p.DeviceId == Settings.Default.Application_DeviceId);
+
+            var localUnsyncedTickets = query
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .ToList();
 
@@ -1502,11 +1509,18 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            var localUnsyncedTickets = unitOfWork
-                .ParkingTickets
-                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+            var query = unitOfWork.ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced);
+
+            bool syncAllDeviceTickets = Settings.Default.Application_Sync_AllDeviceTickets;
+
+            if (!syncAllDeviceTickets)
+                query = query.Where(p => p.DeviceId == Settings.Default.Application_DeviceId);
+
+            var localUnsyncedTickets = query
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .ToList();
+
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()

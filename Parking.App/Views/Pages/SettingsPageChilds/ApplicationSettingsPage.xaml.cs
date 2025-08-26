@@ -1,6 +1,4 @@
-﻿
-using Wpf.Ui.Violeta.Controls;
-using TextBox = Wpf.Ui.Controls.TextBox;
+﻿using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
 {
@@ -39,10 +37,18 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
 
             APIServerAddressTextBox.Text = Settings.Default.Application_ApiServerAddress;
             this.PreviewKeyDown += Window_PreviewKeyDown;
+            this.Unloaded += SyncConfigPage_Unloaded;
         }
         private void Change_Click(object sender, RoutedEventArgs e)
         {
             Settings.Default.Save();
+        }
+        private void SyncConfigPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (!PermissionHelper.CheckUserPermission("PARKINGMANAGER", "ApplicationSettings"))
+                AllDeviceTicketsToggle.Visibility = Visibility.Visible;
+            else
+                AllDeviceTicketsToggle.Visibility = Visibility.Collapsed;
         }
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

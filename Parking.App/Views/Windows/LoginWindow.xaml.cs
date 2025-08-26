@@ -30,7 +30,6 @@ namespace Parking.App.Views.Windows
             _userService = App.GetService<IUserService>();
             _parkingService = App.GetService<IParkingService>();
             Loaded += LoginWindow_Unloaded;
-
         }
 
         private void LoginWindow_Unloaded(object sender, RoutedEventArgs e)
@@ -43,7 +42,6 @@ namespace Parking.App.Views.Windows
 
                 Login();
             }
-
         }
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
@@ -400,7 +398,7 @@ namespace Parking.App.Views.Windows
             string decrypted = AesEncryption.Decrypt(encrypted, CrendentialsKey, Iv);
             string[] parts = decrypted.Split(":");
             if (parts.Length == 2)
-                return (parts[0], parts[1]);
+                return (parts[0].Trim(), parts[1].Trim());
 
             return null;
         }

@@ -149,6 +149,14 @@
                 </DockPanel>
             </StackPanel>
         </Border>
+        <Border x:Name="AllDeviceTicketsToggle" Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right" Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Sync_AllDeviceTickets, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="همگام سازی  قبض های تمام دستگاه ها" />
+                </DockPanel>
+            </StackPanel>
+        </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>

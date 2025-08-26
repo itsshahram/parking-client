@@ -26,14 +26,6 @@ public partial class MainWindow : FluentWindow
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
 
-        //await Task.Run(() =>
-        //{
-        //    this.Dispatcher.Invoke(() =>
-        //    {
-        //        //Loaded += (_, _) => RootNavigation.Navigate(typeof(MainPage));
-        //        RootNavigation.Navigate(typeof(MainPage));
-        //    });
-        //});
     }
     private readonly IScheduler scheduler;
     public BackgroundTask BackgroundTask { get; private set; }
@@ -63,7 +55,6 @@ public partial class MainWindow : FluentWindow
                 string credentialsFilePath = AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat";
                 if (File.Exists(credentialsFilePath))
                 {
-
                     TokenStore.Clear();
                     File.Delete(credentialsFilePath);
                 }
