@@ -694,5 +694,17 @@ namespace Parking.App {
                 this["Application_Sync_EnableSyncLicensePlateGroup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_Sync_AllDeviceTickets {
+            get {
+                return ((bool)(this["Application_Sync_AllDeviceTickets"]));
+            }
+            set {
+                this["Application_Sync_AllDeviceTickets"] = value;
+            }
+        }
     }
 }
