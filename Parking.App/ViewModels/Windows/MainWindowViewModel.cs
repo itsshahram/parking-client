@@ -99,8 +99,6 @@ public partial class MainWindowViewModel : ObservableObject
                 TargetPageType = typeof(SettingsPage)
             });
         }
-        if (File.Exists(Path.Combine(AppDataFolder, "credentials.dat")))
-        {
             FooterMenuItems.Add(new NavigationViewItem()
             {
                 Content = "خروج",
@@ -108,8 +106,6 @@ public partial class MainWindowViewModel : ObservableObject
                 Tag = "Logout",
                 Command = new CommunityToolkit.Mvvm.Input.RelayCommand(HandleLogout)
             });
-        }
-
     }
     private void HandleLogout()
     {
