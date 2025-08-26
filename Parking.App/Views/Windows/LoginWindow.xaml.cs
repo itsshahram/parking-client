@@ -29,19 +29,24 @@ namespace Parking.App.Views.Windows
             _logger = App.GetService<ILogger<LoginWindow>>();
             _userService = App.GetService<IUserService>();
             _parkingService = App.GetService<IParkingService>();
-            Loaded += LoginWindow_Unloaded;
+            ContentRendered += LoginWindow_ContentRendered;
         }
 
-        private void LoginWindow_Unloaded(object sender, RoutedEventArgs e)
+        private  void LoginWindow_ContentRendered(object sender, EventArgs e)
         {
-            var credential = LoadCredentials();
-            if (credential != null)
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                usernameBox.Text = credential.Value.Username;
-                passwordBox.Text = credential.Value.Password;
+                var creds = LoadCredentials();
 
-                Login();
-            }
+                if (creds != null)
+                {
+                    usernameBox.Text = creds.Value.Username;
+                    passwordBox.Password = creds.Value.Password;
+
+                    Login();
+                }
+            }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+
         }
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
