@@ -42,28 +42,4 @@ public partial class MainWindow : FluentWindow
         e.Cancel = true;
         this.Hide();
     }
-
-    private void RootNavigation_OnItemInvoked(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is NavigationViewItem item)
-        {
-            if (item.Tag?.ToString() == "Logout")
-            {
-                TokenStore.Clear();
-
-                this.Hide();
-                string credentialsFilePath = AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat";
-                if (File.Exists(credentialsFilePath))
-                {
-                    TokenStore.Clear();
-                    File.Delete(credentialsFilePath);
-                }
-
-                var loginWindow = new LoginWindow();
-                loginWindow.Show();
-
-                this.Close();
-            }
-        }
-    }
 }

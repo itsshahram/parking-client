@@ -76,7 +76,7 @@ public partial class App : Application
                 services.AddTransient<BackgroundTask>();
 
                 services.AddScoped<MainWindow>();
-                services.AddScoped<LoginWindow>();
+                services.AddTransient<LoginWindow>();
 
                 services.AddScoped<MainPage>();
                 services.AddScoped<MainWindowViewModel>();

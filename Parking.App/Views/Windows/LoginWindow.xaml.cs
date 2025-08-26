@@ -17,9 +17,11 @@ namespace Parking.App.Views.Windows
         private readonly IParkingService? _parkingService;
         private readonly ILogger<LoginWindow> _logger;
 
-        private static string CredenatialsPath = AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat";
-        private static readonly byte[] CrendentialsKey = Encoding.UTF8.GetBytes("1234567890123456");
-        private static readonly byte[] Iv = Encoding.UTF8.GetBytes("1234567890123456");
+        private static readonly string AppDataFolder =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Parking.App");
+        private static readonly string CredentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
+        private static readonly string KeyPath = Path.Combine(AppDataFolder, "aeskey.bin");
+
 
         public LoginWindow()
         {
@@ -154,7 +156,7 @@ namespace Parking.App.Views.Windows
                     if (result == Domain.General.LoginStatus.Success && syncStatus)
                     {
                         if (rememberMe is true)
-                            SaveCredentails(username, pasword);
+                            SaveCredentials(username, pasword);
 
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
@@ -196,7 +198,7 @@ namespace Parking.App.Views.Windows
                     {
 
                         if (rememberMe is true)
-                            SaveCredentails(username, pasword);
+                            SaveCredentials(username, pasword);
 
                         var syncResult = await StartSyncJobs();
 
@@ -385,29 +387,42 @@ namespace Parking.App.Views.Windows
             };
         }
 
-        public static void SaveCredentails(string Username, string Password)
+        public static void SaveCredentials(string username, string password)
         {
-            string combined = $"{Username}: {Password}";
-
-            byte[] encrypted = AesEncryption.Encrypt(combined, CrendentialsKey, Iv);
-            File.WriteAllBytes(CredenatialsPath, encrypted);
+            Directory.CreateDirectory(AppDataFolder);
+            byte[] key = GetOrCreateKey();
+            string combined = $"{username}:{password}";
+            byte[] encrypted = AesEncryption.Encrypt(combined, key);
+            File.WriteAllBytes(CredentialsPath, encrypted);
         }
+
 
         public static (string Username, string Password)? LoadCredentials()
         {
-            if (!File.Exists(CredenatialsPath))
+            if (!File.Exists(CredentialsPath))
                 return null;
 
-            byte[] encrypted = File.ReadAllBytes(CredenatialsPath);
+            byte[] key = GetOrCreateKey();
+            byte[] encrypted = File.ReadAllBytes(CredentialsPath);
+            string decrypted = AesEncryption.Decrypt(encrypted, key);
 
-            string decrypted = AesEncryption.Decrypt(encrypted, CrendentialsKey, Iv);
-            string[] parts = decrypted.Split(":");
+            string[] parts = decrypted.Split(':');
             if (parts.Length == 2)
                 return (parts[0].Trim(), parts[1].Trim());
 
             return null;
         }
 
+        private static byte[] GetOrCreateKey()
+        {
+            if (!File.Exists(KeyPath))
+            {
+                var key = AesEncryption.GenerateKey();
+                AesEncryption.SaveKey(key, KeyPath);
+                return key;
+            }
+            return AesEncryption.LoadKey(KeyPath);
+        }
         private enum JobState
         {
             None, Syncing, Success, Failed

@@ -48,6 +48,10 @@ public partial class MainWindowViewModel : ObservableObject
         }
     };
 
+    private static readonly string AppDataFolder =
+    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Parking.App");
+
+
     [ObservableProperty]
     private ObservableCollection<object> _footerMenuItems = new();
     public MainWindowViewModel()
@@ -95,7 +99,7 @@ public partial class MainWindowViewModel : ObservableObject
                 TargetPageType = typeof(SettingsPage)
             });
         }
-        if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + "_encryptionKey.dat"))
+        if (File.Exists(Path.Combine(AppDataFolder, "credentials.dat")))
         {
             FooterMenuItems.Add(new NavigationViewItem()
             {
@@ -105,25 +109,33 @@ public partial class MainWindowViewModel : ObservableObject
                 Command = new CommunityToolkit.Mvvm.Input.RelayCommand(HandleLogout)
             });
         }
+
     }
     private void HandleLogout()
     {
         TokenStore.Clear();
 
-        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_encryptionKey.dat");
-        if (File.Exists(path)) File.Delete(path);
+        string credentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
+        if (File.Exists(credentialsPath))
+            File.Delete(credentialsPath);
 
+        string keyPath = Path.Combine(AppDataFolder, "aeskey.bin");
+        if (File.Exists(keyPath))
+            File.Delete(keyPath);
 
-        var loginWindow = new LoginWindow();
+        var windowsToClose = Application.Current.Windows.Cast<Window>()
+            .Where(w => !(w is LoginWindow)).ToList();
 
-        Application.Current.MainWindow = loginWindow;
-        loginWindow.Show();
+        foreach (var w in windowsToClose)
+            w.Close();
 
-        foreach (Window w in Application.Current.Windows)
+        Application.Current.Dispatcher.BeginInvoke(async () =>
         {
-            if (w != loginWindow)
-                w.Close();
-        }
-    }
 
+            var loginWindow = App.GetService<LoginWindow>() ?? new LoginWindow();
+            Application.Current.MainWindow = loginWindow;
+            loginWindow.Show();
+        }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+    }
 }
+
