@@ -45,7 +45,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         }
         private void SyncConfigPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (!PermissionHelper.CheckUserPermission("PARKINGMANAGER", "ApplicationSettings"))
+            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
                 AllDeviceTicketsToggle.Visibility = Visibility.Visible;
             else
                 AllDeviceTicketsToggle.Visibility = Visibility.Collapsed;

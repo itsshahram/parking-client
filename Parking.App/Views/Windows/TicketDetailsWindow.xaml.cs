@@ -1,4 +1,5 @@
 ﻿using System.Printing;
+using System.Threading.Tasks;
 using System.Windows.Markup;
 using System.Windows.Xps;
 using Border = Wpf.Ui.Controls.Border;
@@ -37,6 +38,7 @@ namespace Parking.App.Views.Windows
                 if (ticketId != null)
                 {
                     this.DataContext = ViewModel;
+                    ViewModel.TicketId = ticketId;
                     InitializeComponent();
                     if (Cameras.Any())
                     {
@@ -58,7 +60,6 @@ namespace Parking.App.Views.Windows
 
                     if (extraimages != null)
                     {
-
                         foreach (var image in extraimages)
                         {
                             if (image.Image != null)
@@ -80,6 +81,7 @@ namespace Parking.App.Views.Windows
                     ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
                     this.Close();
                 }
+                CustomPaymentCheckPermission();
             }
             catch (Exception ex)
             {
@@ -103,7 +105,9 @@ namespace Parking.App.Views.Windows
             this.Close();
         }
 
-        private async void SetTicketData(Guid ticketId)
+        private async
+        Task
+SetTicketData(Guid ticketId)
         {
             try
             {
@@ -151,6 +155,7 @@ namespace Parking.App.Views.Windows
                         PaymentBtn.Visibility = Visibility.Collapsed;
                         CashPaymentBtn.Visibility = Visibility.Collapsed;
                         PaymentBtn.Visibility = Visibility.Collapsed;
+                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
                         //MissingCardToggle.IsChecked = true;
                         MissingCardToggle.IsEnabled = false;
                     }
@@ -160,6 +165,7 @@ namespace Parking.App.Views.Windows
                         PaymentBtn.Visibility = Visibility.Collapsed;
                         CashPaymentBtn.Visibility = Visibility.Collapsed;
                         PaymentBtn.Visibility = Visibility.Collapsed;
+                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
                         MissingCardToggle.IsEnabled = false;
                     }
                     if (!PaymentPermission)
@@ -167,6 +173,7 @@ namespace Parking.App.Views.Windows
                         PaymentBtn.Visibility = Visibility.Collapsed;
                         CashPaymentBtn.Visibility = Visibility.Collapsed;
                         PaymentBtn.Visibility = Visibility.Collapsed;
+                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
                         MissingCardToggle.IsEnabled = false;
                     }
                     MainPanel.Visibility = Visibility.Visible;
@@ -208,7 +215,7 @@ namespace Parking.App.Views.Windows
                 {
                     this.OtherPlateBox.Visibility = Visibility.Collapsed;
                     this.IRPlateBox.Visibility = Visibility.Visible;
-                    
+
                 });
                 plate_LeftNumber.Text = plate.LeftTwoDigits;
                 plate_RightNumber.Text = plate.RightThreeDigits;
@@ -227,7 +234,7 @@ namespace Parking.App.Views.Windows
             }
 
 
-                PlateCharName.Content = plate.Letter.ConvertToString();
+            PlateCharName.Content = plate.Letter.ConvertToString();
 
         }
         private void TicketDetailsWindow_KeyUp(object sender, KeyEventArgs e)
@@ -356,7 +363,7 @@ namespace Parking.App.Views.Windows
                                 TraceNo = "00000",
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid ,
+                                CardUid = ViewModel.Item.CardUid,
                                 ExitImage = ExitImage
                             });
                             if (rs)
@@ -526,7 +533,7 @@ namespace Parking.App.Views.Windows
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
                                 CardUid = ViewModel.Item.CardUid,
-                                ExitRegistrarUserId = TokenStore.UserId ,
+                                ExitRegistrarUserId = TokenStore.UserId,
                                 ExitImage = ExitImage
                             });
 
@@ -546,7 +553,7 @@ namespace Parking.App.Views.Windows
                                 TraceNo = "00000",
                                 ExitGate = GateName,
                                 IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid ,
+                                CardUid = ViewModel.Item.CardUid,
                                 ExitImage = ExitImage
                             });
                         }
@@ -645,13 +652,28 @@ namespace Parking.App.Views.Windows
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
         {
-                         this.Close();
+            this.Close();
         }
 
         private async void Print_Btn_Click(object sender, RoutedEventArgs e)
         {
 
             PrintTicket();
+        }
+
+        private void CustomPayment_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            CustomAmountPaymentModalWindow customAmountPaymentModalWindow = new CustomAmountPaymentModalWindow(ViewModel.TicketId)
+            {
+                Owner = this
+            };
+            var result = customAmountPaymentModalWindow.ShowDialog();
+
+            if (result == true)
+            {
+                ViewModel.Item.TotalAmount = customAmountPaymentModalWindow.ViewModel.Amount;
+                CashPayment();
+            }
         }
         private async void PrintTicket()
         {
@@ -666,7 +688,7 @@ namespace Parking.App.Views.Windows
                     ParkingName = ticket.ParkingName,
                     StartTime = ticket.StartTime.ToLongShamsiString() + "  " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
                     VehicleSegmentName = ticket.VehicleSegmentName,
-                    EndTime = (ticket.IsExited ?? false) ? ticket.EndTime.ToLongShamsiString() + " " + ticket.EndTime?.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"):"",
+                    EndTime = (ticket.IsExited ?? false) ? ticket.EndTime.ToLongShamsiString() + " " + ticket.EndTime?.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
                     PaidAmount = ticket.PaidAmount.ToString("N0"),
                     TotalAmount = ticket.TotalAmount.ToString("N0"),
                     TotalDiscount = ticket.Discount.ToString("N0")
@@ -704,6 +726,14 @@ namespace Parking.App.Views.Windows
             writer.Write(fixedDoc, printTicket);
 
             Console.WriteLine("Printing completed successfully.");
+        }
+
+        private async void CustomPaymentCheckPermission()
+        {
+            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "CustomAmouontPayment") && PaymentPermission)
+                CustomPayment_Btn.Visibility = Visibility.Collapsed;
+            else
+                CustomPayment_Btn.Visibility = Visibility.Visible;
         }
     }
 }

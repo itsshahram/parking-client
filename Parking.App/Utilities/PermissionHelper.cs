@@ -55,6 +55,16 @@ public static class PermissionHelper
                 _ => false
             };
         }
+
+        if (action == "CustomAmouontPayment")
+        {
+            result = enRoleName.ToUpper() switch
+            {
+                "PARKINGMANAGER" => true,
+                "PARKINGAGENT" => false,
+                _ => false
+            };
+        }
         return result;
     }
 }

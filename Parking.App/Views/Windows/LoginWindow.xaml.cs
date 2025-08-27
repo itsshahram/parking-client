@@ -1,8 +1,6 @@
 ﻿using Parking.App.Models.GeneralServiceResponse;
 using Parking.Domain.Entities.User;
 
-using static Parking.App.Helpers.InternetChecker;
-
 
 namespace Parking.App.Views.Windows
 {

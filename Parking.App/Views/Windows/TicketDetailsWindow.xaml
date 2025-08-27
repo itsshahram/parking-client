@@ -31,7 +31,7 @@
                 <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>-->
-        
+
         <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -87,6 +87,15 @@
                                    Padding="20 5 20 5"  
                                    Icon="{ui:SymbolIcon Symbol=Home24}" 
                                    FontSize="24" Click="ExitBtn_Click"/>
+                        <ui:Button x:Name="CustomPayment_Btn" VerticalAlignment="Stretch" 
+                            HorizontalAlignment="Stretch"  
+                            Grid.Column="3" 
+                            Margin="0,1,6,1" 
+                            IsDefault="True" 
+                            Appearance="Primary" 
+                            Padding="20 5 20 5"  
+                            Icon="{ui:SymbolIcon Symbol=Money24}" 
+                            FontSize="24" Click="CustomPayment_Btn_Click" RenderTransformOrigin="-0.433,0.475"/>
                     </Grid>
 
                 </StackPanel>

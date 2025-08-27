@@ -81,6 +81,7 @@ public partial class App : Application
                 services.AddScoped<MainPage>();
                 services.AddScoped<MainWindowViewModel>();
                 services.AddTransient<TicketDetailsWindow>();
+                services.AddTransient<CustomAmountPaymentModalWindow>();
                 services.AddScoped<SettingsPageViewModel>();
 
                 services.AddScoped<LicensePlateGroupPage>();
