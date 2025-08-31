@@ -8,13 +8,17 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
     public partial class ApplicationSettingsPage : Page
     {
         private readonly IParkingService _parkingService;
+        public ObservableCollection<string> Descriptions { get; set; } = new ObservableCollection<string>();
+        public ICommand RemoveDescriptionCommand { get; }
+
         public ApplicationSettingsPage()
         {
+            RemoveDescriptionCommand = new Helpers.RelayCommand(RemoveDescription);
 
             _parkingService = App.GetService<IParkingService>();
 
             InitializeComponent();
-
+            this.DataContext = this; 
             var vehicleSegmentsList = _parkingService.GetVehicleSegments().Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa }).ToList();
             vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = 0, Content = "انتخاب بدون پیش ‌فرض" });
             foreach (var item in vehicleSegmentsList)
@@ -38,6 +42,16 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             APIServerAddressTextBox.Text = Settings.Default.Application_ApiServerAddress;
             this.PreviewKeyDown += Window_PreviewKeyDown;
             this.Unloaded += SyncConfigPage_Unloaded;
+
+            var saved = Settings.Default.Application_DefaultTicketDescription;
+            if (!string.IsNullOrEmpty(saved))
+            {
+                foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    Descriptions.Add(desc.Trim());
+                }
+            }
+
         }
         private void Change_Click(object sender, RoutedEventArgs e)
         {
@@ -176,6 +190,42 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 Settings.Default.Application_MainPage_ReloadShortcut = shortcutText;
                 Settings.Default.Save();
             }
+        }
+
+        private void DescriptionTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                AddDescription();
+                e.Handled = true;
+            }
+        }
+
+        private void AddDescription()
+        {
+            var text = DescriptionTextBox.Text.Trim();
+            if (!string.IsNullOrEmpty(text) && !Descriptions.Contains(text))
+            {
+                Descriptions.Add(text);
+                SaveDescriptions();
+            }
+            DescriptionTextBox.Clear();
+        }
+
+        private void RemoveDescription(object param)
+        {
+            if (param is string text && Descriptions.Contains(text))
+            {
+                Descriptions.Remove(text);
+                SaveDescriptions();
+            }
+        }
+
+        private void SaveDescriptions()
+        {
+            var result = string.Join(", ", Descriptions);
+            Settings.Default.Application_DefaultTicketDescription = result;
+            Settings.Default.Save();
         }
     }
 }

@@ -24,7 +24,6 @@ namespace Parking.App.Views.Windows
         private string ExitImage { get; set; }
         private readonly ILogger<TicketDetailsWindow> _logger;
         private List<(ImageSource ImageSource, string Name, bool ForSave)> ExtraImagesList = new List<(ImageSource ImageSource, string Name, bool ForSave)>();
-
         private DispatcherTimer _closeTimer;
         public TicketDetailsWindow(Guid ticketId, BitmapSource currentImage, List<(string Image, string Name)>? extraimages, long? cardUid)
         {

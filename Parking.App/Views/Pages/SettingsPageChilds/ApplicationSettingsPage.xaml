@@ -17,6 +17,7 @@
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                 <DockPanel>
+
                     <ComboBox DockPanel.Dock="Right" 
                         SelectedValue="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_GateType, Mode=TwoWay}" 
                            SelectedValuePath="Tag"
@@ -78,6 +79,40 @@
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Left" Margin="5"  Text="قیمت کارت مفقودی" VerticalAlignment="Center"/>
                 </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+
+                <TextBlock Margin="0,0,0,5" Text="توضیحات پیش فرض قبض" VerticalAlignment="Center"/>
+
+                <!-- ItemsControl to display badges -->
+                <ItemsControl ItemsSource="{Binding Descriptions}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border  Background="#4CAF50" CornerRadius="10" Margin="2" Padding="5">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding}" Foreground="White" Margin="0,0,5,0"/>
+                                    <Button Content="x" Width="16" Height="16" Padding="0"
+                                    Command="{Binding DataContext.RemoveDescriptionCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                    CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Input textbox -->
+                <ui:TextBox x:Name="DescriptionTextBox"
+                    FlowDirection="RightToLeft"
+                    MinWidth="200"
+                    KeyDown="DescriptionTextBox_KeyDown"
+            PlaceholderText="توضیحات را وارد کنید و Enter را فشار دهید"/>
             </StackPanel>
         </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">

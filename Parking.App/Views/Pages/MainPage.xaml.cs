@@ -35,6 +35,9 @@ namespace Parking.App.Views.Pages
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+
+            DescriptionComboBox.ItemsSource = ViewModel.Descriptions;
+            DescriptionComboBox.SelectedIndex = 0;
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -973,7 +976,7 @@ namespace Parking.App.Views.Pages
                                         var receiptContent = ReceiptPrinter.GenerateReceiptContent(new ReceiptModel
                                         {
                                             BarcodeId = ticket.BarcodeId,
-                                            Description = "--",
+                                            Description = ViewModel.TicketDescription,
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
                                             StartTime = ticket.StartTime.ToLongShamsiString() + " " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
@@ -1399,6 +1402,32 @@ namespace Parking.App.Views.Pages
             }
             return;
         }
-    }
 
+        private void DescriptionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DescriptionComboBox.SelectedItem is string selected)
+            {
+                if (selected == "توضیحات دلخواه")
+                {
+                    CustomDescriptionBox.Visibility = Visibility.Visible;
+                    CustomDescriptionBox.Focus();
+                }
+                else
+                {
+                    ViewModel.SelectedDescription = selected;
+                    CustomDescriptionBox.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private void CustomDescription_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var text = CustomDescription_TextBox.Text;
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                ViewModel.SelectedDescription = text;
+            }
+        }
+    }
 }

@@ -4,6 +4,23 @@ namespace Parking.App.ViewModels.Pages;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
+
+    public MainPageViewModel()
+    {
+
+        LatestEntryListItems = new ObservableCollection<TicketsListViewModel>();
+        LatestExitedListItems = new ObservableCollection<TicketsListViewModel>();
+        var saved = Settings.Default.Application_DefaultTicketDescription;
+        if (!string.IsNullOrEmpty(saved))
+        {
+            foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                Descriptions.Add(desc.Trim());
+        }
+
+        Descriptions.Insert(0, "توضیحات دلخواه");
+
+        SelectedDescription = Descriptions.FirstOrDefault();
+    }
     private ComboBoxItem _selectedVehicleSegmentItem;
     public ComboBoxItem SelectedVehicleSegmentItem
     {
@@ -70,6 +87,56 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
     }
 
+    private string _ticketDescription;
+    public string TicketDescription
+    {
+        get => _ticketDescription;
+        set
+        {
+            if (_ticketDescription != value)
+            {
+                _ticketDescription = value;
+                OnPropertyChanged(nameof(TicketDescription));
+            }
+        }
+    }
+
+
+    private ObservableCollection<string> _descriptions = new ObservableCollection<string>();
+    public ObservableCollection<string> Descriptions
+    {
+        get => _descriptions;
+        set { _descriptions = value; OnPropertyChanged(nameof(Descriptions)); }
+    }
+
+    private string _selectedDescription;
+    public string SelectedDescription
+    {
+        get => _selectedDescription;
+        set
+        {
+            if (_selectedDescription != value)
+            {
+                _selectedDescription = value;
+                OnPropertyChanged(nameof(SelectedDescription));
+
+                IsCustomDescriptionVisible = _selectedDescription == "توضیحات دلخواه";
+
+                if (!IsCustomDescriptionVisible)
+                {
+                    TicketDescription = _selectedDescription;
+                }
+            }
+        }
+    }
+
+    private bool _isCustomDescriptionVisible;
+    public bool IsCustomDescriptionVisible
+    {
+        get => _isCustomDescriptionVisible;
+        set { _isCustomDescriptionVisible = value; OnPropertyChanged(nameof(IsCustomDescriptionVisible)); }
+    }
+
 
     private ObservableCollection<TicketsListViewModel> latestEntryListItems;
     public ObservableCollection<TicketsListViewModel> LatestEntryListItems
@@ -101,12 +168,5 @@ public class MainPageViewModel : INotifyPropertyChanged
     protected virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public MainPageViewModel()
-    {
-
-        LatestEntryListItems = new ObservableCollection<TicketsListViewModel>();
-        LatestExitedListItems = new ObservableCollection<TicketsListViewModel>();
     }
 }

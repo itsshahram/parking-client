@@ -706,5 +706,17 @@ namespace Parking.App {
                 this["Application_Sync_AllDeviceTickets"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Application_DefaultTicketDescription {
+            get {
+                return ((string)(this["Application_DefaultTicketDescription"]));
+            }
+            set {
+                this["Application_DefaultTicketDescription"] = value;
+            }
+        }
     }
 }
