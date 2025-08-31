@@ -10,6 +10,7 @@ namespace Parking.App.Models;
 public class ReceiptModel
 {
     public string? Description { get; set; }
+    public string? DriverDescription { get; set; }
     public string? LicensePlate { get; set; }
     public long BarcodeId { get; set; }
     public string? VehicleSegmentName { get; set; }

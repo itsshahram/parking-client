@@ -104,9 +104,18 @@ public class ReceiptPrinter
         stackPanel.Children.Add(new Separator());
         stackPanel.Children.Add(new TextBlock
         {
-            Text = $"توضیحات: {receipt.Description}",
+            Text = $"زمان: {receipt.Description}",
             FontSize = 12,
             TextAlignment = TextAlignment.Center , Width = 170, TextWrapping = TextWrapping.Wrap,
+        });
+        stackPanel.Children.Add(new Separator());
+        stackPanel.Children.Add(new TextBlock
+        {
+            Text = $"توضیحات: {receipt.DriverDescription}",
+            FontSize = 12,
+            TextAlignment = TextAlignment.Center,
+            Width = 170,
+            TextWrapping = TextWrapping.Wrap,
         });
         stackPanel.Children.Add(new TextBlock
         {

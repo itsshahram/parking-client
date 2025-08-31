@@ -189,10 +189,10 @@
                                         <TextBlock Text="نام و نام خانوادگی راننده" />
                                         <ui:TextBox Text="{Binding DriverFullName, Mode=TwoWay}"/>
                                     </StackPanel>
-                                    <StackPanel Margin="0 5">
+                                    <!--<StackPanel Margin="0 5">
                                         <TextBlock Text="توصیحات راننده" />
                                         <ui:TextBox Text="{Binding DriverDescription, Mode=TwoWay}" />
-                                    </StackPanel>
+                                    </StackPanel>-->
                                     <StackPanel Margin="0 5">
                                         <TextBlock Text="توضیحات پیش فرض" />
                                         <ComboBox x:Name="DescriptionComboBox" 
@@ -203,7 +203,7 @@
 
                                     <StackPanel x:Name="CustomDescriptionBox" Visibility="Collapsed" Margin="0 5">
                                         <TextBlock Text="توضیحات دلخواه" />
-                                        <ui:TextBox x:Name="CustomDescription_TextBox" TextChanged="CustomDescription_TextChanged" Text="{Binding Description, Mode=TwoWay}" />
+                                        <ui:TextBox x:Name="CustomDescription_TextBox" TextChanged="CustomDescription_TextChanged" Text="{Binding DriverDescription, Mode=TwoWay}" />
                                     </StackPanel>
                                 </StackPanel>
 

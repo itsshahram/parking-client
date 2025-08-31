@@ -899,7 +899,8 @@ public class ParkingService : IParkingService
                     ExitGate = s.ExitGate,
                     ExitImage = s.ExitImage,
                     StartImage = s.StartImage,
-                    BarcodeId = s.BarcodeId
+                    BarcodeId = s.BarcodeId, 
+                    DriverDescription = s.DriverDescription
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {

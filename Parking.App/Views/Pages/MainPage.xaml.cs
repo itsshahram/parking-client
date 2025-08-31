@@ -1415,6 +1415,7 @@ namespace Parking.App.Views.Pages
                 else
                 {
                     ViewModel.SelectedDescription = selected;
+                    ViewModel.DriverDescription = selected;
                     CustomDescriptionBox.Visibility = Visibility.Collapsed;
                 }
             }

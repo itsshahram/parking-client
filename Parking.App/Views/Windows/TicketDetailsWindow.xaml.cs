@@ -284,12 +284,12 @@ namespace Parking.App.Views.Windows
                     }
                 }
 
-                if (e.Key == Key.F3)
-                {
-                    PrintTicket();
-                }
-            }
 
+            }
+            if (e.Key == Key.F3)
+            {
+                PrintTicket();
+            }
 
         }
         public async void Payment()
@@ -680,6 +680,8 @@ namespace Parking.App.Views.Windows
                 var receiptContent = ReceiptPrinter.GenerateInvoiceContent(new InvoiceModel
                 {
                     BarcodeId = ticket.BarcodeId,
+                    DriverDescription = ticket.DriverDescription,
+
                     Description = ticket.Description,
                     LicensePlate = ticket.LicensePlate,
                     ParkingName = ticket.ParkingName,

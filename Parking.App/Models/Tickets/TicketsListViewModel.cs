@@ -15,6 +15,7 @@ public class TicketsListViewModel
     public long? CardUid { get; set; }
     public string? VehicleManufacturerName { get; set; }
     public string? Description { get; set; }
+    public string? DriverDescription { get; set; }
     public long BarcodeId { get; set; }
     public int ParkingLotId { get; set; }
     public int? VehicleSegmentId { get; set; }
