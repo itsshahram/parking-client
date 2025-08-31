@@ -1,5 +1,4 @@
 ﻿using System.Printing;
-using System.Threading.Tasks;
 using System.Windows.Markup;
 using System.Windows.Xps;
 using Border = Wpf.Ui.Controls.Border;
@@ -105,9 +104,7 @@ namespace Parking.App.Views.Windows
             this.Close();
         }
 
-        private async
-        Task
-SetTicketData(Guid ticketId)
+        private async Task SetTicketData(Guid ticketId)
         {
             try
             {
@@ -255,7 +252,6 @@ SetTicketData(Guid ticketId)
                     {
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
-
                 }
                 if (e.Key == Key.Space)
                 {
@@ -287,7 +283,6 @@ SetTicketData(Guid ticketId)
                     {
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
-
                 }
 
                 if (e.Key == Key.F3)
@@ -521,7 +516,8 @@ SetTicketData(Guid ticketId)
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                             {
-                                PaidAmount = ViewModel.Item.TotalAmount,
+                                PaidAmount = ViewModel.Item.PaidAmount,
+                                TotalAmount = ViewModel.Item.TotalAmount,
                                 PaidCreditCard = "",
                                 PaidType = "Naghdi",
                                 RefId = "0000",
@@ -534,7 +530,7 @@ SetTicketData(Guid ticketId)
                                 IsMissingCard = IsMissingCard,
                                 CardUid = ViewModel.Item.CardUid,
                                 ExitRegistrarUserId = TokenStore.UserId,
-                                ExitImage = ExitImage
+                                ExitImage = ExitImage,
                             });
 
                         }
@@ -542,6 +538,7 @@ SetTicketData(Guid ticketId)
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                             {
+                                TotalAmount = ViewModel.Item.TotalAmount,
                                 PaidAmount = ViewModel.Item.TotalAmount,
                                 PaidCreditCard = "",
                                 PaidType = "Naghdi",
@@ -671,6 +668,7 @@ SetTicketData(Guid ticketId)
 
             if (result == true)
             {
+                ViewModel.Item.PaidAmount = customAmountPaymentModalWindow.ViewModel.Amount;
                 ViewModel.Item.TotalAmount = customAmountPaymentModalWindow.ViewModel.Amount;
                 CashPayment();
             }

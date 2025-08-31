@@ -901,79 +901,33 @@ public class ParkingService : IParkingService
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var segmentTask = unitOfWork.VehicleSegments.FirstOrDefaultAsync(p => p.Id == ticket.VehicleSegmentId);
-                var discountTask = GetLicensePlateDiscountPercentAsync(ticket.EnLicensePlate ?? "_");
-                var segmentPriceTask = unitOfWork.ParkingVehicleSegmentPrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                var cardTask = unitOfWork.Cards.FirstOrDefaultAsync(c => c.CardSerialNo == ticket.CardUid);
-                var segmentVariablePriceTask = unitOfWork.ParkingVehicleSegmentVariablePrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                await Task.WhenAll(segmentVariablePriceTask, segmentPriceTask, cardTask, segmentTask, discountTask);
-                var segment = segmentTask.Result;
-                var segmentPrices = segmentPriceTask.Result;
-                var segmentVariablePrice = segmentVariablePriceTask.Result;
-                var card = cardTask.Result;
+                var segment = await unitOfWork.VehicleSegments
+                    .FirstOrDefaultAsync(p => p.Id == ticket.VehicleSegmentId);
+
+                var discount = await GetLicensePlateDiscountPercentAsync(ticket.EnLicensePlate ?? "_");
+
+                var segmentPrices = await unitOfWork.ParkingVehicleSegmentPrices
+                    .Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId)
+                    .ToListAsync();
+
+                var card = await unitOfWork.Cards
+                    .FirstOrDefaultAsync(c => c.CardSerialNo == ticket.CardUid);
+
+                var segmentVariablePrice = await unitOfWork.ParkingVehicleSegmentVariablePrices
+                    .Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId)
+                    .ToListAsync();
+
                 stopwatch.Stop();
                 _logger.LogError($"GetTicketDetailsAsync  Run Time: {stopwatch.ElapsedMilliseconds} ms");
-                //var segmentTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefaultAsync();
-                //    }
-                //});
-
-                //var segmentPriceTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.ParkingVehicleSegmentPrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                //    }
-                //});
-
-                //var discountTask = Task.Run(() => GetLicensePlateDiscountPercent(ticket.EnLicensePlate ?? "_"));
-
-                //var cardTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.Cards.Find(c => c.CardSerialNo == ticket.CardUid).FirstOrDefaultAsync();
-                //    }
-                //});
-
-                //var segmentVariablePriceTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.ParkingVehicleSegmentVariablePrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                //    }
-                //});
-                //await Task.WhenAll(segmentTask, segmentPriceTask, discountTask, cardTask);
-
-
-
-                //var segmentTask = Task.Run(async() =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefaultAsync();
-                //    }
-                //});
-
-
-
 
 
                 if (segmentPrices != null)
                 {
-                    List<(int, int, int)> hourlyrate = new List<(int, int, int)>(); // Initialize the list
+                    List<(int, int, int)> hourlyrate = new List<(int, int, int)>();
                     foreach (var item in segmentPrices)
                     {
                         hourlyrate.Add((item.TimeFrom.Hour, item.TimeTo.Hour, (int)item.HourlyRate));
                     }
-                    var discount = await discountTask;
-                    //var discount = GetLicensePlateDiscountPercent(ticket.EnLicensePlate ?? "_");
-
-
-
 
                     if (card != null)
                     {
@@ -1000,7 +954,6 @@ public class ParkingService : IParkingService
 
                         if (card != null)
                         {
-
                             if (card.PercentDiscount > 0)
                             {
                                 description = description + " | " + $"کارت دارای تخفیف {card.PercentDiscount} درصدی میباشد ";
@@ -2078,23 +2031,24 @@ public class ParkingService : IParkingService
         {
 
             unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == request.TicketId, update => update
-                                                .SetProperty(product => product.IsExited, product => true)
-                                                .SetProperty(product => product.EndTime, product => DateTime.Now)
-                                                .SetProperty(product => product.IsPaid, product => true)
-                                                .SetProperty(product => product.PaidAmount, product => request.PaidAmount)
-                                                .SetProperty(product => product.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
-                                                .SetProperty(product => product.RefId, product => request.RefId)
-                                                .SetProperty(product => product.PaidType, product => request.PaidType)
-                                                .SetProperty(product => product.PaidDate, product => request.PaidDate)
-                                                .SetProperty(product => product.RRN, product => request.RRN)
-                                                .SetProperty(product => product.TraceNo, product => request.TraceNo)
-                                                .SetProperty(product => product.DeviceId, product => Settings.Default.Application_DeviceId)
-                                                .SetProperty(product => product.MerchantNumber, product => request.MerchantNumber)
-                                                .SetProperty(product => product.ExitGate, product => request.ExitGate)
-                                                .SetProperty(product => product.ExitImage, product => request.ExitImage)
-                                                .SetProperty(product => product.IsCardMissing, product => request.IsMissingCard)
-                                                .SetProperty(product => product.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
-                                                .SetProperty(product => product.TicketStatus, product => TicketStatus.Unsynced));
+                                                .SetProperty(ticket => ticket.IsExited, product => true)
+                                                .SetProperty(ticket => ticket.EndTime, product => DateTime.Now)
+                                                .SetProperty(ticket => ticket.IsPaid, product => true)
+                                                .SetProperty(ticket => ticket.PaidAmount, product => request.PaidAmount)
+                                                .SetProperty(ticket => ticket.TotalAmount, ticket => request.TotalAmount ?? ticket.TotalAmount)
+                                                .SetProperty(ticket => ticket.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
+                                                .SetProperty(ticket => ticket.RefId, product => request.RefId)
+                                                .SetProperty(ticket => ticket.PaidType, product => request.PaidType)
+                                                .SetProperty(ticket => ticket.PaidDate, product => request.PaidDate)
+                                                .SetProperty(ticket => ticket.RRN, product => request.RRN)
+                                                .SetProperty(ticket => ticket.TraceNo, product => request.TraceNo)
+                                                .SetProperty(ticket => ticket.DeviceId, product => Settings.Default.Application_DeviceId)
+                                                .SetProperty(ticket => ticket.MerchantNumber, product => request.MerchantNumber)
+                                                .SetProperty(ticket => ticket.ExitGate, product => request.ExitGate)
+                                                .SetProperty(ticket => ticket.ExitImage, product => request.ExitImage)
+                                                .SetProperty(ticket => ticket.IsCardMissing, product => request.IsMissingCard)
+                                                .SetProperty(ticket => ticket.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
+                                                .SetProperty(ticket => ticket.TicketStatus, product => TicketStatus.Unsynced));
             //unitOfWork.Commit();
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, false));
 
