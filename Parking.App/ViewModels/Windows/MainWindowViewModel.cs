@@ -133,7 +133,7 @@ public partial class MainWindowViewModel : ObservableObject
             var loginWindow = App.GetService<LoginWindow>() ?? new LoginWindow();
             Application.Current.MainWindow = loginWindow;
             loginWindow.Show();
-        }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        }, DispatcherPriority.ApplicationIdle);
     }
 }
 

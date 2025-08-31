@@ -760,8 +760,9 @@ public class ParkingService : IParkingService
                                                       RRN = s.RRN,
                                                       LicensePlateGroupId = s.LicensePlateGroupId,
                                                       Description = s.Description,
-                                                      CardUid = s.CardUid
-                                                  }).FirstOrDefault();
+                                                      CardUid = s.CardUid,
+                                                      BarcodeId = s.BarcodeId,
+ار                                                  }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 var segment = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefault();
@@ -894,7 +895,8 @@ public class ParkingService : IParkingService
                     EntranceGate = s.EntranceGate,
                     ExitGate = s.ExitGate,
                     ExitImage = s.ExitImage,
-                    StartImage = s.StartImage
+                    StartImage = s.StartImage,
+                    BarcodeId = s.BarcodeId
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {

@@ -903,9 +903,6 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
-
-
-
                     //تخصیص فضای پارک 
                     var parkingSpace = _parkingService.GetOneFreeSpaceId();
                     if (parkingSpace.SpaceId == null)
