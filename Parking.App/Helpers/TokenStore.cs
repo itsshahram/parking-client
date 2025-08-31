@@ -12,6 +12,9 @@ public static class TokenStore
     private static DateTime _expirationDateTime;
     private static string _userName;
     private static string _roleName;
+
+    public static event EventHandler RoleChanged;
+
     public static bool ServerStatus
     {
         get => _serverStatus;
@@ -25,7 +28,14 @@ public static class TokenStore
     public static string RoleName
     {
         get => _roleName;
-        set => _roleName = value;
+        set
+        {
+            if (_roleName != value)
+            {
+                _roleName = value;
+                RoleChanged?.Invoke(null, EventArgs.Empty);
+            }
+        }
     }
     public static DateTime ExpirationDateTime
     {
@@ -57,6 +67,7 @@ public static class TokenStore
         get => _fullName;
         set => _fullName = value;
     }
+
 
     public static void Clear()
     {
