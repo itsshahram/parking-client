@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 
 namespace Parking.App.Views.Windows;
@@ -6,6 +7,7 @@ namespace Parking.App.Views.Windows;
 public partial class CustomAmountPaymentModalWindow : FluentWindow
 {
     public CustomAmountPaymentViewModel ViewModel { get; set; } = new CustomAmountPaymentViewModel();
+    private static readonly Regex _numericRegex = new Regex("[^0-9]+");
 
     public CustomAmountPaymentModalWindow(Guid ticketId)
     {
@@ -24,6 +26,27 @@ public partial class CustomAmountPaymentModalWindow : FluentWindow
     {
         DialogResult = false;
         Close();
+    }
+
+    private void AmountTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = _numericRegex.IsMatch(e.Text);
+    }
+
+    private void AmountTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(typeof(string)))
+        {
+            string text = (string)e.DataObject.GetData(typeof(string));
+            if (_numericRegex.IsMatch(text)) 
+            {
+                e.CancelCommand();
+            }
+        }
+        else
+        {
+            e.CancelCommand();
+        }
     }
 
     private void AmountTextBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -25,12 +25,14 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                         <ui:TextBox x:Name="AmountTextBox"
-                                    MinWidth="200"
-                                    FlowDirection="LeftToRight"
-                                    VerticalAlignment="Center"
-                                    Text="0"
-                                    PlaceholderText="0"
-                                    TextChanged="AmountTextBox_TextChanged"/>
+                               MinWidth="200"
+                               FlowDirection="LeftToRight"
+                               VerticalAlignment="Center"
+                               Text="0"
+                               PlaceholderText="0"
+                               PreviewTextInput="AmountTextBox_PreviewTextInput"
+                               DataObject.Pasting="AmountTextBox_Pasting"
+                               TextChanged="AmountTextBox_TextChanged"/>
                         <TextBlock DockPanel.Dock="Left" Margin="5" Text="ریال" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Left" Margin="5" Text="مبلغ" VerticalAlignment="Center"/>
