@@ -762,7 +762,7 @@ public class ParkingService : IParkingService
                                                       Description = s.Description,
                                                       CardUid = s.CardUid,
                                                       BarcodeId = s.BarcodeId,
-ار                                                  }).FirstOrDefault();
+                                                  }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 var segment = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefault();
@@ -823,6 +823,9 @@ public class ParkingService : IParkingService
                             }
                         }
                     }
+                    ParkingLot? parkingLot = unitOfWork.ParkingLots.FirstOrDefault(x => x.Id == ticket.ParkingLotId);
+                    ticket.ParkingName = parkingLot?.Name;
+
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
@@ -975,6 +978,8 @@ public class ParkingService : IParkingService
 
                         }
                     }
+                    ParkingLot? parkingLot = await unitOfWork.ParkingLots.FirstOrDefaultAsync(x => x.Id == ticket.ParkingLotId);
+                    ticket.ParkingName = parkingLot?.Name;
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
