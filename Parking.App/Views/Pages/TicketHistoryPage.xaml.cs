@@ -59,34 +59,34 @@ namespace Parking.App.Views.Pages
 
         private void SetDefaultParameter()
         {
-            var yesterday = DateTime.Now.AddDays(-1).ToShamsi().Split(" / ");
-            entryStartYearTextBox.Text = yesterday[0];
-            entryStartMountTextBox.Text = yesterday[1];
-            entryStartDayTextBox.Text = yesterday[2];
-            entryStartHourTextBox.Text = "00";
-            entryStartMinutesTextBox.Text = "00";
+            //var yesterday = DateTime.Now.AddDays(-1).ToShamsi().Split(" / ");
+            //entryStartYearTextBox.Text = yesterday[0];
+            //entryStartMountTextBox.Text = yesterday[1];
+            //entryStartDayTextBox.Text = yesterday[2];
+            //entryStartHourTextBox.Text = "00";
+            //entryStartMinutesTextBox.Text = "00";
 
 
-            var now = DateTime.Now;
-            var nowShamsi = now.ToShamsi().Split(" / ");
-            entryEndYearTextBox.Text = nowShamsi[0];
-            entryEndMountTextBox.Text = nowShamsi[1];
-            entryEndDayTextBox.Text = nowShamsi[2];
-            entryEndHourTextBox.Text = "23";
-            entryEndMinutesTextBox.Text = "59";
+            //var now = DateTime.Now;
+            //var nowShamsi = now.ToShamsi().Split(" / ");
+            //entryEndYearTextBox.Text = nowShamsi[0];
+            //entryEndMountTextBox.Text = nowShamsi[1];
+            //entryEndDayTextBox.Text = nowShamsi[2];
+            //entryEndHourTextBox.Text = "23";
+            //entryEndMinutesTextBox.Text = "59";
 
-            var tomorrow = now.AddDays(1).ToShamsi().Split(" / ");
-            exitStartYearTextBox.Text = tomorrow[0];
-            exitStartMountTextBox.Text = tomorrow[1];
-            exitStartDayTextBox.Text = tomorrow[2];
-            exitStartHourTextBox.Text = "00";
-            exitStartMinutesTextBox.Text = "00";
+            //var tomorrow = now.AddDays(1).ToShamsi().Split(" / ");
+            //exitStartYearTextBox.Text = tomorrow[0];
+            //exitStartMountTextBox.Text = tomorrow[1];
+            //exitStartDayTextBox.Text = tomorrow[2];
+            //exitStartHourTextBox.Text = "00";
+            //exitStartMinutesTextBox.Text = "00";
 
-            exitEndYearTextBox.Text = tomorrow[0];
-            exitEndMountTextBox.Text = tomorrow[1];
-            exitEndDayTextBox.Text = tomorrow[2];
-            exitEndHourTextBox.Text = "23";
-            exitEndMinutesTextBox.Text = "59";
+            //exitEndYearTextBox.Text = tomorrow[0];
+            //exitEndMountTextBox.Text = tomorrow[1];
+            //exitEndDayTextBox.Text = tomorrow[2];
+            //exitEndHourTextBox.Text = "23";
+            //exitEndMinutesTextBox.Text = "59";
 
             List<VehicleSegmentModel> list = [new VehicleSegmentModel { Id = 0, NameFa = "همه" }, .. _parkingService.GetVehicleSegments()];
 

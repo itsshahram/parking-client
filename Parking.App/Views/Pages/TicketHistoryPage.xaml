@@ -42,15 +42,15 @@
                             <StackPanel Margin="10 5">
                                 <TextBlock Text="تاریخ ورود از" />
                                 <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                    <ui:TextBox x:Name="entryStartYearTextBox" MaxLength="4" PlaceholderText="1403" Text="1403" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryStartYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryStartMountTextBox" MaxLength="2" PlaceholderText="06" Text="06" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryStartMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryStartDayTextBox" MaxLength="2" PlaceholderText="29" Text="29" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryStartDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
                                     <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
-                                    <ui:TextBox x:Name="entryStartHourTextBox" MaxLength="2" PlaceholderText="12" Text="12" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryStartHourTextBox" MaxLength="2" PlaceholderText="12"  Margin="2 0" />
                                     <TextBlock Text=":" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryStartMinutesTextBox" MaxLength="2" PlaceholderText="00" Text="00" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryStartMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -58,15 +58,15 @@
                             <StackPanel Margin="10 5">
                                 <TextBlock Text="تاریخ ورود تا" />
                                 <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                    <ui:TextBox x:Name="entryEndYearTextBox" MaxLength="4" PlaceholderText="1403" Text="1403" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryEndYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryEndMountTextBox" MaxLength="2" PlaceholderText="06" Text="06" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryEndMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryEndDayTextBox" MaxLength="2" PlaceholderText="29" Text="29" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryEndDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
                                     <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
-                                    <ui:TextBox x:Name="entryEndHourTextBox" MaxLength="2" PlaceholderText="12" Text="12" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryEndHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0" />
                                     <TextBlock Text=":" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="entryEndMinutesTextBox" MaxLength="2" PlaceholderText="00" Text="00" Margin="2 0" />
+                                    <ui:TextBox x:Name="entryEndMinutesTextBox" MaxLength="2" PlaceholderText="00"  Margin="2 0" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -74,15 +74,15 @@
                             <StackPanel Margin="10 5">
                                 <TextBlock Text="تاریخ خروج از" />
                                 <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                    <ui:TextBox x:Name="exitStartYearTextBox" MaxLength="4" PlaceholderText="1403" Text="1403" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitStartYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitStartMountTextBox" MaxLength="2" PlaceholderText="06" Text="06" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitStartMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitStartDayTextBox" MaxLength="2" PlaceholderText="29" Text="29" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitStartDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
                                     <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
-                                    <ui:TextBox x:Name="exitStartHourTextBox" MaxLength="2" PlaceholderText="12" Text="12" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitStartHourTextBox" MaxLength="2" PlaceholderText="12"  Margin="2 0" />
                                     <TextBlock Text=":" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitStartMinutesTextBox" MaxLength="2" PlaceholderText="00" Text="00" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitStartMinutesTextBox" MaxLength="2" PlaceholderText="00"  Margin="2 0" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -90,15 +90,15 @@
                             <StackPanel Margin="10 5">
                                 <TextBlock Text="تاریخ خروج تا" />
                                 <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                    <ui:TextBox x:Name="exitEndYearTextBox" MaxLength="4" PlaceholderText="1403" Text="1403" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitEndYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitEndMountTextBox" MaxLength="2" PlaceholderText="06" Text="06" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitEndMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
                                     <TextBlock Text="/" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitEndDayTextBox" MaxLength="2" PlaceholderText="29" Text="29" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitEndDayTextBox" MaxLength="2" PlaceholderText="29" Margin="2 0" />
                                     <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
-                                    <ui:TextBox x:Name="exitEndHourTextBox" MaxLength="2" PlaceholderText="12" Text="12" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitEndHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0" />
                                     <TextBlock Text=":" VerticalAlignment="Center" />
-                                    <ui:TextBox x:Name="exitEndMinutesTextBox" MaxLength="2" PlaceholderText="00" Text="00" Margin="2 0" />
+                                    <ui:TextBox x:Name="exitEndMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0" />
                                 </StackPanel>
                             </StackPanel>
 
