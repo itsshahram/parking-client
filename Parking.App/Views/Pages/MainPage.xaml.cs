@@ -767,9 +767,6 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
-
-
-
                     if (Settings.Default.Application_EntryCardRequirement)
                     {
                         CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
@@ -791,7 +788,6 @@ namespace Parking.App.Views.Pages
                             ShowMessage("خطا", "کارت نا معتبر میباشد. چنانچه کارت برای این پارکینگ است نسبت به ثبت آن اقدام فرمایید.");
                             return false;
                         }
-
 
                         //چک کردن خالی بودن کارت
                         if (Settings.Default.Application_EntryCardRequirement)
@@ -901,9 +897,6 @@ namespace Parking.App.Views.Pages
                     _logger.LogError("Error03", ex);
                     return false;
                 }
-
-
-
                 try
                 {
                     //تخصیص فضای پارک 
@@ -979,7 +972,7 @@ namespace Parking.App.Views.Pages
                                             Description = ViewModel.TicketDescription,
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
-                                            StartTime = ticket.StartTime.ToLongShamsiString() + " " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
+                                            StartTime = ticket.StartTime.ToLongShamsiString() + " " + ticket.StartTime.ToString("HH:mm"),
                                             VehicleSegmentName = ticket.VehicleSegmentName
                                         });
                                         PrintHelper.Print(receiptContent);
