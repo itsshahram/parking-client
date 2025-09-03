@@ -256,6 +256,7 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Collapsed;
             OtherPlateBox.Visibility = Visibility.Visible;
             PlateTitle.Text = "پلاک منطقه، خارجی و یا موتور";
+            IsIranPlate = false;
             RunPlateSort(true);
         }
 
