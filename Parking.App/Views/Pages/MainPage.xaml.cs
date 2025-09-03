@@ -266,6 +266,7 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Visible;
             OtherPlateBox.Visibility = Visibility.Collapsed;
             PlateTitle.Text = "پلاک ایران";
+            IsIranPlate = true;
             RunPlateSort(false);
         }
         private void RunPlateSort(bool isOtherPlate)
