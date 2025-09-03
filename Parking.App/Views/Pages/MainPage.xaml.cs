@@ -972,7 +972,7 @@ namespace Parking.App.Views.Pages
                                             Description = ViewModel.TicketDescription,
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
-                                            StartTime = ticket.StartTime.ToLongShamsiString() + " " + ticket.StartTime.ToString("HH:mm"),
+                                            StartTime = ticket.StartTime.ToShamsi() + " " + ticket.StartTime.ToString("HH:mm"),
                                             VehicleSegmentName = ticket.VehicleSegmentName
                                         });
                                         PrintHelper.Print(receiptContent);

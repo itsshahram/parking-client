@@ -685,9 +685,9 @@ namespace Parking.App.Views.Windows
                     Description = ticket.Description,
                     LicensePlate = ticket.LicensePlate,
                     ParkingName = ticket.ParkingName,
-                    StartTime = ticket.StartTime.ToLongShamsiString() + "  " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
+                    StartTime = ticket.StartTime.ToShamsi() + "  " + ticket.StartTime.ToString("HH:mm"),
                     VehicleSegmentName = ticket.VehicleSegmentName,
-                    EndTime = (ticket.IsExited ?? false) ? ticket.EndTime.ToLongShamsiString() + " " + ticket.EndTime?.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                    EndTime = ((ticket.IsExited ?? false) && ticket.EndTime != null) ? ticket.EndTime?.ToShamsi() + " " + ticket.EndTime?.ToString("HH:mm") : "",
                     PaidAmount = ticket.PaidAmount.ToString("N0"),
                     TotalAmount = ticket.TotalAmount.ToString("N0"),
                     TotalDiscount = ticket.Discount.ToString("N0")
