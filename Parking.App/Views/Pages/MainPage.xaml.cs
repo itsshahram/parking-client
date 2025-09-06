@@ -981,7 +981,8 @@ namespace Parking.App.Views.Pages
                                             ParkingName = ticket.ParkingName,
                                             StartTime = ticket.StartTime.ToShamsi() + " " + ticket.StartTime.ToString("HH:mm"),
                                             VehicleSegmentName = ticket.VehicleManufacturerName, 
-                                            QueueNumber = ticket.QueueNumber
+                                            QueueNumber = ticket.QueueNumber, 
+                                            DriverDescription = ticket.DriverDescription
                                         }, widthPixels);
                                         PrintHelper.Print(receiptContent);
                                     }

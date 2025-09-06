@@ -32,22 +32,10 @@ public class ReceiptPrinter
 
         var stackPanel = new StackPanel
         {
-            Width = width - 30, // برای در نظر گرفتن Padding و Border
+            Width = width - 30, 
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top
         };
-
-        stackPanel.Children.Add(new TextBlock
-        {
-            Text = $"قبض پارکینگ {receipt.ParkingName}",
-            FontSize = 15,
-            FontWeight = FontWeights.Bold,
-            TextAlignment = TextAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            TextWrapping = TextWrapping.Wrap,
-            Width = width - 50,
-            Margin = new Thickness(0, 0, 0, 5)
-        });
 
         if (receipt.QueueNumber != null)
         {
@@ -61,8 +49,8 @@ public class ReceiptPrinter
                 Background = Brushes.White,
                 Child = new TextBlock
                 {
-                    Text = $"نوبت: {receipt.QueueNumber}",
-                    FontSize = 18,
+                    Text = $"{receipt.QueueNumber}",
+                    FontSize = 25,
                     FontWeight = FontWeights.Bold,
                     TextAlignment = TextAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center
@@ -71,6 +59,19 @@ public class ReceiptPrinter
 
             stackPanel.Children.Add(queueBorder);
         }
+
+        stackPanel.Children.Add(new TextBlock
+        {
+            Text = $"{receipt.ParkingName}",
+            FontSize = 15,
+            FontWeight = FontWeights.Bold,
+            TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextWrapping = TextWrapping.Wrap,
+            Width = width - 50,
+            Margin = new Thickness(0, 0, 0, 5)
+        });
+
 
         var infoGrid = new Grid
         {
@@ -81,9 +82,31 @@ public class ReceiptPrinter
         infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        void AddRow(string label, string value, bool? valueInNewRow = false)
+        void AddRow(string label, string value, bool? valueInNewRow = false, bool? justValue = false)
         {
-            if ((bool)valueInNewRow)
+            if ((bool)justValue)
+            {
+                // فقط value نمایش داده شود
+                int valueRowIndex = infoGrid.RowDefinitions.Count;
+                infoGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var valueText = new TextBlock
+                {
+                    Text = value,
+                    FontSize = 15,
+                    Margin = new Thickness(2),
+                    TextWrapping = TextWrapping.Wrap,
+                    FlowDirection = FlowDirection.RightToLeft , 
+                    HorizontalAlignment = HorizontalAlignment.Center , VerticalAlignment= VerticalAlignment.Bottom
+                };
+                Grid.SetRow(valueText, valueRowIndex);
+                Grid.SetColumn(valueText, 0);
+                Grid.SetColumnSpan(valueText, 2);
+                infoGrid.Children.Add(valueText);
+                return;
+            }
+
+            if (valueInNewRow == true)
             {
                 // ردیف اول: فقط label
                 int labelRowIndex = infoGrid.RowDefinitions.Count;
@@ -152,10 +175,11 @@ public class ReceiptPrinter
         }
 
         //AddRow("زمان:", receipt.Description);
-        AddRow("توضیحات:", receipt.DriverDescription, true);
-        AddRow(" ورود:", receipt.StartTime);
-
+        AddRow("صف:", receipt.DriverDescription, false,false);
         AddRow("نوع:", receipt.VehicleSegmentName);
+        AddRow("ورود:", receipt.StartTime);
+
+
         AddRow("پلاک:", receipt.LicensePlate);
 
         stackPanel.Children.Add(infoGrid);
@@ -306,14 +330,15 @@ public class ReceiptPrinter
         }
 
         //AddRow("زمان:", receipt.Description);
-        AddRow("توضیحات:", receipt.DriverDescription, true);
+        AddRow("صف:", receipt.DriverDescription, false);
+        AddRow("نوع:", receipt.VehicleSegmentName);
         AddRow(" ورود:", receipt.StartTime);
         if (receipt.EndTime!=null && receipt.EndTime.Length>2)
         {
             AddRow(" خروج:", receipt.EndTime);
         }
         
-        AddRow("نوع:", receipt.VehicleSegmentName);
+       
         AddRow("پلاک:", receipt.LicensePlate);
         AddRow("مبلغ کل:", $"{receipt.TotalAmount:N0} ریال");
         AddRow("تخفیف:", $"{receipt.TotalDiscount:N0} ریال");

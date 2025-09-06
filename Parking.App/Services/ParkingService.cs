@@ -769,7 +769,9 @@ public class ParkingService : IParkingService
                                                       LicensePlateGroupId = s.LicensePlateGroupId,
                                                       Description = s.Description,
                                                       CardUid = s.CardUid,
-                                                      BarcodeId = s.BarcodeId, QueueNumber = s.QueueNumber
+                                                      BarcodeId = s.BarcodeId,
+                                                      QueueNumber = s.QueueNumber , 
+                                                      DriverDescription = s.DriverDescription
                                                   }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
