@@ -940,6 +940,7 @@ namespace Parking.App.Views.Pages
                             CardUid = _cardSerialNo,
                             DriverDescription = ViewModel.DriverDescription,
                             DriverPhoneNumber = ViewModel.DriverPhoneNumber,
+                            TicketDescriptionItemId = ViewModel.SelectedDescription.Id,
                             DriverFullName = ViewModel.DriverFullName,
                             ParkingSpaceID = parkingSpace.SpaceId ?? new Guid(),
                             ParkingSectionId = parkingSpace.SectionId ?? new Guid(),
@@ -968,6 +969,10 @@ namespace Parking.App.Views.Pages
 
                                     if (ticket != null)
                                     {
+                                        double dpi = Settings.Default.Application_Print_dpi;
+                                        double widthMm = Settings.Default.Application_Print_widthMm;
+                                        double widthInches = widthMm / 25.4;
+                                        double widthPixels = dpi * widthInches;
                                         var receiptContent = ReceiptPrinter.GenerateReceiptContent(new ReceiptModel
                                         {
                                             BarcodeId = ticket.BarcodeId,
@@ -975,8 +980,9 @@ namespace Parking.App.Views.Pages
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
                                             StartTime = ticket.StartTime.ToShamsi() + " " + ticket.StartTime.ToString("HH:mm"),
-                                            VehicleSegmentName = ticket.VehicleSegmentName
-                                        });
+                                            VehicleSegmentName = ticket.VehicleManufacturerName, 
+                                            QueueNumber = ticket.QueueNumber
+                                        }, widthPixels);
                                         PrintHelper.Print(receiptContent);
                                     }
 
@@ -1400,9 +1406,9 @@ namespace Parking.App.Views.Pages
 
         private void DescriptionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DescriptionComboBox.SelectedItem is string selected)
+            if (DescriptionComboBox.SelectedItem is TicketDescriptionItemModel selected)
             {
-                if (selected == "توضیحات دلخواه")
+                if (selected.Id == 0)
                 {
                     CustomDescriptionBox.Visibility = Visibility.Visible;
                     CustomDescriptionBox.Focus();
@@ -1410,7 +1416,7 @@ namespace Parking.App.Views.Pages
                 else
                 {
                     ViewModel.SelectedDescription = selected;
-                    ViewModel.DriverDescription = selected;
+                    ViewModel.DriverDescription = selected.Text;
                     CustomDescriptionBox.Visibility = Visibility.Collapsed;
                 }
             }
@@ -1422,7 +1428,7 @@ namespace Parking.App.Views.Pages
 
             if (!string.IsNullOrEmpty(text))
             {
-                ViewModel.SelectedDescription = text;
+                ViewModel.DriverDescription = text;
             }
         }
     }

@@ -718,5 +718,41 @@ namespace Parking.App {
                 this["Application_DefaultTicketDescription"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_QueueActive {
+            get {
+                return ((bool)(this["Application_QueueActive"]));
+            }
+            set {
+                this["Application_QueueActive"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("96")]
+        public double Application_Print_dpi {
+            get {
+                return ((double)(this["Application_Print_dpi"]));
+            }
+            set {
+                this["Application_Print_dpi"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("58")]
+        public double Application_Print_widthMm {
+            get {
+                return ((double)(this["Application_Print_widthMm"]));
+            }
+            set {
+                this["Application_Print_widthMm"] = value;
+            }
+        }
     }
 }

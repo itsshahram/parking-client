@@ -195,10 +195,11 @@
                                     </StackPanel>-->
                                     <StackPanel Margin="0 5">
                                         <TextBlock Text="توضیحات پیش فرض" />
-                                        <ComboBox x:Name="DescriptionComboBox" 
-                                    SelectedIndex="0"
-                                    SelectedItem="{Binding SelectedDescription, Mode=TwoWay}"
-                                    SelectionChanged="DescriptionComboBox_SelectionChanged"/>
+                                                    <ComboBox x:Name="DescriptionComboBox" 
+                                                SelectedIndex="0"
+                                                              DisplayMemberPath="Text"
+                                                SelectedItem="{Binding SelectedDescription, Mode=TwoWay}"
+                                                SelectionChanged="DescriptionComboBox_SelectionChanged"/>
                                     </StackPanel>
 
                                     <StackPanel x:Name="CustomDescriptionBox" Visibility="Collapsed" Margin="0 5">

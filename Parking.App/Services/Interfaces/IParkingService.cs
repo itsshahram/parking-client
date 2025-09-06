@@ -86,4 +86,14 @@ public interface IParkingService
     Guid? GetTicketIdByBarcode(long barcode);
 
     #endregion
+
+
+    #region TicketDescription
+    List<TicketDescriptionItemModel> GetAllTicketDescriptionItems();
+    TicketDescriptionItemModel? GetTicketDescriptionItemById(int id);
+    bool AddTicketDescriptionItem(TicketDescriptionItemModel request);
+    bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request);
+    bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
+    bool DeleteTicketDescriptionItem(int id);
+    #endregion
 }

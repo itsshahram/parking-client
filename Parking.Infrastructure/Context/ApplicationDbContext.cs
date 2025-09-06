@@ -34,7 +34,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<CardCreditHistory> CardCreditHistories { get; set; }
     public DbSet<ParkingTicketImage> ParkingTicketImages { get; set; }
     public DbSet<ParkingTicketExtraImage> ParkingTicketExtraImages { get; set; }
-    public DbSet<AddCardItem> AddCardItems { get; set; }
+    public DbSet<TicketDescriptionItem> TicketDescriptionItems { get; set; }
+    public DbSet<TicketQueueItem> TicketQueueItems { get; set; }
+    public DbSet<TicketQueueResetPolicy> TicketQueueResetPolicies { get; set; }
+
 
 
 

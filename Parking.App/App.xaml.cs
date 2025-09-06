@@ -64,6 +64,7 @@ public partial class App : Application
                 services.AddTransient<IParkingService, ParkingService>();
                 services.AddTransient<ISynchronizationService, SynchronizationService>();
                 services.AddTransient<IUserService, UserService>();
+                services.AddTransient<ITicketQueueService, TicketQueueService>();
 
                 services.AddScoped<IThemeService, ThemeService>();
 
