@@ -32,10 +32,8 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         {
             try
             {
-                var app = (App)App.Current;
-                app.CloseMainWindow();
-                var login = App.GetService<LoginWindow>();
-                login?.ShowDialog();
+                MainWindowViewModel main = new MainWindowViewModel();
+                main.HandleLogout();
             }
             catch (Exception ex)
             {
