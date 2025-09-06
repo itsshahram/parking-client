@@ -185,5 +185,8 @@
     <Setting Name="Application_Print_widthMm" Type="System.Double" Scope="User">
       <Value Profile="(Default)">58</Value>
     </Setting>
+    <Setting Name="Application_ParkingLotReciptDescription" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

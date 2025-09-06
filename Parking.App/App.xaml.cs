@@ -1,21 +1,10 @@
 ﻿using Coravel;
-using Coravel.Scheduling.Schedule.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic.Logging;
-using Parking.App.Utilities;
 using Parking.Domain.Contracts.Base;
-using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.User;
-using Parking.Domain.Entities.Vehicles;
 using Serilog;
-using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
-using System;
 using System.Net;
-using System.Windows.Forms;
 using Log = Serilog.Log;
 
 namespace Parking.App;

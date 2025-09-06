@@ -32,7 +32,7 @@ public class ReceiptPrinter
 
         var stackPanel = new StackPanel
         {
-            Width = width - 30, 
+            Width = width - 30,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top
         };
@@ -96,8 +96,9 @@ public class ReceiptPrinter
                     FontSize = 15,
                     Margin = new Thickness(2),
                     TextWrapping = TextWrapping.Wrap,
-                    FlowDirection = FlowDirection.RightToLeft , 
-                    HorizontalAlignment = HorizontalAlignment.Center , VerticalAlignment= VerticalAlignment.Bottom
+                    FlowDirection = FlowDirection.RightToLeft,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Bottom
                 };
                 Grid.SetRow(valueText, valueRowIndex);
                 Grid.SetColumn(valueText, 0);
@@ -175,7 +176,7 @@ public class ReceiptPrinter
         }
 
         //AddRow("زمان:", receipt.Description);
-        AddRow("صف:", receipt.DriverDescription, false,false);
+        AddRow("صف:", receipt.DriverDescription, false, false);
         AddRow("نوع:", receipt.VehicleSegmentName);
         AddRow("ورود:", receipt.StartTime);
 
@@ -193,6 +194,26 @@ public class ReceiptPrinter
             Margin = new Thickness(0, 10, 0, 0)
         });
 
+        stackPanel.Children.Add(new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Margin = new Thickness(0, 5, 0, 5)
+        });
+
+        stackPanel.Children.Add(new TextBlock
+        {
+            Text = Settings.Default.Application_ParkingLotReciptDescription,
+            FontSize = 13,
+            FontWeight = FontWeights.SemiBold,
+            TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
+            TextWrapping = TextWrapping.Wrap,
+            Width = width - 30
+        });
+
+
         outerBorder.Child = stackPanel;
         return outerBorder;
     }
@@ -200,13 +221,14 @@ public class ReceiptPrinter
     {
         var outerBorder = new Border
         {
-            Width = width -10,
+            Width = width - 10,
             BorderBrush = Brushes.Black,
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(10),
             Padding = new Thickness(5),
             Margin = new Thickness(5),
-            Background = Brushes.White , HorizontalAlignment = HorizontalAlignment.Center
+            Background = Brushes.White,
+            HorizontalAlignment = HorizontalAlignment.Center
         };
 
         var stackPanel = new StackPanel
@@ -222,8 +244,9 @@ public class ReceiptPrinter
             FontSize = 15,
             FontWeight = FontWeights.Bold,
             TextAlignment = TextAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center, TextWrapping = TextWrapping.Wrap,
-            Width = width - 50 ,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            TextWrapping = TextWrapping.Wrap,
+            Width = width - 50,
             Margin = new Thickness(0, 0, 0, 5)
         });
 
@@ -333,12 +356,12 @@ public class ReceiptPrinter
         AddRow("صف:", receipt.DriverDescription, false);
         AddRow("نوع:", receipt.VehicleSegmentName);
         AddRow(" ورود:", receipt.StartTime);
-        if (receipt.EndTime!=null && receipt.EndTime.Length>2)
+        if (receipt.EndTime != null && receipt.EndTime.Length > 2)
         {
             AddRow(" خروج:", receipt.EndTime);
         }
-        
-       
+
+
         AddRow("پلاک:", receipt.LicensePlate);
         AddRow("مبلغ کل:", $"{receipt.TotalAmount:N0} ریال");
         AddRow("تخفیف:", $"{receipt.TotalDiscount:N0} ریال");
@@ -353,6 +376,25 @@ public class ReceiptPrinter
             Width = width - 40,
             Stretch = Stretch.Uniform,
             Margin = new Thickness(0, 10, 0, 0)
+        });
+
+        stackPanel.Children.Add(new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Margin = new Thickness(0, 5, 0, 5)
+        });
+
+        stackPanel.Children.Add(new TextBlock
+        {
+            Text = Settings.Default.Application_ParkingLotReciptDescription,
+            FontSize = 13,
+            FontWeight = FontWeights.SemiBold,
+            TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
+            TextWrapping = TextWrapping.Wrap,
+            Width = width - 30
         });
 
         outerBorder.Child = stackPanel;
