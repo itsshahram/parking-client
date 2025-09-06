@@ -104,6 +104,11 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             Settings.Default.Application_GatePCName = ((TextBox)sender).Text;
             Settings.Default.Save();
         }
+        private void TextBoxes_TextChanged(object sender, TextChangedEventArgs e)
+        {
+           
+            Settings.Default.Save();
+        }
 
         private void DeviceId_TextChanged(object sender, TextChangedEventArgs e)
         {

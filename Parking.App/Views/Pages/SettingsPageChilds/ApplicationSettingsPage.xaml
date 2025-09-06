@@ -283,7 +283,7 @@
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                         <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Print_dpi, Mode=TwoWay}" 
-                                    TextChanged="GateTextBox_TextChanged"  
+                                    TextChanged="TextBoxes_TextChanged"  
                                     FlowDirection="LeftToRight"
                                     MinWidth="200"/>
                     </StackPanel>
@@ -297,7 +297,7 @@
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                         <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Print_widthMm, Mode=TwoWay}" 
-                                    TextChanged="GateTextBox_TextChanged"  
+                                    TextChanged="TextBoxes_TextChanged"  
                                     FlowDirection="LeftToRight"
                                     MinWidth="200"/>
                     </StackPanel>
@@ -321,7 +321,7 @@
 
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                         <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_ParkingLotReciptDescription, Mode=TwoWay}" 
-                                    TextChanged="GateTextBox_TextChanged"  
+                                    TextChanged="TextBoxes_TextChanged"  
                                     FlowDirection="LeftToRight"
                                     MinWidth="200"/>
                     </StackPanel>
