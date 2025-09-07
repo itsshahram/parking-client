@@ -1,4 +1,5 @@
-﻿using TextBox = Wpf.Ui.Controls.TextBox;
+﻿using static Parking.App.Helpers.AppInfoHelper;
+using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
 {
@@ -11,6 +12,8 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         public ObservableCollection<string> Descriptions { get; set; } = new ObservableCollection<string>();
         public ICommand RemoveDescriptionCommand { get; }
 
+
+
         public ApplicationSettingsPage()
         {
             RemoveDescriptionCommand = new Helpers.RelayCommand(RemoveDescription);
@@ -18,7 +21,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             _parkingService = App.GetService<IParkingService>();
 
             InitializeComponent();
-            this.DataContext = this; 
+            this.DataContext = this;
             var vehicleSegmentsList = _parkingService.GetVehicleSegments().Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa }).ToList();
             vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = 0, Content = "انتخاب بدون پیش ‌فرض" });
             foreach (var item in vehicleSegmentsList)
@@ -31,14 +34,8 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 if (ElasticBox != null)
                     ElasticBox.Visibility = Visibility.Visible;
             }
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            var publishDate = (BuildDateAttribute)Assembly
-                                .GetExecutingAssembly()
-                                .GetCustomAttributes(typeof(BuildDateAttribute), false)
-                                .FirstOrDefault();
-            AppVersionText.Text = version;
-            PublishDateText.Text = publishDate?.Date.ToString() ?? "Unknown";
-
+            AppVersionText.Text = GetVersion();
+            PublishDateText.Text = GetBuildDate();
             APIServerAddressTextBox.Text = Settings.Default.Application_ApiServerAddress;
             this.PreviewKeyDown += Window_PreviewKeyDown;
             this.Unloaded += SyncConfigPage_Unloaded;
