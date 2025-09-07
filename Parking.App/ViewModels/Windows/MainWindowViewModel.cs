@@ -109,7 +109,7 @@ public partial class MainWindowViewModel : ObservableObject
             Command = new CommunityToolkit.Mvvm.Input.RelayCommand(HandleLogout)
         });
     }
-    private void HandleLogout()
+    public void HandleLogout()
     {
         TokenStore.Clear();
 

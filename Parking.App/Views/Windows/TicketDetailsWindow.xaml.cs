@@ -6,6 +6,7 @@ using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using Grid = Wpf.Ui.Controls.Grid;
 using Image = Wpf.Ui.Controls.Image;
+using Size = System.Windows.Size;
 using StackPanel = Wpf.Ui.Controls.StackPanel;
 using TextBlock = Wpf.Ui.Controls.TextBlock;
 
@@ -515,7 +516,7 @@ namespace Parking.App.Views.Windows
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                             {
-                                PaidAmount = ViewModel.Item.PaidAmount,
+                                PaidAmount = ViewModel.Item.TotalAmount,
                                 TotalAmount = ViewModel.Item.TotalAmount,
                                 PaidCreditCard = "",
                                 PaidType = "Naghdi",
@@ -677,23 +678,32 @@ namespace Parking.App.Views.Windows
             try
             {
                 var ticket = await _parkingService?.GetTicketDetailsAsync(ViewModel.Item.Id);
+
+
+                double dpi = Settings.Default.Application_Print_dpi;
+                double widthMm = Settings.Default.Application_Print_widthMm;
+                double widthInches = widthMm / 25.4;
+                double widthPixels = dpi * widthInches;
+
+
                 var receiptContent = ReceiptPrinter.GenerateInvoiceContent(new InvoiceModel
                 {
                     BarcodeId = ticket.BarcodeId,
                     DriverDescription = ticket.DriverDescription,
-
+                     QueueNumber = ticket.QueueNumber,
                     Description = ticket.Description,
                     LicensePlate = ticket.LicensePlate,
                     ParkingName = ticket.ParkingName,
-                    StartTime = ticket.StartTime.ToLongShamsiString() + "  " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-                    VehicleSegmentName = ticket.VehicleSegmentName,
-                    EndTime = (ticket.IsExited ?? false) ? ticket.EndTime.ToLongShamsiString() + " " + ticket.EndTime?.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                    StartTime = ticket.StartTime.ToShamsi() + "  " + ticket.StartTime.ToString("HH:mm"),
+                    VehicleSegmentName = ticket.VehicleManufacturerName,
+                    EndTime = ((ticket.IsExited ?? false) && ticket.EndTime != null) ? ticket.EndTime?.ToShamsi() + " " + ticket.EndTime?.ToString("HH:mm") : "",
                     PaidAmount = ticket.PaidAmount.ToString("N0"),
                     TotalAmount = ticket.TotalAmount.ToString("N0"),
                     TotalDiscount = ticket.Discount.ToString("N0")
-                });
+                }, widthPixels);
                 // Print the receipt 
                 // PrintHelper.Print(receiptContent);
+
                 DirectPrint(receiptContent);
             }
             catch
@@ -703,28 +713,69 @@ namespace Parking.App.Views.Windows
                 return;
             }
         }
+        //private void DirectPrint(UIElement contentToPrint)
+        //{
+
+        //    PrintQueue printQueue = LocalPrintServer.GetDefaultPrintQueue();
+        //    PrintTicket printTicket = printQueue.DefaultPrintTicket;
+
+        //    FixedDocument fixedDoc = new FixedDocument();
+        //    //fixedDoc.DocumentPaginator.PageSize = new Size(96 * 3.2, 96 * 4); 
+
+
+        //    PageContent pageContent = new PageContent();
+        //    FixedPage fixedPage = new FixedPage();
+
+
+        //    fixedPage.Children.Add(contentToPrint);
+        //    ((IAddChild)pageContent).AddChild(fixedPage);
+        //    fixedDoc.Pages.Add(pageContent);
+
+        //    XpsDocumentWriter writer = PrintQueue.CreateXpsDocumentWriter(printQueue);
+        //    writer.Write(fixedDoc, printTicket);
+
+        //    Console.WriteLine("Printing completed successfully.");
+        //}
         private void DirectPrint(UIElement contentToPrint)
         {
-
+            // تنظیمات پرینتر
             PrintQueue printQueue = LocalPrintServer.GetDefaultPrintQueue();
             PrintTicket printTicket = printQueue.DefaultPrintTicket;
 
-            FixedDocument fixedDoc = new FixedDocument();
-            //fixedDoc.DocumentPaginator.PageSize = new Size(96 * 3.2, 96 * 4); 
+           
+            double dpi = Settings.Default.Application_Print_dpi;
+            double widthMm = Settings.Default.Application_Print_widthMm;
+            double widthInches = widthMm / 25.4;
+            double widthPixels = dpi * widthInches; 
 
+            
+            contentToPrint.Measure(new Size(widthPixels, double.PositiveInfinity));
+            contentToPrint.Arrange(new Rect(new System.Windows.Point(0, 0), contentToPrint.DesiredSize));
+            double contentHeight = contentToPrint.DesiredSize.Height;
+
+            // تنظیم اندازه صفحه بر اساس محتوای واقعی
+            Size pageSize = new Size(widthPixels, contentHeight);
+
+            FixedDocument fixedDoc = new FixedDocument();
+            fixedDoc.DocumentPaginator.PageSize = pageSize;
+
+            FixedPage fixedPage = new FixedPage
+            {
+                Width = pageSize.Width,
+                Height = pageSize.Height
+            };
+
+            FixedPage.SetLeft(contentToPrint, 0);
+            FixedPage.SetTop(contentToPrint, 0);
+            fixedPage.Children.Add(contentToPrint);
 
             PageContent pageContent = new PageContent();
-            FixedPage fixedPage = new FixedPage();
-
-
-            fixedPage.Children.Add(contentToPrint);
             ((IAddChild)pageContent).AddChild(fixedPage);
             fixedDoc.Pages.Add(pageContent);
 
+            // ارسال به پرینتر
             XpsDocumentWriter writer = PrintQueue.CreateXpsDocumentWriter(printQueue);
             writer.Write(fixedDoc, printTicket);
-
-            Console.WriteLine("Printing completed successfully.");
         }
 
         private async void CustomPaymentCheckPermission()

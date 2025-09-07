@@ -256,6 +256,7 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Collapsed;
             OtherPlateBox.Visibility = Visibility.Visible;
             PlateTitle.Text = "پلاک منطقه، خارجی و یا موتور";
+            IsIranPlate = false;
             RunPlateSort(true);
         }
 
@@ -265,6 +266,7 @@ namespace Parking.App.Views.Pages
             IRPlateBox.Visibility = Visibility.Visible;
             OtherPlateBox.Visibility = Visibility.Collapsed;
             PlateTitle.Text = "پلاک ایران";
+            IsIranPlate = true;
             RunPlateSort(false);
         }
         private void RunPlateSort(bool isOtherPlate)
@@ -767,9 +769,6 @@ namespace Parking.App.Views.Pages
 
                 try
                 {
-
-
-
                     if (Settings.Default.Application_EntryCardRequirement)
                     {
                         CardModel? card = _parkingService.GetCardInfo(_cardSerialNo);
@@ -791,7 +790,6 @@ namespace Parking.App.Views.Pages
                             ShowMessage("خطا", "کارت نا معتبر میباشد. چنانچه کارت برای این پارکینگ است نسبت به ثبت آن اقدام فرمایید.");
                             return false;
                         }
-
 
                         //چک کردن خالی بودن کارت
                         if (Settings.Default.Application_EntryCardRequirement)
@@ -901,9 +899,6 @@ namespace Parking.App.Views.Pages
                     _logger.LogError("Error03", ex);
                     return false;
                 }
-
-
-
                 try
                 {
                     //تخصیص فضای پارک 
@@ -945,6 +940,7 @@ namespace Parking.App.Views.Pages
                             CardUid = _cardSerialNo,
                             DriverDescription = ViewModel.DriverDescription,
                             DriverPhoneNumber = ViewModel.DriverPhoneNumber,
+                            TicketDescriptionItemId = ViewModel.SelectedDescription.Id,
                             DriverFullName = ViewModel.DriverFullName,
                             ParkingSpaceID = parkingSpace.SpaceId ?? new Guid(),
                             ParkingSectionId = parkingSpace.SectionId ?? new Guid(),
@@ -973,15 +969,21 @@ namespace Parking.App.Views.Pages
 
                                     if (ticket != null)
                                     {
+                                        double dpi = Settings.Default.Application_Print_dpi;
+                                        double widthMm = Settings.Default.Application_Print_widthMm;
+                                        double widthInches = widthMm / 25.4;
+                                        double widthPixels = dpi * widthInches;
                                         var receiptContent = ReceiptPrinter.GenerateReceiptContent(new ReceiptModel
                                         {
                                             BarcodeId = ticket.BarcodeId,
                                             Description = ViewModel.TicketDescription,
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
-                                            StartTime = ticket.StartTime.ToLongShamsiString() + " " + ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-                                            VehicleSegmentName = ticket.VehicleSegmentName
-                                        });
+                                            StartTime = ticket.StartTime.ToShamsi() + " " + ticket.StartTime.ToString("HH:mm"),
+                                            VehicleSegmentName = ticket.VehicleManufacturerName, 
+                                            QueueNumber = ticket.QueueNumber, 
+                                            DriverDescription = ticket.DriverDescription
+                                        }, widthPixels);
                                         PrintHelper.Print(receiptContent);
                                     }
 
@@ -1405,9 +1407,9 @@ namespace Parking.App.Views.Pages
 
         private void DescriptionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DescriptionComboBox.SelectedItem is string selected)
+            if (DescriptionComboBox.SelectedItem is TicketDescriptionItemModel selected)
             {
-                if (selected == "توضیحات دلخواه")
+                if (selected.Id == 0)
                 {
                     CustomDescriptionBox.Visibility = Visibility.Visible;
                     CustomDescriptionBox.Focus();
@@ -1415,7 +1417,7 @@ namespace Parking.App.Views.Pages
                 else
                 {
                     ViewModel.SelectedDescription = selected;
-                    ViewModel.DriverDescription = selected;
+                    ViewModel.DriverDescription = selected.Text;
                     CustomDescriptionBox.Visibility = Visibility.Collapsed;
                 }
             }
@@ -1427,7 +1429,7 @@ namespace Parking.App.Views.Pages
 
             if (!string.IsNullOrEmpty(text))
             {
-                ViewModel.SelectedDescription = text;
+                ViewModel.DriverDescription = text;
             }
         }
     }

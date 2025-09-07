@@ -1,5 +1,6 @@
 ﻿using Parking.Domain.General;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Parking.Domain.Entities.ParkingTicket;
@@ -51,6 +52,15 @@ public class ParkingTicket
     public string? DriverFullName { get; set; }
     public string? DriverPhoneNumber { get; set; }
     public string? DriverDescription { get; set; }
+
+
+    public int? QueueNumber { get; set; }
+    public int? TicketDescriptionItemId { get; set; }
+
+    [ForeignKey(nameof(TicketDescriptionItemId))]
+    public TicketDescriptionItem? TicketDescriptionItem { get; set; }
+
+
     public Guid? UserId { get; set; }
     public Guid? ExitRegistrarUserId { get; set; }
     public TicketStatus TicketStatus { get; set; }

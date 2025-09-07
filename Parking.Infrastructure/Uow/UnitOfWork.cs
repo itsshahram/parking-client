@@ -28,6 +28,13 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; private set; }
     public IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices { get; private set; }
     public IRepository<AddCardItem> AddCardItems { get; private set; }
+    public IRepository<TicketDescriptionItem> TicketDescriptionItems { get; private set; }
+    public IRepository<TicketQueueItem> TicketQueueItems { get; private set; }
+    public IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; private set; }
+
+
+
+
     public UnitOfWork(ApplicationDbContext context,
         IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices,
         IRepository<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices,
@@ -45,7 +52,10 @@ public class UnitOfWork : IUnitOfWork
         IRepository<ApplicationUser> Users,
         IRepository<ApplicationRole> Roles,
         IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages,
-        IRepository<AddCardItem> addCardItems)
+        IRepository<AddCardItem> addCardItems, 
+        IRepository<TicketDescriptionItem> TicketDescriptionItems, 
+        IRepository<TicketQueueItem> TicketQueueItems, 
+        IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies)
     {
 
         this.Roles = Roles;
@@ -66,6 +76,9 @@ public class UnitOfWork : IUnitOfWork
         this.ParkingTicketExtraImages = ParkingTicketExtraImages;
         _context = context;
         AddCardItems = addCardItems;
+        this.TicketDescriptionItems = TicketDescriptionItems;
+        this.TicketQueueItems = TicketQueueItems;
+        this.TicketQueueResetPolicies = TicketQueueResetPolicies;
     }
     public async Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class
     {

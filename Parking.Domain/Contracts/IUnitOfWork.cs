@@ -24,6 +24,9 @@ public interface IUnitOfWork  //:IDisposable
     IRepository<ParkingTicketImage> ParkingTicketImages { get; }
     IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; }
     IRepository<AddCardItem> AddCardItems { get; }
+    IRepository<TicketDescriptionItem> TicketDescriptionItems { get; }
+    IRepository<TicketQueueItem> TicketQueueItems { get; }
+    IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; }
 
     Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class;
     List<T> ExecuteRawQuery<T>(string sql, params object[] parameters) where T : class;

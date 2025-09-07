@@ -57,5 +57,6 @@ public class TicketsListViewModel
     public bool IsMissingCard { get; set; } = false;
     public string? EntranceGate { get; set; }
     public string? ExitGate { get; set; }
+    public int? QueueNumber { get; set; }
 
 }

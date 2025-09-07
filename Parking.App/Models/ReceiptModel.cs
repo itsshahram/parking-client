@@ -17,6 +17,7 @@ public class ReceiptModel
     public string? ParkingName { get; set; }
     public string? StartTime { get; set; }
     public BitmapImage? BarcodeImage { get; set; }
+    public int? QueueNumber { get; set; }
 }
 public class InvoiceModel : ReceiptModel
 {

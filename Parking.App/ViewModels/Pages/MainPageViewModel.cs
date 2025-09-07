@@ -4,22 +4,35 @@ namespace Parking.App.ViewModels.Pages;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
-
+    private readonly IParkingService _parkingService;
     public MainPageViewModel()
     {
 
         LatestEntryListItems = new ObservableCollection<TicketsListViewModel>();
         LatestExitedListItems = new ObservableCollection<TicketsListViewModel>();
-        var saved = Settings.Default.Application_DefaultTicketDescription;
-        if (!string.IsNullOrEmpty(saved))
-        {
-            foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                Descriptions.Add(desc.Trim());
-        }
+        _parkingService = App.GetService<IParkingService>();
 
-        Descriptions.Insert(0, "توضیحات دلخواه");
+        //if (!string.IsNullOrEmpty(saved))
+        //{
+        //    foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        //        Descriptions.Add(desc.Trim());
+        //}
+
+        //Descriptions.Insert(0, "توضیحات دلخواه");
+        LoadDescriptions();
+    }
+    private void LoadDescriptions()
+    {
+        var items = _parkingService.GetAllTicketDescriptionItems();
+        Descriptions.Clear();
+        Descriptions.Add(new TicketDescriptionItemModel { Id = 0, IsQueueEnabled = false, CreateDate = DateTime.Now, Text = "توضیحات دلخواه" });
 
         SelectedDescription = Descriptions.FirstOrDefault();
+
+        foreach (var item in items)
+        {
+            Descriptions.Add(item);
+        }
     }
     private ComboBoxItem _selectedVehicleSegmentItem;
     public ComboBoxItem SelectedVehicleSegmentItem
@@ -102,15 +115,15 @@ public class MainPageViewModel : INotifyPropertyChanged
     }
 
 
-    private ObservableCollection<string> _descriptions = new ObservableCollection<string>();
-    public ObservableCollection<string> Descriptions
+    private ObservableCollection<TicketDescriptionItemModel> _descriptions = new ObservableCollection<TicketDescriptionItemModel>();
+    public ObservableCollection<TicketDescriptionItemModel> Descriptions
     {
         get => _descriptions;
         set { _descriptions = value; OnPropertyChanged(nameof(Descriptions)); }
     }
 
-    private string _selectedDescription;
-    public string SelectedDescription
+    private TicketDescriptionItemModel _selectedDescription;
+    public TicketDescriptionItemModel SelectedDescription
     {
         get => _selectedDescription;
         set
@@ -120,11 +133,11 @@ public class MainPageViewModel : INotifyPropertyChanged
                 _selectedDescription = value;
                 OnPropertyChanged(nameof(SelectedDescription));
 
-                IsCustomDescriptionVisible = _selectedDescription == "توضیحات دلخواه";
+                IsCustomDescriptionVisible = _selectedDescription.Id == 0;
 
                 if (!IsCustomDescriptionVisible)
                 {
-                    TicketDescription = _selectedDescription;
+                    TicketDescription = _selectedDescription.Text;
                 }
             }
         }

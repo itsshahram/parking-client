@@ -1,4 +1,6 @@
-﻿using static Parking.App.Helpers.AppInfoHelper;
+﻿using Parking.Domain.Entities.ParkingTicket;
+using System.Diagnostics;
+using static Parking.App.Helpers.AppInfoHelper;
 using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
@@ -9,7 +11,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
     public partial class ApplicationSettingsPage : Page
     {
         private readonly IParkingService _parkingService;
-        public ObservableCollection<string> Descriptions { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<TicketDescriptionItemModel> Descriptions { get; set; } = new ObservableCollection<TicketDescriptionItemModel>();
         public ICommand RemoveDescriptionCommand { get; }
 
 
@@ -40,16 +42,27 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             this.PreviewKeyDown += Window_PreviewKeyDown;
             this.Unloaded += SyncConfigPage_Unloaded;
 
-            var saved = Settings.Default.Application_DefaultTicketDescription;
-            if (!string.IsNullOrEmpty(saved))
-            {
-                foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    Descriptions.Add(desc.Trim());
-                }
-            }
+            LoadDescriptions();
 
         }
+        private void LoadDescriptions()
+        {
+            var items = _parkingService.GetAllTicketDescriptionItems();
+            Descriptions.Clear();
+            foreach (var item in items) {
+                Descriptions.Add(item);
+            }
+        }
+        private void RemoveDescription_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button btn && btn.DataContext is TicketDescriptionItemModel item)
+            {
+                _parkingService.DeleteTicketDescriptionItem(item.Id);
+                LoadDescriptions();
+            }
+        }
+
+
         private void Change_Click(object sender, RoutedEventArgs e)
         {
             Settings.Default.Save();
@@ -86,6 +99,11 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private void GateTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Settings.Default.Application_GatePCName = ((TextBox)sender).Text;
+            Settings.Default.Save();
+        }
+        private void TextBoxes_TextChanged(object sender, TextChangedEventArgs e)
+        {
+           
             Settings.Default.Save();
         }
 
@@ -200,29 +218,48 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
 
         private void AddDescription()
         {
-            var text = DescriptionTextBox.Text.Trim();
-            if (!string.IsNullOrEmpty(text) && !Descriptions.Contains(text))
+            var text = DescriptionTextBox.Text;
+            if (!string.IsNullOrEmpty(text) )
             {
-                Descriptions.Add(text);
-                SaveDescriptions();
+                if (Descriptions.Any(d => d.Text == text))
+                {
+                    System.Windows.MessageBox.Show("این توضیح قبلا اضافه شده است.");
+                    return;
+                }
+                var newItem = new TicketDescriptionItemModel
+                {
+                    Text = text,
+                    CreateDate = DateTime.Now,
+                    IsQueueEnabled = false
+                };
+                _parkingService.AddTicketDescriptionItem(newItem);
+                LoadDescriptions(); 
             }
             DescriptionTextBox.Clear();
         }
 
         private void RemoveDescription(object param)
         {
-            if (param is string text && Descriptions.Contains(text))
+            if (param is TicketDescriptionItemModel)
             {
-                Descriptions.Remove(text);
-                SaveDescriptions();
+                _parkingService.DeleteTicketDescriptionItem(((TicketDescriptionItemModel)param).Id);
+                LoadDescriptions();
+            }
+        }
+        private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleSwitch toggle && toggle.DataContext is TicketDescriptionItemModel item)
+            {
+                bool newValue = (bool)toggle.IsChecked;
+                _parkingService.ChangeTicketDescriptionItemQueueStatus(item.Id, newValue);
             }
         }
 
-        private void SaveDescriptions()
-        {
-            var result = string.Join(", ", Descriptions);
-            Settings.Default.Application_DefaultTicketDescription = result;
-            Settings.Default.Save();
-        }
+        //private void SaveDescriptions()
+        //{
+        //    var result = string.Join(", ", Descriptions);
+        //    Settings.Default.Application_DefaultTicketDescription = result;
+        //    Settings.Default.Save();
+        //}
     }
 }

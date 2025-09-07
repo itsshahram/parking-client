@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Parking.App.Views.Pages.SettingsPageChilds"
+      xmlns:models="clr-namespace:Parking.App.Models.Tickets"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:Properties="clr-namespace:Parking.App"
       FontFamily="{StaticResource IranYekanFont}" 
@@ -87,20 +88,43 @@
                 <TextBlock Margin="0,0,0,5" Text="توضیحات پیش فرض قبض" VerticalAlignment="Center"/>
 
                 <!-- ItemsControl to display badges -->
-                <ItemsControl ItemsSource="{Binding Descriptions}">
+                <ItemsControl ItemsSource="{Binding Descriptions, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel/>
+                            <WrapPanel />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border  Background="#4CAF50" CornerRadius="10" Margin="2" Padding="5">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding}" Foreground="White" Margin="0,0,5,0"/>
-                                    <Button Content="x" Width="16" Height="16" Padding="0"
-                                    Command="{Binding DataContext.RemoveDescriptionCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                    CommandParameter="{Binding}"/>
+                            <Border Background="#304CAF50" CornerRadius="10" Margin="2" Padding="5" MinWidth="300" >
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <DockPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                                       
+                                         <ui:Button Icon="{ui:SymbolIcon Symbol=Delete24}" CornerRadius="10"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0" 
+                                                    Margin="5 0 "
+                                                    Appearance="Danger"
+                                                    Click="RemoveDescription_Click" 
+                                                    DockPanel.Dock="Left" />
+                                        <TextBlock Text="نوبت دهی: "  VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                        
+                                        <ui:ToggleSwitch
+                                                    IsChecked="{Binding IsQueueEnabled, Mode=TwoWay}"
+                                                    FlowDirection="RightToLeft"
+                                                    OffContent="غیر فعال"
+                                                    OnContent="فعال"
+                                                    Margin="5,0"
+                                                    VerticalAlignment="Center" 
+                                                    Click="ToggleSwitch_Toggled"  
+                                                    DockPanel.Dock="Left"  />
+                                        
+                                        <Separator Margin="5 0"/>
+
+                                        <TextBlock Text="{Binding Text}" TextWrapping="WrapWithOverflow"  VerticalAlignment="Center" HorizontalAlignment="Stretch"  Margin="0 0 5 0"/>
+                                    </DockPanel>
+
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -113,6 +137,14 @@
                     MinWidth="200"
                     KeyDown="DescriptionTextBox_KeyDown"
             PlaceholderText="توضیحات را وارد کنید و Enter را فشار دهید"/>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+                    <ui:ToggleSwitch DockPanel.Dock="Right"  Click="Change_Click" IsChecked="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_QueueActive, Mode=TwoWay}" FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" />
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="فعالسازی نوبت دهی برای توضیحات" />
+                </DockPanel>
             </StackPanel>
         </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
@@ -246,6 +278,34 @@
             </StackPanel>
         </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Print_dpi, Mode=TwoWay}" 
+                                    TextChanged="TextBoxes_TextChanged"  
+                                    FlowDirection="LeftToRight"
+                                    MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="دی پی آی پرینتر"  VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_Print_widthMm, Mode=TwoWay}" 
+                                    TextChanged="TextBoxes_TextChanged"  
+                                    FlowDirection="LeftToRight"
+                                    MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="عرض پرینتر به میلی متر"  VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Right" Margin="5"   >
                     <Run Text="1.0.0.1"  x:Name="AppVersionText" />
@@ -254,6 +314,20 @@
                 </TextBlock>
                 <TextBlock DockPanel.Dock="Left" Margin="5" VerticalAlignment="Center"  Text="ورژن نرم افزار" />
             </DockPanel>
+        </Border>
+        <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                <DockPanel>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ui:TextBox Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_ParkingLotReciptDescription, Mode=TwoWay}" 
+                                    TextChanged="TextBoxes_TextChanged"  
+                                    FlowDirection="LeftToRight"
+                                    MinWidth="200"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="توضیحات فوتر قبض"  VerticalAlignment="Center"/>
+                </DockPanel>
+            </StackPanel>
         </Border>
     </StackPanel>
 </Page>

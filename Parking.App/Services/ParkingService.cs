@@ -1,17 +1,21 @@
-﻿using Parking.App.Models.Dto.Card;
+﻿using Azure.Core;
+using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
+using Parking.App.Services.Interfaces;
 using Parking.App.Utilities.PriceCalculation;
 using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -23,16 +27,20 @@ public class ParkingService : IParkingService
     //private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IUnitOfWork unitOfWork;
     private IHttpClientFactory _httpClientFactory;
+    private ITicketQueueService _ticketQueueService;
+
+
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
 
     public List<VehicleSegment> _vehicleSegmentsList;
-    public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory)
+    public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory, ITicketQueueService ticketQueueService)
     {
         //this.unitOfWork = unitOfWork;
         //_unitOfWorkFactory = unitOfWorkFactory;                                     Remove All Comments
         _logger = logger;
+        _ticketQueueService = ticketQueueService;
 
         _httpClientFactory = httpClientFactory;
         client = _httpClientFactory.CreateClient();
@@ -762,6 +770,8 @@ public class ParkingService : IParkingService
                                                       Description = s.Description,
                                                       CardUid = s.CardUid,
                                                       BarcodeId = s.BarcodeId,
+                                                      QueueNumber = s.QueueNumber , 
+                                                      DriverDescription = s.DriverDescription
                                                   }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
@@ -899,8 +909,9 @@ public class ParkingService : IParkingService
                     ExitGate = s.ExitGate,
                     ExitImage = s.ExitImage,
                     StartImage = s.StartImage,
-                    BarcodeId = s.BarcodeId, 
-                    DriverDescription = s.DriverDescription
+                    BarcodeId = s.BarcodeId,
+                    DriverDescription = s.DriverDescription   
+                    , QueueNumber= s.QueueNumber 
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
@@ -1198,6 +1209,9 @@ public class ParkingService : IParkingService
         {
             var groupId = GetGroupIdByEnLicensePlate(request.EnLicensePlate ?? "__-_-___");
             long barcode = RandomNumberGenerator.GenerateLongRandomNumber();
+
+            string? DriverDescription = (request.TicketDescriptionItemId != null && request.TicketDescriptionItemId > 0) ? GetTicketDescriptionItemById((int)request.TicketDescriptionItemId)?.Text : request.DriverDescription;
+
             while (unitOfWork.ParkingTickets.Find(x => x.BarcodeId == barcode).Any())
             {
                 barcode = RandomNumberGenerator.GenerateLongRandomNumber();
@@ -1229,7 +1243,8 @@ public class ParkingService : IParkingService
                 EntranceGate = request.EntranceGate,
                 BarcodeId = barcode,
                 UserId = request.CreatorUserId,
-                DriverDescription = request.DriverDescription,
+                TicketDescriptionItemId = (request.TicketDescriptionItemId > 0) ? request.TicketDescriptionItemId : null,
+                DriverDescription = DriverDescription,
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
                 DeviceId = Settings.Default.Application_DeviceId,
@@ -1239,13 +1254,27 @@ public class ParkingService : IParkingService
 
             unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(s => s.IsOccupied, true));
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, true));
+            if (Settings.Default.Application_QueueActive)
+            {
+                if (ticket.TicketDescriptionItemId != null && request.TicketDescriptionItemId > 0)
+                {
+                    try
+                    {
+                       var result = _ticketQueueService.AssignQueueNumberAsync((int)ticket.TicketDescriptionItemId, ticket.Id);
+                        unitOfWork.ParkingTickets.ExecuteUpdate(s => s.Id == ticket.Id, update => update.SetProperty(s => s.QueueNumber, result));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"خطا در ثبت نوبت قبض  {ex.Message}", ex);
+                    }
+                }
+            }
             return new TServiceResponse<Guid>() { Succeeded = true, Result = ticket.Id, Message = "بلیط بارکینگ با موفقیت ثبت شد" };
-
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new TServiceResponse<Guid>() { Succeeded = false, Message = "خطا در ثبت اطلاعات" };
+            return new TServiceResponse<Guid>() { Succeeded = false, Message = "خطا در ثبت قبض" };
         }
     }
 
@@ -2935,4 +2964,146 @@ public class ParkingService : IParkingService
             return Guid.Empty;
         return ticket.Id;
     }
+
+    public List<TicketDescriptionItemModel> GetAllTicketDescriptionItems()
+    {
+        try
+        {
+            var items = unitOfWork.TicketDescriptionItems.GetAll().Select(t => new TicketDescriptionItemModel
+            {
+                Id = t.Id,
+                CreateDate = t.CreateDate,
+                IsQueueEnabled = t.IsQueueEnabled,
+                Text = t.Text
+            }).ToList();
+            return items;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return new List<TicketDescriptionItemModel>();
+        }
+    }
+
+    public TicketDescriptionItemModel? GetTicketDescriptionItemById(int id)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                var model = new TicketDescriptionItemModel
+                {
+                    Id = item.Id,
+                    CreateDate = item.CreateDate,
+                    IsQueueEnabled = item.IsQueueEnabled,
+                    Text = item.Text
+                };
+                return model;
+            }
+            return null;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return null;
+        }
+    }
+
+    public bool AddTicketDescriptionItem(TicketDescriptionItemModel request)
+    {
+        try
+        {
+            TicketDescriptionItem item = new TicketDescriptionItem
+            {
+                CreateDate = DateTime.Now,
+                IsQueueEnabled = request.IsQueueEnabled,
+                Text = request.Text
+            };
+            unitOfWork.TicketDescriptionItems.Add(item);
+            unitOfWork.TicketDescriptionItems.Commit();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(request.Id);
+            if (item != null)
+            {
+                unitOfWork.TicketDescriptionItems.ExecuteUpdate(p => p.Id == request.Id, update => update
+            .SetProperty(p => p.IsQueueEnabled, request.IsQueueEnabled)
+            .SetProperty(p => p.Text, request.Text)
+            );
+                //unitOfWork.TicketDescriptionItems.Update(item);
+                //unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool ChangeTicketDescriptionItemQueueStatus(int id, bool status)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                item.IsQueueEnabled = status;
+                //unitOfWork.TicketDescriptionItems.Update(item);
+                unitOfWork.TicketDescriptionItems.ExecuteUpdate(p => p.Id == id, update => update
+                            .SetProperty(p => p.IsQueueEnabled, status));
+                //_ticketQueueService.SetQueueEnabledAsync(item.Id, status);
+                if (status == true)
+                {
+                    _ticketQueueService.SetResetIntervalAsync(item.Id, 30);
+                }
+                unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool DeleteTicketDescriptionItem(int id)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                unitOfWork.TicketDescriptionItems.Delete(item);
+                unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+
 }
