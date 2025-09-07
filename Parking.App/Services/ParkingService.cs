@@ -299,12 +299,12 @@ public class ParkingService : IParkingService
             return new List<ParkingSpaceModel>();
         }
     }
-    public int GetFreeSpacesCount()
+    public int? GetFreeSpacesCount()
     {
         try
         {
-
-            var count = unitOfWork.ParkingSpaces.Find(p => p.IsOccupied == false).Count();
+            var parkingLotCapacity = GetParkingLotCapacity();
+            var count = parkingLotCapacity - unitOfWork.ParkingTickets.Find(p => p.IsExited == false).Count();
             return count;
         }
         catch (Exception ex)
@@ -313,13 +313,12 @@ public class ParkingService : IParkingService
             return 0;
         }
     }
-    public int GetSpacesCount()
+    public int? GetSpacesCount()
     {
         try
         {
-
-            var count = unitOfWork.ParkingSpaces.GetAll().Count();
-            return count;
+            var capacity = GetParkingLotCapacity();
+            return capacity;
         }
         catch (Exception ex)
         {
@@ -342,6 +341,9 @@ public class ParkingService : IParkingService
             return (null, null);
         }
     }
+
+    public int? GetParkingLotCapacity()
+        => unitOfWork.ParkingLots.FirstOrDefault()?.Capacity;
     public async Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId)
     {
         try
@@ -770,7 +772,7 @@ public class ParkingService : IParkingService
                                                       Description = s.Description,
                                                       CardUid = s.CardUid,
                                                       BarcodeId = s.BarcodeId,
-                                                      QueueNumber = s.QueueNumber , 
+                                                      QueueNumber = s.QueueNumber,
                                                       DriverDescription = s.DriverDescription
                                                   }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
@@ -910,8 +912,9 @@ public class ParkingService : IParkingService
                     ExitImage = s.ExitImage,
                     StartImage = s.StartImage,
                     BarcodeId = s.BarcodeId,
-                    DriverDescription = s.DriverDescription   
-                    , QueueNumber= s.QueueNumber 
+                    DriverDescription = s.DriverDescription
+                    ,
+                    QueueNumber = s.QueueNumber
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
@@ -1252,7 +1255,6 @@ public class ParkingService : IParkingService
             };
             unitOfWork.ParkingTickets.Add(ticket);
 
-            unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(s => s.IsOccupied, true));
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, true));
             if (Settings.Default.Application_QueueActive)
             {
@@ -1260,7 +1262,7 @@ public class ParkingService : IParkingService
                 {
                     try
                     {
-                       var result = _ticketQueueService.AssignQueueNumberAsync((int)ticket.TicketDescriptionItemId, ticket.Id);
+                        var result = _ticketQueueService.AssignQueueNumberAsync((int)ticket.TicketDescriptionItemId, ticket.Id);
                         unitOfWork.ParkingTickets.ExecuteUpdate(s => s.Id == ticket.Id, update => update.SetProperty(s => s.QueueNumber, result));
                     }
                     catch (Exception ex)
@@ -2088,17 +2090,6 @@ public class ParkingService : IParkingService
                                                 .SetProperty(ticket => ticket.TicketStatus, product => TicketStatus.Unsynced));
             //unitOfWork.Commit();
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, false));
-
-
-            //unitOfWork.Commit();
-
-            var ticket = unitOfWork.ParkingTickets.Find(s => s.Id == request.TicketId).FirstOrDefault();
-            if (ticket != null)
-            {
-                unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(product => product.IsOccupied, product => false));
-
-                //unitOfWork.Commit();
-            }
             return true;
 
         }

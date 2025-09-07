@@ -690,7 +690,7 @@ namespace Parking.App.Views.Windows
                 {
                     BarcodeId = ticket.BarcodeId,
                     DriverDescription = ticket.DriverDescription,
-                     QueueNumber = ticket.QueueNumber,
+                    QueueNumber = ticket.QueueNumber,
                     Description = ticket.Description,
                     LicensePlate = ticket.LicensePlate,
                     ParkingName = ticket.ParkingName,
@@ -742,13 +742,13 @@ namespace Parking.App.Views.Windows
             PrintQueue printQueue = LocalPrintServer.GetDefaultPrintQueue();
             PrintTicket printTicket = printQueue.DefaultPrintTicket;
 
-           
+
             double dpi = Settings.Default.Application_Print_dpi;
             double widthMm = Settings.Default.Application_Print_widthMm;
             double widthInches = widthMm / 25.4;
-            double widthPixels = dpi * widthInches; 
+            double widthPixels = dpi * widthInches;
 
-            
+
             contentToPrint.Measure(new Size(widthPixels, double.PositiveInfinity));
             contentToPrint.Arrange(new Rect(new System.Windows.Point(0, 0), contentToPrint.DesiredSize));
             double contentHeight = contentToPrint.DesiredSize.Height;

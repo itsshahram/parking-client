@@ -901,14 +901,6 @@ namespace Parking.App.Views.Pages
                 }
                 try
                 {
-                    //تخصیص فضای پارک 
-                    var parkingSpace = _parkingService.GetOneFreeSpaceId();
-                    if (parkingSpace.SpaceId == null)
-                    {
-                        ShowMessage("خطا", "ظرفیت پارکینگ تکمیل میباشد");
-                        return false;
-                    }
-
                     //66_gh_732_IR42
                     // ایجاد قبض
 
@@ -927,7 +919,6 @@ namespace Parking.App.Views.Pages
                         FaPlate = "ایران" + plate.IranCode.Replace("IR", "") + "_" + plate.RightThreeDigits + plate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + $"{plate.LeftTwoDigits}";
 
 
-
                     if (Settings.Default.Application_GatePCName?.Length < 3)
                         EntranceGate = Environment.MachineName;
                     else
@@ -942,8 +933,6 @@ namespace Parking.App.Views.Pages
                             DriverPhoneNumber = ViewModel.DriverPhoneNumber,
                             TicketDescriptionItemId = ViewModel.SelectedDescription.Id,
                             DriverFullName = ViewModel.DriverFullName,
-                            ParkingSpaceID = parkingSpace.SpaceId ?? new Guid(),
-                            ParkingSectionId = parkingSpace.SectionId ?? new Guid(),
                             EnLicensePlate = LatestValidEnPlate,
                             EntranceGate = EntranceGate,
                             StartTime = startTime,
@@ -1114,8 +1103,6 @@ namespace Parking.App.Views.Pages
                         ms.Title = title;
                         ms.Content = message;
                         ms.IsPrimaryButtonEnabled = false;
-                        //ms.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(252, 228, 236));
-                        //ms.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(33, 33, 33));
                         ms.IsSecondaryButtonEnabled = false;
                         ms.CloseButtonText = "متوجه شدم";
                         await ms.ShowDialogAsync();
@@ -1254,10 +1241,7 @@ namespace Parking.App.Views.Pages
         {
             try
             {
-                //if (e.Key == Key.Enter)
-                //{
-                //    CreateTicket();
-                //}
+
             }
             catch
             {
@@ -1265,15 +1249,6 @@ namespace Parking.App.Views.Pages
             }
         }
 
-        //[DllImport("kernel32.dll")]
-        //[return: MarshalAs(UnmanagedType.Bool)]
-        //private static extern bool AllocConsole();
-
-        //public static void ShowConsole()
-        //{
-        //    AllocConsole();
-        //    Console.WriteLine("========================>>>>>>>>>>>>>");
-        //}
         #region ImageBox
 
         private DispatcherTimer _refreshExtraImagesTimer;
@@ -1289,7 +1264,6 @@ namespace Parking.App.Views.Pages
         }
         private void RefreshExtraImagesTimer_Tick(object sender, EventArgs e)
         {
-            //LoadExtraImages();
             UpdateCameraImages();
         }
         public List<CameraConfigModel> Cameras { get; set; } = CameraConfigManager.GetActiveCameras();
@@ -1313,7 +1287,6 @@ namespace Parking.App.Views.Pages
                                 camera.ImageSource = bitmapImage;
                             }, DispatcherPriority.Background);
 
-                            //camera.ImageSource = bitmapImage;
                             result.Add(new(bitmapImage.ResizeAndCompressBitmap(1024, 768, 72, 72, 60), cam.Name));
                         }
                     }

@@ -23,8 +23,8 @@ namespace Parking.App.Views.Pages
         {
             ViewModel.ParkingName = ParkingLotInfoStore.ParkingInfo.Name ?? "_";
             ViewModel.TotalCards = _parkingService.GetCardsCount();
-            ViewModel.TotalSpaces = _parkingService.GetSpacesCount();
-            ViewModel.OccupiedSpaces = _parkingService.GetSpacesCount() - _parkingService.GetFreeSpacesCount();
+            ViewModel.TotalSpaces = _parkingService.GetSpacesCount() ?? 0;
+            ViewModel.OccupiedSpaces = (_parkingService.GetSpacesCount() - _parkingService.GetFreeSpacesCount()).Value;
             ViewModel.TotalDiscountedCards = _parkingService.GetDiscountedCardsCount();
         }
 

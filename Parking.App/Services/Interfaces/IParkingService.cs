@@ -16,8 +16,9 @@ public interface IParkingService
     List<VehicleSegmentModel> GetVehicleSegments();
     List<ParkingSectionModel> GetSections();
     List<ParkingSpaceModel> GetSpaces();
-    int GetFreeSpacesCount();
-    int GetSpacesCount();
+    int? GetFreeSpacesCount();
+    int? GetSpacesCount();
+    int? GetParkingLotCapacity();
     (Guid? SpaceId, Guid? SectionId) GetOneFreeSpaceId();
     Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId);
     List<TicketsListViewModel> GetLatestTickets(TicketType type, int take);
