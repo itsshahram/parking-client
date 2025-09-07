@@ -43,16 +43,34 @@ public partial class AddCardHistoryPage : Page
 
     private void SetDefaultParameter()
     {
-        var yesterdayTime = DateTime.Now.AddDays(-90).ToShamsi().Split(" / ");
-        StartYearTextBox.Text = yesterdayTime[0];
-        StartMountTextBox.Text = yesterdayTime[1];
+        string[] SafeSplitShamsi(DateTime date)
+        {
+            var parts = date.ToShamsi().Split('/');
+            if (parts.Length < 3)
+            {
+                return
+                [
+                date.Year.ToString("D4"),
+                date.Month.ToString("D2"),
+                date.Day.ToString("D2")
+                ];
+            }
+            return parts;
+        }
 
+        var nowTime = SafeSplitShamsi(DateTime.Now);
 
-        var nowTime = DateTime.Now.ToShamsi().Split(" / ");
-        EndYearTextBox.Text = nowTime[0];
-        EndMountTextBox.Text = nowTime[1];
-        EndDayTextBox.Text = nowTime[2];
+        StartYearTextBox.Text = nowTime[0];
+        StartMountTextBox.Text = nowTime[1];
+        StartDayTextBox.Text = nowTime[2];
+
+        var yesterdayTime = SafeSplitShamsi(DateTime.Now.AddDays(-90));
+
+        EndYearTextBox.Text = yesterdayTime[0];
+        EndMountTextBox.Text = yesterdayTime[1];
+        EndDayTextBox.Text = yesterdayTime[2];
     }
+
 
     private void PaginationControl_Loaded(object sender, RoutedEventArgs e)
     {
@@ -148,7 +166,7 @@ public partial class AddCardHistoryPage : Page
         // Update UI controls
         resultCount.Text = totalCount.ToString();
         HistoryDataGrid.ItemsSource = ViewModel.Items;
-       
+
     }
 
     private void EndTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)

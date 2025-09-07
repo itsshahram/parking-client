@@ -1,20 +1,5 @@
-﻿using Parking.App.Helpers;
-using Parking.App.Services.Interfaces;
-using Parking.App.ViewModels.Pages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿using Parking.App.Views.Pages.CardsPageChilds;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Parking.App.Views.Pages
 {
@@ -42,5 +27,13 @@ namespace Parking.App.Views.Pages
             ViewModel.OccupiedSpaces = _parkingService.GetSpacesCount() - _parkingService.GetFreeSpacesCount();
             ViewModel.TotalDiscountedCards = _parkingService.GetDiscountedCardsCount();
         }
+
+        private void CardWithDisCount_LinkButton_Click(object sender, RoutedEventArgs e)
+        {
+            var page = new AddCardHistoryPage();
+
+            NavigationService.Navigate(page);
+        }
     }
 }
+
