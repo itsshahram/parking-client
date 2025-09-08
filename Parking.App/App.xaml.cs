@@ -132,6 +132,13 @@ public partial class App : Application
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
+        if (Settings.Default.IsFirstRun)
+        {
+            Settings.Default.Upgrade();
+            Settings.Default.IsFirstRun = false;
+            Settings.Default.Save();
+        }
+
         if (Settings.Default.Application_Logging)
         {
             if (Settings.Default.Application_Logging_In_Elastic)
@@ -162,7 +169,7 @@ public partial class App : Application
             }
             else
             {
-                Serilog.Log.Logger = new LoggerConfiguration()
+                Log.Logger = new LoggerConfiguration()
                     .Enrich.FromLogContext()
                     .Enrich.WithMachineName()
                     .WriteTo.File("logs/log-.txt",

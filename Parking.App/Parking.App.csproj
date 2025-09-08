@@ -10,7 +10,7 @@
 		<Configurations>Debug;Release;DebugWithANPR</Configurations>
 		<UseWindowsForms>True</UseWindowsForms>
 		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-		<Version>1.0.10</Version>
+		<Version>1.0.11</Version>
 	</PropertyGroup>
 	<PropertyGroup>
 		<BuildDate>$([System.DateTime]::Now.ToString("yyyy-MM-dd"))</BuildDate>

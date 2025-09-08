@@ -32,7 +32,7 @@ namespace Parking.App.Views.Windows
             ContentRendered += LoginWindow_ContentRendered;
         }
 
-        private  void LoginWindow_ContentRendered(object sender, EventArgs e)
+        private void LoginWindow_ContentRendered(object sender, EventArgs e)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -45,7 +45,7 @@ namespace Parking.App.Views.Windows
 
                     Login();
                 }
-            }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }), DispatcherPriority.ApplicationIdle);
 
         }
 

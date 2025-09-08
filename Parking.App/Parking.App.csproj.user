@@ -85,6 +85,9 @@
     <Compile Update="Views\Windows\LoginWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\TempLoginWindows.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\TicketDetailsWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

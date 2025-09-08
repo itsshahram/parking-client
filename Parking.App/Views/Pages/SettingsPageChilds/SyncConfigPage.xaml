@@ -13,6 +13,7 @@
       Title="SyncConfigPage">
 
     <Grid FlowDirection="RightToLeft"  Margin="10">
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
         <ScrollViewer Grid.Row="1"  VerticalAlignment="Stretch"  VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock Margin="5" FontWeight="Bold" Text="تنظیمات همگام سازی داده ها" />
