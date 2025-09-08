@@ -246,9 +246,6 @@ namespace Parking.App.Views.Pages
             {
                 System.Windows.MessageBox.Show(message, title);
             }
-
-
-
         }
 
         private void PlateAssignmentToggle_Checked(object sender, RoutedEventArgs e)

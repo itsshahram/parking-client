@@ -61,6 +61,9 @@
     <Compile Update="Views\Pages\SettingsPageChilds\CameraSettingsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Pages\SettingsPageChilds\HotKeyManagment.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Pages\SettingsPageChilds\POSSettingsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

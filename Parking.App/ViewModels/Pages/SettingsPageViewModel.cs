@@ -1,9 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Windows.Media;
-using Wpf.Ui.Controls;
-
-namespace Parking.App.ViewModels.Pages;
+﻿namespace Parking.App.ViewModels.Pages;
 
 public partial class SettingsPageViewModel : ObservableObject
 {
@@ -14,7 +9,7 @@ public partial class SettingsPageViewModel : ObservableObject
         {
             Content = "تنظیمات نمایشی",
             Icon = new SymbolIcon { Symbol = SymbolRegular.Desktop24 },
-            TargetPageType = typeof(Views.Pages.SettingsPageChilds.AppearanceSettingsPage) 
+            TargetPageType = typeof(Views.Pages.SettingsPageChilds.AppearanceSettingsPage)
         },
         new NavigationViewItem()
         {
@@ -33,6 +28,12 @@ public partial class SettingsPageViewModel : ObservableObject
             Content = "تنظیمات اپلیکیشن",
             Icon = new SymbolIcon { Symbol = SymbolRegular.Apps24 },
             TargetPageType = typeof(Views.Pages.SettingsPageChilds.ApplicationSettingsPage)
+        } ,
+                new NavigationViewItem()
+        {
+            Content = "تنظیمات کیبورد",
+            Icon = new SymbolIcon { Symbol = SymbolRegular.Key24 },
+            TargetPageType = typeof(Views.Pages.SettingsPageChilds.HotKeyManagment)
         } ,
         new NavigationViewItem()
         {

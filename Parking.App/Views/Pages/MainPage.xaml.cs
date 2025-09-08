@@ -20,6 +20,8 @@ namespace Parking.App.Views.Pages
         private DispatcherTimer _refreshDataTimer;
         private static CancellationTokenSource LocalCancellationTokenSource { get; set; } = new CancellationTokenSource();
         public MainPageViewModel ViewModel { get; private set; } = new MainPageViewModel();
+        public HotKeyManagementViewModel _hotKeyVm { get; private set; } = new HotKeyManagementViewModel();
+
 
         public MainPage()
         {
@@ -28,6 +30,7 @@ namespace Parking.App.Views.Pages
             this.DataContext = ViewModel;
             InitializeComponent();
             LoadData();
+            _hotKeyVm.Load();
             OtherPlateToggle.IsChecked = false;
             OtherPlateToggle_Unchecked(OtherPlateToggle, new RoutedEventArgs());
             LocalCancellationTokenSource = new CancellationTokenSource();
@@ -66,16 +69,21 @@ namespace Parking.App.Views.Pages
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-            {
-                var focused = Keyboard.FocusedElement;
+            var focused = Keyboard.FocusedElement;
 
-                if (focused == BarcodeTextBox)
+            if (focused == BarcodeTextBox)
+            {
+                var hotKey = _hotKeyVm.GetHotKey(HotKeyActionType.SearchBarcode);
+                if (e.Key == hotKey.Key)
                 {
                     BTNSearchBarcode_Click(BarcodeTextBox, new RoutedEventArgs());
                     e.Handled = true;
                 }
-                else
+            }
+            else
+            {
+                var hotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CreateTicket);
+                if (e.Key == hotKey.Key)
                 {
                     CreateTicket();
                     e.Handled = true;
@@ -89,9 +97,8 @@ namespace Parking.App.Views.Pages
                 ? $"{pressedKey}"
                 : $"{pressedModifiers} + {pressedKey}";
 
-            string savedShortcutText = Settings.Default.Application_MainPage_ReloadShortcut;
-
-            return pressedShortcutText == savedShortcutText;
+            var refreshPageShortcut = _hotKeyVm.GetHotKey(HotKeyActionType.MaiPageResetForm);
+            return pressedShortcutText == refreshPageShortcut.Shortcut;
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -969,8 +976,8 @@ namespace Parking.App.Views.Pages
                                             LicensePlate = ticket.LicensePlate,
                                             ParkingName = ticket.ParkingName,
                                             StartTime = ticket.StartTime.ToShamsi() + " " + ticket.StartTime.ToString("HH:mm"),
-                                            VehicleSegmentName = ticket.VehicleManufacturerName, 
-                                            QueueNumber = ticket.QueueNumber, 
+                                            VehicleSegmentName = ticket.VehicleManufacturerName,
+                                            QueueNumber = ticket.QueueNumber,
                                             DriverDescription = ticket.DriverDescription
                                         }, widthPixels);
                                         PrintHelper.Print(receiptContent);

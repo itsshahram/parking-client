@@ -19,6 +19,7 @@ namespace Parking.App.Views.Windows
     {
         public List<CameraConfigModel> Cameras { get; set; }
         public TicketDetailsWindowViewModel ViewModel { get; set; } = new TicketDetailsWindowViewModel();
+        public HotKeyManagementViewModel _hotKeyVm { get; set; } = new HotKeyManagementViewModel();
         private readonly IParkingService? _parkingService;
         private bool IsMissingCard { get; set; } = false;
         private bool PaymentPermission { get; set; } = true;
@@ -87,6 +88,10 @@ namespace Parking.App.Views.Windows
                 ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
                 _logger.LogError("Error in Ticket Details", ex);
             }
+            PaymentBtn.Content = $"پرداخت ({_hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace)?.Key})";
+            CashPaymentBtn.Content = $"پرداخت نقدی ({_hotKeyVm.GetHotKey(HotKeyActionType.CashPayment)?.Key})";
+            PrintBtn.Content = $"چاپ رسید({_hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt)?.Key})";
+            MissingCardToggleLabel.Content = $"آیا کارت مفقود شده است. (کلید {_hotKeyVm.GetHotKey(HotKeyActionType.LostCard)?.Key} برای فعال شدن)";
         }
         private void InitializeCloseTimer()
         {
@@ -242,7 +247,8 @@ namespace Parking.App.Views.Windows
             }
             if (Settings.Default.Application_GateType.Contains("1"))
             {
-                if (e.Key == Key.F1)
+                var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
+                if (e.Key == cashPaymentHotKey.Key)
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
@@ -253,7 +259,9 @@ namespace Parking.App.Views.Windows
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
                 }
-                if (e.Key == Key.Space)
+                var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
+
+                if (e.Key == paymentWithSpaceHotKey.Key)
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
@@ -266,7 +274,8 @@ namespace Parking.App.Views.Windows
 
                 }
 
-                if (e.Key == Key.F12)
+                var missingCardHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.LostCard);
+                if (e.Key == missingCardHotKey.Key)
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
@@ -287,7 +296,9 @@ namespace Parking.App.Views.Windows
 
 
             }
-            if (e.Key == Key.F3)
+            var printReceipt = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
+
+            if (e.Key == printReceipt.Key)
             {
                 PrintTicket();
             }

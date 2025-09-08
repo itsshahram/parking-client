@@ -77,8 +77,6 @@ public class ParkingService : IParkingService
                     StartWorkingHours = _localParkingInfo.StartWorkingHours,
                     Province = _localParkingInfo.Province
                 };
-                //result.Sections = GetSectionsAsync();
-                //result.ParkingSpaces = GetSpacesAsync();
                 return new TServiceResponse<ParkingLotModel>(true, "عملیات موفق", result);
             }
             else

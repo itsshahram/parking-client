@@ -1,6 +1,4 @@
-﻿using Parking.Domain.Entities.ParkingTicket;
-using System.Diagnostics;
-using static Parking.App.Helpers.AppInfoHelper;
+﻿using static Parking.App.Helpers.AppInfoHelper;
 using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace Parking.App.Views.Pages.SettingsPageChilds
@@ -39,11 +37,9 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             AppVersionText.Text = GetVersion();
             PublishDateText.Text = GetBuildDate();
             APIServerAddressTextBox.Text = Settings.Default.Application_ApiServerAddress;
-            this.PreviewKeyDown += Window_PreviewKeyDown;
             this.Unloaded += SyncConfigPage_Unloaded;
 
             LoadDescriptions();
-
         }
         private void LoadDescriptions()
         {
@@ -152,59 +148,11 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private Key _pressedKey;
         private ModifierKeys _pressedModifiers;
 
-        private void ShortcutTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            e.Handled = true;
-
-            Key key = e.Key == Key.System ? e.SystemKey : e.Key;
-            if (key == Key.None)
-                key = e.ImeProcessedKey;
-
-            _pressedModifiers = Keyboard.Modifiers;
-            _pressedKey = key;
-
-            // Format display text:
-            // If no modifiers, show only key (e.g., "F5")
-            // Otherwise show modifiers + key (e.g., "Control + F5")
-            string shortcutText = _pressedModifiers == ModifierKeys.None
-                ? $"{_pressedKey}"
-                : $"{_pressedModifiers} + {_pressedKey}";
-
-            ShortcutTextBox.Text = shortcutText;
-
-            // Save shortcut string to settings
-            Settings.Default.Application_MainPage_ReloadShortcut = shortcutText;
-            Settings.Default.Save();
-        }
 
         // Retrieve the shortcut later
         private (ModifierKeys modifiers, Key key) GetShortcut()
         {
             return (_pressedModifiers, _pressedKey);
-        }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (ShortcutTextBox.IsFocused)
-            {
-                e.Handled = true;
-
-                Key key = e.Key == Key.System ? e.SystemKey : e.Key;
-                if (key == Key.None)
-                    key = e.ImeProcessedKey;
-
-                _pressedModifiers = Keyboard.Modifiers;
-                _pressedKey = key;
-
-                string shortcutText = _pressedModifiers == ModifierKeys.None
-                    ? $"{_pressedKey}"
-                    : $"{_pressedModifiers} + {_pressedKey}";
-
-                ShortcutTextBox.Text = shortcutText;
-
-                Settings.Default.Application_MainPage_ReloadShortcut = shortcutText;
-                Settings.Default.Save();
-            }
         }
 
         private void DescriptionTextBox_KeyDown(object sender, KeyEventArgs e)

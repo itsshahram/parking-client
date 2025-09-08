@@ -61,15 +61,15 @@
                                 <StackPanel Margin="10 0">
                                     <DockPanel  Margin="10">
                                         <ui:ToggleSwitch x:Name="MissingCardToggle"  FlowDirection="LeftToRight" DockPanel.Dock="Right" Checked="MissingCardToggle_Checked" Unchecked="MissingCardToggle_Unchecked" OffContent="غیر فعال" OnContent="فعال"/>
-                                        <Label DockPanel.Dock="Left" Content="آیا کارت مفقود شده است.  (کلید F12 برای فعال شدن)" Margin="0 0 20 0"/>
+                                        <Label x:Name="MissingCardToggleLabel" DockPanel.Dock="Left" Content="" Margin="0 0 20 0"/>
                                     </DockPanel>
                                 </StackPanel>
 
                             </Border>
 
                         </StackPanel>
-                        <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت (Space)" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
-                        <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی (F1)" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
+                        <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
+                        <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
                         <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
                                    Click="Print_Btn_Click"
                                    HorizontalAlignment="Stretch" 
@@ -77,7 +77,7 @@
                                    Margin="3" 
                                    IsDefault="True" 
                                    Appearance="Info" 
-                                   Padding="20 5 20 5" Content="چاپ رسید (F3)" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                                   Padding="20 5 20 5" Content="چاپ رسید" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
                         <ui:Button x:Name="ExitBtn" VerticalAlignment="Stretch" Grid.Row="1" 
                                    HorizontalAlignment="Stretch"  
                                    Grid.Column="3" 
