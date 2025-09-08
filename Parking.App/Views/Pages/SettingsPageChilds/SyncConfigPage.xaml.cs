@@ -1,10 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
-
-namespace Parking.App.Views.Pages.SettingsPageChilds
+﻿namespace Parking.App.Views.Pages.SettingsPageChilds
 {
-    /// <summary>
-    /// Interaction logic for AccountsSettingsPage.xaml
-    /// </summary>
     public partial class SyncConfigPage : Page
     {
         private readonly ILogger<SyncConfigPage> _logger;
@@ -27,46 +22,52 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             {
                 if (string.IsNullOrEmpty(TokenStore.BearerToken))
                 {
-                    var creds = LoadCredentials();
+                    var credentials = LoadCredentials();
 
-                    string username, password;
+                    string username = string.Empty;
+                    string password = string.Empty;
 
-                    if (creds == null)
+                    if (credentials == null)
                     {
                         var loginWindow = new TempLoginWindows
                         {
                             Owner = Application.Current.MainWindow
                         };
 
-                        if (loginWindow.ShowDialog() == true)
+                        if (loginWindow.ShowDialog() != true)
+                            return;
+
+                        username = loginWindow.Username;
+                        password = loginWindow.Password;
+                    }
+                    else
+                    {
+                        username = credentials.Value.Username;
+                        password = credentials.Value.Password;
+
+                        var loginResult = await _synchronizationService.CheckTokenAsync(username, password);
+
+                        if (!loginResult.Succeeded)
                         {
+                            var loginWindow = new TempLoginWindows
+                            {
+                                Owner = Application.Current.MainWindow
+                            };
+
+                            if (loginWindow.ShowDialog() != true)
+                                return;
+
                             username = loginWindow.Username;
                             password = loginWindow.Password;
                         }
-                        else
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        username = creds.Value.Username;
-                        password = creds.Value.Password;
                     }
 
-                    var loginToServerResult = await _synchronizationService?.CheckTokenAsync(username, password);
-
-                    if (loginToServerResult.Succeeded)
-                    {
-                        _logger.LogInformation("New bearer token retrieved.");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("");
-                    }
+                    _logger.LogInformation("Token is now set in TokenStore.");
                 }
             }
         }
+
+
 
 
         public static (string Username, string Password)? LoadCredentials()
@@ -74,7 +75,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             if (!File.Exists(CredentialsPath))
                 return null;
 
-            byte[] key = GetOrCreateKey();
+            byte[] key = GetKey();
             byte[] encrypted = File.ReadAllBytes(CredentialsPath);
             string decrypted = AesEncryption.Decrypt(encrypted, key);
 
@@ -151,7 +152,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 });
 
         }
-        private static byte[] GetOrCreateKey()
+        private static byte[] GetKey()
             => AesEncryption.LoadKey(KeyPath);
     }
 }

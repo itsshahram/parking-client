@@ -4,18 +4,33 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Parking.App.Views.Windows"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="TempLoginWindows" Height="200" Width="200">
-    <Grid>
+        Title="ورود به حساب"
+        Height="300"
+        Width="350"
+        WindowStartupLocation="CenterScreen">
 
-        <StackPanel Margin="20">
-            <TextBlock Text="Username"/>
-            <TextBox x:Name="txtUsername" Margin="0,5,0,10"/>
+    <Grid FlowDirection="RightToLeft">
+        <StackPanel Margin="20" HorizontalAlignment="Center">
+            <StackPanel Width="260" Margin="5">
+                <TextBlock Text="نام کاربری" />
+                <ui:TextBox x:Name="usernameBox"
+                            TextChanged="usernameBox_TextChanged"
+                            FlowDirection="LeftToRight"/>
+            </StackPanel>
 
-            <TextBlock Text="Password"/>
-            <PasswordBox x:Name="txtPassword" Margin="0,5,0,10"/>
-
-            <Button Content="Login" Width="100" HorizontalAlignment="Right" Click="BtnLogin_Click"/>
+            <StackPanel Width="260" Margin="5">
+                <TextBlock Text="رمز عبور" />
+                <ui:PasswordBox x:Name="passwordBox"
+                                TextChanged="passwordBox_TextChanged"
+                                FlowDirection="LeftToRight"/>
+            </StackPanel>
+            <Button Content="ورود"
+                    Width="100"
+                    HorizontalAlignment="Right"
+                    Margin="0,15,0,0"
+                    Click="BtnLogin_Click"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -2,33 +2,43 @@
 
 namespace Parking.App.Views.Windows
 {
-    /// <summary>
-    /// Interaction logic for TempLoginWindows.xaml
-    /// </summary>
     public partial class TempLoginWindows : Window
     {
         public string Username { get; private set; } = string.Empty;
         public string Password { get; private set; } = string.Empty;
 
+        private readonly ISynchronizationService _synchronizationService;
+
         public TempLoginWindows()
         {
             InitializeComponent();
+            _synchronizationService = App.GetService<ISynchronizationService>();
         }
 
-        private void BtnLogin_Click(object sender, RoutedEventArgs e)
+        private async void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
-            Username = txtUsername.Text;
-            Password = txtPassword.Password;
+            Username = usernameBox.Text;
+            Password = passwordBox.Password;
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                ShowMessage("", "لطفا ایمیل و پسورد را وارد کنید");
+                ShowMessage("ورود به حساب", "لطفا نام کاربری و رمز عبور را وارد کنید");
                 return;
             }
 
-            DialogResult = true;
-            Close();
+            var loginResult = await _synchronizationService.CheckTokenAsync(Username, Password);
+
+            if (loginResult?.Succeeded == true)
+            {
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                ShowMessage("ورود به حساب", "نام کاربری یا رمز عبور اشتباه است");
+            }
         }
+
         private async void ShowMessage(string title, string message)
         {
             try
@@ -55,5 +65,8 @@ namespace Parking.App.Views.Windows
                 System.Windows.MessageBox.Show(message, title);
             }
         }
+
+        private void usernameBox_TextChanged(object sender, RoutedEventArgs e) { }
+        private void passwordBox_TextChanged(object sender, RoutedEventArgs e) { }
     }
 }
