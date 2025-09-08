@@ -48,7 +48,7 @@ public enum HotKeyActionType
     [Display(Name = "ثبت قبض")]
     CreateTicket,
 
-    [Display(Name = "جستجو قبض")]
+    [Display(Name = "جستجو قبض با بارکد")]
     SearchBarcode,
 
     [Display(Name = "پرداخت نقدی")]
@@ -60,9 +60,9 @@ public enum HotKeyActionType
     [Display(Name = "چاپ رسید")]
     PrintReceipt,
 
-    [Display(Name = "مفقود کردن کارت")]
+    [Display(Name = "علام مفقودی کارت")]
     LostCard,
 
-    [Display(Name = "رفرش صفحه اصلی")]
+    [Display(Name = "بروزرسانی صفحه اصلی")]
     MaiPageResetForm
 }
