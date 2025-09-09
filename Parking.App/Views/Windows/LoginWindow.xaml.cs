@@ -15,12 +15,6 @@ namespace Parking.App.Views.Windows
         private readonly IParkingService? _parkingService;
         private readonly ILogger<LoginWindow> _logger;
 
-        private static readonly string AppDataFolder =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Parking.App");
-        private static readonly string CredentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
-        private static readonly string KeyPath = Path.Combine(AppDataFolder, "aeskey.bin");
-
-
         public LoginWindow()
         {
             InitializeComponent();
@@ -387,22 +381,23 @@ namespace Parking.App.Views.Windows
 
         public static void SaveCredentials(string username, string password)
         {
-            Directory.CreateDirectory(AppDataFolder);
+            Directory.CreateDirectory(Constants.AppDataFolder);
             byte[] key = GetOrCreateKey();
             string combined = $"{username}:{password}";
             byte[] encrypted = AesEncryption.Encrypt(combined, key);
-            File.WriteAllBytes(CredentialsPath, encrypted);
+            File.WriteAllBytes(Constants.CredentialsPath, encrypted);
         }
 
 
         public static (string Username, string Password)? LoadCredentials()
         {
-            if (!File.Exists(CredentialsPath))
+            if (!File.Exists(Constants.CredentialsPath))
                 return null;
 
             byte[] key = GetOrCreateKey();
-            byte[] encrypted = File.ReadAllBytes(CredentialsPath);
+            byte[] encrypted = File.ReadAllBytes(Constants.CredentialsPath);
             string decrypted = AesEncryption.Decrypt(encrypted, key);
+
 
             string[] parts = decrypted.Split(':');
             if (parts.Length == 2)
@@ -413,13 +408,13 @@ namespace Parking.App.Views.Windows
 
         private static byte[] GetOrCreateKey()
         {
-            if (!File.Exists(KeyPath))
+            if (!File.Exists(Constants.KeyPath))
             {
                 var key = AesEncryption.GenerateKey();
-                AesEncryption.SaveKey(key, KeyPath);
+                AesEncryption.SaveKey(key, Constants.KeyPath);
                 return key;
             }
-            return AesEncryption.LoadKey(KeyPath);
+            return AesEncryption.LoadKey(Constants.KeyPath);
         }
         private enum JobState
         {

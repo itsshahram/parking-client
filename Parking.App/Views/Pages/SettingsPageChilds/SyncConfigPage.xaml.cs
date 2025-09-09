@@ -4,10 +4,7 @@
     {
         private readonly ILogger<SyncConfigPage> _logger;
         private readonly ISynchronizationService _synchronizationService;
-        private static readonly string AppDataFolder =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Parking.App");
-        private static readonly string CredentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
-        private static readonly string KeyPath = Path.Combine(AppDataFolder, "aeskey.bin");
+
 
         public SyncConfigPage()
         {
@@ -72,11 +69,11 @@
 
         public static (string Username, string Password)? LoadCredentials()
         {
-            if (!File.Exists(CredentialsPath))
+            if (!File.Exists(Constants.CredentialsPath))
                 return null;
 
             byte[] key = GetKey();
-            byte[] encrypted = File.ReadAllBytes(CredentialsPath);
+            byte[] encrypted = File.ReadAllBytes(Constants.CredentialsPath);
             string decrypted = AesEncryption.Decrypt(encrypted, key);
 
             string[] parts = decrypted.Split(':');
@@ -153,6 +150,6 @@
 
         }
         private static byte[] GetKey()
-            => AesEncryption.LoadKey(KeyPath);
+            => AesEncryption.LoadKey(Constants.KeyPath);
     }
 }

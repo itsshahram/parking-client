@@ -4,19 +4,15 @@ public partial class HotKeyManagementViewModel : ObservableObject
 {
     public ObservableCollection<HotKeyConfig> HotKeyConfigs { get; set; } = new();
 
-    private static readonly string AppDataFolder =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Parking.App");
-
     private readonly string FilePath = "hotkeys.json";
 
     public HotKeyManagementViewModel()
     {
-        Directory.CreateDirectory(AppDataFolder);
         Load();
         EnsureAllActionsPresent();
     }
 
-    private string GetFullPath() => Path.Combine(AppDataFolder, FilePath);
+    private string GetFullPath() => Path.Combine(Constants.AppDataFolder, FilePath);
 
     public void Load()
     {
