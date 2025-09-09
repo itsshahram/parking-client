@@ -1,5 +1,6 @@
 ﻿using MessageBox = Wpf.Ui.Controls.MessageBox;
 using TextBox = Wpf.Ui.Controls.TextBox;
+
 namespace Parking.App.Views.Pages.SettingsPageChilds;
 
 public partial class HotKeyManagment : Page
@@ -19,8 +20,9 @@ public partial class HotKeyManagment : Page
     {
         _vm.Save();
         ApplyHotkeys();
-        ShowMessage("کلید مبانبر", "کلید های میانبر ذخیره شد");
+        ShowMessage("کلید میانبر", "کلیدهای میانبر ذخیره شد");
     }
+
     private async void ShowMessage(string title, string message)
     {
         try
@@ -48,32 +50,45 @@ public partial class HotKeyManagment : Page
         }
     }
 
-
     private void ShortcutTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         e.Handled = true;
 
+        // Detect actual key
         Key key = e.Key == Key.System ? e.SystemKey : e.Key;
         if (key == Key.None)
             key = e.ImeProcessedKey;
 
         ModifierKeys modifiers = Keyboard.Modifiers;
 
+        // Prevent saving "just modifiers" without an actual key
+        if (IsModifierOnlyKey(key))
+            return;
+
         string shortcutText = modifiers == ModifierKeys.None
             ? $"{key}"
             : $"{modifiers} + {key}";
 
-        if (sender is TextBox tb)
+        if (sender is TextBox tb && tb.DataContext is HotKeyConfig config)
         {
-            tb.Text = shortcutText;
+            // check for duplicates
+            bool alreadyTaken = _vm.HotKeyConfigs.Any(h =>
+                h != config &&
+                h.Key == key &&
+                h.Modifiers == modifiers);
 
-            if (tb.DataContext is HotKeyConfig config)
+            if (alreadyTaken)
             {
-                config.Shortcut = shortcutText;
+                ShowMessage("کلید میانبر", "این ترکیب کلید از قبل استفاده شده است.");
+                return;
             }
+
+            tb.Text = shortcutText;
+            config.Key = key;
+            config.Modifiers = modifiers;
+            config.Shortcut = shortcutText;
         }
     }
-
 
     private void ApplyHotkeys()
     {
@@ -83,7 +98,7 @@ public partial class HotKeyManagment : Page
         foreach (var config in _vm.HotKeyConfigs)
         {
             if (config.Key == Key.None || !IsValidKeyForGesture(config.Key))
-                continue; 
+                continue;
 
             try
             {
@@ -91,23 +106,33 @@ public partial class HotKeyManagment : Page
                 var command = new RoutedUICommand(config.Name, config.Type.ToString(), typeof(HotKeyManagment));
 
                 InputBindings.Add(new InputBinding(command, gesture));
+                CommandBindings.Add(new CommandBinding(command, (s, e) =>
+                {
+                    ShowMessage("میانبر اجرا شد", $"دستور {config.Name} فعال شد.");
+                }));
             }
             catch (NotSupportedException)
             {
+                // Skip unsupported key gestures
             }
         }
     }
 
     private bool IsValidKeyForGesture(Key key)
     {
-        return key != Key.LeftCtrl &&
-               key != Key.RightCtrl &&
-               key != Key.LeftAlt &&
-               key != Key.RightAlt &&
-               key != Key.LeftShift &&
-               key != Key.RightShift &&
-               key != Key.LWin &&
-               key != Key.RWin &&
-               key != Key.None;
+        return !IsModifierOnlyKey(key);
+    }
+
+    private bool IsModifierOnlyKey(Key key)
+    {
+        return key == Key.LeftCtrl ||
+               key == Key.RightCtrl ||
+               key == Key.LeftAlt ||
+               key == Key.RightAlt ||
+               key == Key.LeftShift ||
+               key == Key.RightShift ||
+               key == Key.LWin ||
+               key == Key.RWin ||
+               key == Key.None;
     }
 }

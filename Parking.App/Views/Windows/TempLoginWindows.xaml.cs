@@ -1,31 +1,41 @@
 ﻿using MessageBox = Wpf.Ui.Controls.MessageBox;
 
-namespace Parking.App.Views.Windows
+namespace Parking.App.Views.Windows;
+
+public partial class TempLoginWindows : Window
 {
-    public partial class TempLoginWindows : Window
+    public string Username { get; private set; } = string.Empty;
+    public string Password { get; private set; } = string.Empty;
+
+    private readonly ISynchronizationService _synchronizationService;
+
+    public TempLoginWindows()
     {
-        public string Username { get; private set; } = string.Empty;
-        public string Password { get; private set; } = string.Empty;
+        InitializeComponent();
+        _synchronizationService = App.GetService<ISynchronizationService>();
+    }
 
-        private readonly ISynchronizationService _synchronizationService;
+    private async void BtnLogin_Click(object sender, RoutedEventArgs e)
+    {
+        Username = usernameBox.Text;
+        Password = passwordBox.Password;
 
-        public TempLoginWindows()
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            InitializeComponent();
-            _synchronizationService = App.GetService<ISynchronizationService>();
+            ShowMessage("ورود به حساب", "لطفا نام کاربری و رمز عبور را وارد کنید");
+            return;
         }
 
-        private async void BtnLogin_Click(object sender, RoutedEventArgs e)
+        btnLogin.IsEnabled = false;
+        usernameBox.IsEnabled = false;
+        passwordBox.IsEnabled = false;
+        LoadingRing.Visibility = Visibility.Visible;
+
+        var previousButtonContent = btnLogin.Content;
+        btnLogin.Content = "در حال ورود...";
+
+        try
         {
-            Username = usernameBox.Text;
-            Password = passwordBox.Password;
-
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
-            {
-                ShowMessage("ورود به حساب", "لطفا نام کاربری و رمز عبور را وارد کنید");
-                return;
-            }
-
             var loginResult = await _synchronizationService.CheckTokenAsync(Username, Password);
 
             if (loginResult?.Succeeded == true)
@@ -38,35 +48,47 @@ namespace Parking.App.Views.Windows
                 ShowMessage("ورود به حساب", "نام کاربری یا رمز عبور اشتباه است");
             }
         }
-
-        private async void ShowMessage(string title, string message)
+        catch (Exception ex)
         {
-            try
+            ShowMessage("ورود به حساب", "خطا در ارتباط با سرور. دوباره تلاش کنید.");
+        }
+        finally
+        {
+            LoadingRing.Visibility = Visibility.Collapsed;
+            btnLogin.IsEnabled = true;
+            usernameBox.IsEnabled = true;
+            passwordBox.IsEnabled = true;
+            btnLogin.Content = previousButtonContent;
+        }
+    }
+
+    private async void ShowMessage(string title, string message)
+    {
+        try
+        {
+            if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
             {
-                if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
+                await Application.Current.Dispatcher.Invoke(async () =>
                 {
-                    await Application.Current.Dispatcher.Invoke(async () =>
+                    MessageBox ms = new MessageBox
                     {
-                        MessageBox ms = new MessageBox
-                        {
-                            FlowDirection = System.Windows.FlowDirection.RightToLeft,
-                            Title = title,
-                            Content = message,
-                            IsPrimaryButtonEnabled = false,
-                            IsSecondaryButtonEnabled = false,
-                            CloseButtonText = "متوجه شدم"
-                        };
-                        await ms.ShowDialogAsync();
-                    });
-                }
-            }
-            catch
-            {
-                System.Windows.MessageBox.Show(message, title);
+                        FlowDirection = System.Windows.FlowDirection.RightToLeft,
+                        Title = title,
+                        Content = message,
+                        IsPrimaryButtonEnabled = false,
+                        IsSecondaryButtonEnabled = false,
+                        CloseButtonText = "متوجه شدم"
+                    };
+                    await ms.ShowDialogAsync();
+                });
             }
         }
-
-        private void usernameBox_TextChanged(object sender, RoutedEventArgs e) { }
-        private void passwordBox_TextChanged(object sender, RoutedEventArgs e) { }
+        catch
+        {
+            System.Windows.MessageBox.Show(message, title);
+        }
     }
+
+    private void usernameBox_TextChanged(object sender, RoutedEventArgs e) { }
+    private void passwordBox_TextChanged(object sender, RoutedEventArgs e) { }
 }

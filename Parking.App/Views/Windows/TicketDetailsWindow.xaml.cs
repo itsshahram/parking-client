@@ -88,11 +88,17 @@ namespace Parking.App.Views.Windows
                 ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
                 _logger.LogError("Error in Ticket Details", ex);
             }
-            PaymentBtn.Content = $"پرداخت ({_hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace)?.Key})";
-            CashPaymentBtn.Content = $"پرداخت نقدی ({_hotKeyVm.GetHotKey(HotKeyActionType.CashPayment)?.Key})";
-            PrintBtn.Content = $"چاپ رسید({_hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt)?.Key})";
-            MissingCardToggleLabel.Content = $"آیا کارت مفقود شده است. (کلید {_hotKeyVm.GetHotKey(HotKeyActionType.LostCard)?.Key} برای فعال شدن)";
+            UpdateButtonsTitle();
         }
+
+        private void UpdateButtonsTitle()
+        {
+            PaymentBtn.Content = $"پرداخت ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace))})";
+            CashPaymentBtn.Content = $"پرداخت نقدی ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.CashPayment))})";
+            PrintBtn.Content = $"چاپ رسید ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt))})";
+            MissingCardToggleLabel.Content = $"آیا کارت مفقود شده است؟ (کلید {_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.LostCard))} برای فعال شدن)";
+        }
+
         private void InitializeCloseTimer()
         {
             if (Settings.Default.Appearance_InvoiceShowTime > 0)

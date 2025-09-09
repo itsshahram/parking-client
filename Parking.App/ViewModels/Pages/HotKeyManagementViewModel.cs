@@ -53,6 +53,25 @@ public partial class HotKeyManagementViewModel : ObservableObject
     }
     public HotKeyConfig GetHotKey(HotKeyActionType action)
         => HotKeyConfigs.FirstOrDefault(h => h.Type == action);
+    public string FormatHotkey(HotKeyConfig config)
+    {
+        if (config == null || config.Key == Key.None)
+            return string.Empty;
+
+        var parts = new List<string>();
+
+        if ((config.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            parts.Add("Ctrl");
+        if ((config.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+            parts.Add("Alt");
+        if ((config.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            parts.Add("Shift");
+        if ((config.Modifiers & ModifierKeys.Windows) == ModifierKeys.Windows)
+            parts.Add("Win");
+
+        parts.Add(config.Key.ToString());
+        return string.Join(" + ", parts);
+    }
 
     public void EnsureAllActionsPresent()
     {

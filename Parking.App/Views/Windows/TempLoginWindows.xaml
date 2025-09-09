@@ -35,13 +35,24 @@
                                 Background="{DynamicResource ControlFillColorDefaultBrush}"/>
             </StackPanel>
 
-            <Button Content="ورود"
-                    Width="100"
-                    HorizontalAlignment="Right"
-                    Margin="0,15,0,0"
-                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                    Background="{DynamicResource AccentFillColorDefaultBrush}"
-                    Click="BtnLogin_Click"/>
+            <Grid Width="260" Margin="0,15,0,0">
+                <Button x:Name="btnLogin"
+                        Content="ورود"
+                        Width="100"
+                        HorizontalAlignment="Right"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Background="{DynamicResource AccentFillColorDefaultBrush}"
+                        Click="BtnLogin_Click"/>
+
+                <!-- 🔹 Loading indicator -->
+                <ui:ProgressRing x:Name="LoadingRing"
+                             Width="28"
+                             Height="28"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             Visibility="Collapsed"/>
+            </Grid>
+
         </StackPanel>
     </Grid>
 </Window>
