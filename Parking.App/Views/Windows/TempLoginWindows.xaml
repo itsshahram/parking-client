@@ -6,30 +6,41 @@
         xmlns:local="clr-namespace:Parking.App.Views.Windows"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="ورود به حساب"
         Height="300"
         Width="350"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         WindowStartupLocation="CenterScreen">
 
     <Grid FlowDirection="RightToLeft">
         <StackPanel Margin="20" HorizontalAlignment="Center">
+
             <StackPanel Width="260" Margin="5">
-                <TextBlock Text="نام کاربری" />
+                <TextBlock Text="نام کاربری"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                 <ui:TextBox x:Name="usernameBox"
                             TextChanged="usernameBox_TextChanged"
-                            FlowDirection="LeftToRight"/>
+                            FlowDirection="LeftToRight"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"/>
             </StackPanel>
 
             <StackPanel Width="260" Margin="5">
-                <TextBlock Text="رمز عبور" />
+                <TextBlock Text="رمز عبور"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                 <ui:PasswordBox x:Name="passwordBox"
                                 TextChanged="passwordBox_TextChanged"
-                                FlowDirection="LeftToRight"/>
+                                FlowDirection="LeftToRight"
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                Background="{DynamicResource ControlFillColorDefaultBrush}"/>
             </StackPanel>
+
             <Button Content="ورود"
                     Width="100"
                     HorizontalAlignment="Right"
                     Margin="0,15,0,0"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    Background="{DynamicResource AccentFillColorDefaultBrush}"
                     Click="BtnLogin_Click"/>
         </StackPanel>
     </Grid>
