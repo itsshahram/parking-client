@@ -60,7 +60,7 @@ namespace Parking.App.Views.Pages
             Key key = e.Key == Key.System ? e.SystemKey : e.Key;
             ModifierKeys modifiers = Keyboard.Modifiers;
 
-            if (IsShortcutMatched(key, modifiers))
+            if (IsShortcutMatched(e.Key == Key.System ? e.SystemKey : e.Key, Keyboard.Modifiers, HotKeyActionType.MaiPageResetForm))
             {
                 e.Handled = true;
                 ResetForm();
@@ -69,12 +69,22 @@ namespace Parking.App.Views.Pages
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            ModifierKeys currentModifiers = Keyboard.Modifiers;
+            Key pressedKey = e.Key == Key.System ? e.SystemKey : e.Key;
+
+            bool IsHotKeyPressed(HotKeyConfig? config)
+            {
+                return config != null &&
+                       config.Key == pressedKey &&
+                       config.Modifiers == currentModifiers;
+            }
+
             var focused = Keyboard.FocusedElement;
 
             if (focused == BarcodeTextBox)
             {
-                var hotKey = _hotKeyVm.GetHotKey(HotKeyActionType.SearchBarcode);
-                if (e.Key == hotKey.Key)
+                var searchHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.SearchBarcode);
+                if (IsHotKeyPressed(searchHotKey))
                 {
                     BTNSearchBarcode_Click(BarcodeTextBox, new RoutedEventArgs());
                     e.Handled = true;
@@ -82,8 +92,8 @@ namespace Parking.App.Views.Pages
             }
             else
             {
-                var hotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CreateTicket);
-                if (e.Key == hotKey.Key)
+                var createTicketHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CreateTicket);
+                if (IsHotKeyPressed(createTicketHotKey))
                 {
                     CreateTicket();
                     e.Handled = true;
@@ -91,15 +101,16 @@ namespace Parking.App.Views.Pages
             }
         }
 
-        private bool IsShortcutMatched(Key pressedKey, ModifierKeys pressedModifiers)
-        {
-            string pressedShortcutText = pressedModifiers == ModifierKeys.None
-                ? $"{pressedKey}"
-                : $"{pressedModifiers} + {pressedKey}";
 
-            var refreshPageShortcut = _hotKeyVm.GetHotKey(HotKeyActionType.MaiPageResetForm);
-            return pressedShortcutText == refreshPageShortcut.Shortcut;
+        private bool IsShortcutMatched(Key pressedKey, ModifierKeys pressedModifiers, HotKeyActionType actionType)
+        {
+            var hotKey = _hotKeyVm.GetHotKey(actionType);
+            if (hotKey == null)
+                return false;
+
+            return hotKey.Key == pressedKey && hotKey.Modifiers == pressedModifiers;
         }
+
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {

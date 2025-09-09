@@ -250,11 +250,22 @@ namespace Parking.App.Views.Windows
             if (e.Key == Key.Escape)
             {
                 this.Close();
+                return;
             }
+
+            ModifierKeys currentModifiers = Keyboard.Modifiers;
+
+            bool IsHotKeyPressed(HotKeyConfig? config)
+            {
+                return config != null &&
+                       config.Key == (e.Key == Key.System ? e.SystemKey : e.Key) &&
+                       config.Modifiers == currentModifiers;
+            }
+
             if (Settings.Default.Application_GateType.Contains("1"))
             {
                 var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
-                if (e.Key == cashPaymentHotKey.Key)
+                if (IsHotKeyPressed(cashPaymentHotKey))
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
@@ -265,9 +276,9 @@ namespace Parking.App.Views.Windows
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
                 }
-                var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
 
-                if (e.Key == paymentWithSpaceHotKey.Key)
+                var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
+                if (IsHotKeyPressed(paymentWithSpaceHotKey))
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
@@ -277,38 +288,27 @@ namespace Parking.App.Views.Windows
                     {
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
-
                 }
 
                 var missingCardHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.LostCard);
-                if (e.Key == missingCardHotKey.Key)
+                if (IsHotKeyPressed(missingCardHotKey))
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
                     {
-                        if (!IsMissingCard)
-                        {
-                            MissingCardToggle.IsChecked = true;
-                        }
-                        else
-                        {
-                            MissingCardToggle.IsChecked = false;
-                        }
+                        MissingCardToggle.IsChecked = !IsMissingCard;
                     }
                     else
                     {
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
                 }
-
-
             }
-            var printReceipt = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
 
-            if (e.Key == printReceipt.Key)
+            var printReceiptHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
+            if (IsHotKeyPressed(printReceiptHotKey))
             {
                 PrintTicket();
             }
-
         }
         public async void Payment()
         {

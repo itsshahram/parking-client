@@ -37,20 +37,21 @@ public partial class HotKeyManagementViewModel : ObservableObject
         File.WriteAllText(path, json);
     }
 
-    private (ModifierKeys modifiers, Key key) GetDefaultShortcut(HotKeyActionType action)
+    public (ModifierKeys modifiers, Key key, bool allowSingleKey) GetDefaultShortcut(HotKeyActionType action)
     {
         return action switch
         {
-            HotKeyActionType.CreateTicket => (ModifierKeys.None, Key.Enter),
-            HotKeyActionType.SearchBarcode => (ModifierKeys.None, Key.Enter),
-            HotKeyActionType.CashPayment => (ModifierKeys.None, Key.F1),
-            HotKeyActionType.PaymentWithSpace => (ModifierKeys.None, Key.Space),
-            HotKeyActionType.PrintReceipt => (ModifierKeys.None, Key.F3),
-            HotKeyActionType.LostCard => (ModifierKeys.None, Key.F12),
-            HotKeyActionType.MaiPageResetForm => (ModifierKeys.None, Key.F5),
-            _ => (ModifierKeys.None, Key.None)
+            HotKeyActionType.CreateTicket => (ModifierKeys.None, Key.Enter, true),
+            HotKeyActionType.SearchBarcode => (ModifierKeys.None, Key.Enter, false),
+            HotKeyActionType.CashPayment => (ModifierKeys.None, Key.F1, true),
+            HotKeyActionType.PaymentWithSpace => (ModifierKeys.None, Key.Space, true),
+            HotKeyActionType.PrintReceipt => (ModifierKeys.None, Key.F3, true),
+            HotKeyActionType.LostCard => (ModifierKeys.None, Key.F12, true),
+            HotKeyActionType.MaiPageResetForm => (ModifierKeys.None, Key.F5, true),
+            _ => (ModifierKeys.None, Key.None, true)
         };
     }
+
     public HotKeyConfig GetHotKey(HotKeyActionType action)
         => HotKeyConfigs.FirstOrDefault(h => h.Type == action);
     public string FormatHotkey(HotKeyConfig config)
@@ -79,11 +80,12 @@ public partial class HotKeyManagementViewModel : ObservableObject
         {
             if (!HotKeyConfigs.Any(h => h.Type == action))
             {
-                var (modifiers, key) = GetDefaultShortcut(action);
+                var (modifiers, key, allowSingleKey) = GetDefaultShortcut(action);
 
                 HotKeyConfigs.Add(new HotKeyConfig
                 {
                     Name = action.ToString(),
+                    AllowSingleKey = allowSingleKey,
                     Type = action,
                     Key = key,
                     Modifiers = modifiers

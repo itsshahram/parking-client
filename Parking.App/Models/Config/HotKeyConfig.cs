@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Parking.App.Models;
 
@@ -9,6 +8,7 @@ public class HotKeyConfig
     public HotKeyActionType Type { get; set; }
     public Key Key { get; set; }
     public ModifierKeys Modifiers { get; set; }
+    public bool AllowSingleKey { get; set; } = true;
 
     public string Shortcut
     {
@@ -20,7 +20,6 @@ public class HotKeyConfig
             Key = key;
         }
     }
-
 
     private void ParseShortcut(string shortcut, out ModifierKeys mods, out Key key)
     {
@@ -42,6 +41,7 @@ public class HotKeyConfig
 
     public override string ToString() => Shortcut;
 }
+
 
 public enum HotKeyActionType
 {

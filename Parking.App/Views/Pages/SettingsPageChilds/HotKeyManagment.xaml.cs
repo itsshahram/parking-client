@@ -14,6 +14,22 @@ public partial class HotKeyManagment : Page
         DataContext = _vm;
 
         ApplyHotkeys();
+        FillDefaultsIfMissing();
+    }
+
+    private void FillDefaultsIfMissing()
+    {
+        foreach (var config in _vm.HotKeyConfigs)
+        {
+            if (config.Key == Key.None)
+            {
+                var (mod, key, allowSingleKey) = _vm.GetDefaultShortcut(config.Type);
+                config.Key = key;
+                config.Modifiers = mod;
+                config.AllowSingleKey = allowSingleKey;
+                config.Shortcut = config.Modifiers == ModifierKeys.None ? $"{key}" : $"{mod} + {key}";
+            }
+        }
     }
 
     private void SaveHotkeys_Click(object sender, RoutedEventArgs e)
@@ -54,24 +70,24 @@ public partial class HotKeyManagment : Page
     {
         e.Handled = true;
 
-        // Detect actual key
         Key key = e.Key == Key.System ? e.SystemKey : e.Key;
         if (key == Key.None)
             key = e.ImeProcessedKey;
 
         ModifierKeys modifiers = Keyboard.Modifiers;
 
-        // Prevent saving "just modifiers" without an actual key
         if (IsModifierOnlyKey(key))
             return;
 
-        string shortcutText = modifiers == ModifierKeys.None
-            ? $"{key}"
-            : $"{modifiers} + {key}";
-
         if (sender is TextBox tb && tb.DataContext is HotKeyConfig config)
         {
-            // check for duplicates
+            if (!config.AllowSingleKey && modifiers == ModifierKeys.None &&
+                ((key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9)))
+            {
+                ShowMessage("کلید میانبر", "برای اعداد باید از کلید کمکی (Ctrl/Alt/Shift) استفاده کنید.");
+                return;
+            }
+
             bool alreadyTaken = _vm.HotKeyConfigs.Any(h =>
                 h != config &&
                 h.Key == key &&
@@ -83,10 +99,10 @@ public partial class HotKeyManagment : Page
                 return;
             }
 
-            tb.Text = shortcutText;
             config.Key = key;
             config.Modifiers = modifiers;
-            config.Shortcut = shortcutText;
+            config.Shortcut = modifiers == ModifierKeys.None ? $"{key}" : $"{modifiers} + {key}";
+            tb.Text = config.Shortcut;
         }
     }
 
@@ -113,15 +129,11 @@ public partial class HotKeyManagment : Page
             }
             catch (NotSupportedException)
             {
-                // Skip unsupported key gestures
             }
         }
     }
 
-    private bool IsValidKeyForGesture(Key key)
-    {
-        return !IsModifierOnlyKey(key);
-    }
+    private bool IsValidKeyForGesture(Key key) => !IsModifierOnlyKey(key);
 
     private bool IsModifierOnlyKey(Key key)
     {
