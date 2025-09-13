@@ -39,11 +39,12 @@ public partial class MainWindowViewModel : ObservableObject
             Icon = new SymbolIcon { Symbol = SymbolRegular.VehicleCarParking24 },
             TargetPageType = typeof(SeizedPlatePage)
         });
+
         MenuItems.Add(new NavigationViewItem()
         {
             Content = "گزارش",
             Icon = new SymbolIcon { Symbol = SymbolRegular.History24 },
-            TargetPageType = typeof(TicketHistoryPage)
+            TargetPageType = PermissionHelper.CheckUserPermission(TokenStore.RoleName, "FullReport") ? typeof(FullTicketHistoryPage) : typeof(TicketHistoryPage)
         });
         MenuItems.Add(new NavigationViewItem()
         {

@@ -62,6 +62,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Coravel" Version="6.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />

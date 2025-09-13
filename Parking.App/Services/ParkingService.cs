@@ -1,21 +1,17 @@
-﻿using Azure.Core;
-using Parking.App.Models.Dto.Card;
+﻿using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
-using Parking.App.Services.Interfaces;
 using Parking.App.Utilities.PriceCalculation;
 using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -1371,6 +1367,20 @@ public class ParkingService : IParkingService
         if (request.LicensePlate != null && request.LicensePlate.Length > 1)
             tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
 
+        if (request.PriceFrom != null)
+            tickets = tickets.Where(x => x.TotalAmount >= request.PriceFrom);
+
+        if (request.PriceTo != null)
+            tickets = tickets.Where(x => x.TotalAmount <= request.PriceTo);
+
+        if (!string.IsNullOrEmpty(request.EntryRegistrar))
+            tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
+
+        if (!string.IsNullOrEmpty(request.ExitRegistrar))
+            tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+
+        if (request.HasDiscrepancy == true)
+            tickets = tickets.Where(x => x.TotalAmount != x.PaidAmount || x.Discount > 0 && x.IsExited == true);
 
         if (request.VehicleStatus != null)
         {
@@ -1383,7 +1393,7 @@ public class ParkingService : IParkingService
 
         return tickets;
     }
-    private static System.Linq.Expressions.Expression<Func<TicketsListViewModel, TicketsListViewModel>> ToTicketListViewModelResult()
+    private static Expression<Func<TicketsListViewModel, TicketsListViewModel>> ToTicketListViewModelResult()
     {
         return s => new TicketsListViewModel
         {
@@ -3094,5 +3104,21 @@ public class ParkingService : IParkingService
         }
     }
 
+    public List<string?> GetEntryRegistrars()
+    {
+        return unitOfWork.ParkingTickets.GetAll()
+            .Where(t => !t.IsExited)
+            .Select(t => t.EntranceGate)
+            .Distinct()
+            .ToList();
+    }
 
+    public List<string?> GetExitRegistrars()
+    {
+        return unitOfWork.ParkingTickets.GetAll()
+            .Where(t => t.IsExited)
+            .Select(t => t.ExitGate)
+            .Distinct()
+            .ToList();
+    }
 }

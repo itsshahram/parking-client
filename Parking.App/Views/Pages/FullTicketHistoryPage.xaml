@@ -1,0 +1,379 @@
+﻿<Page x:Class="Parking.App.Views.Pages.FullTicketHistoryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:components="clr-namespace:Parking.App.Views.Components"
+      mc:Ignorable="d" 
+      FontFamily="{StaticResource IranYekanFont}" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      Title="FullTicketHistoryPage">
+    <Page.Resources>
+        <Style x:Key="MyDataGridCell" TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="50"/>
+        </Style>
+        <DataTemplate x:Key="ComboBoxItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding NameFa}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" FlowDirection="RightToLeft">
+            <StackPanel>
+                <components:ParkingInfo />
+                <Border CornerRadius="6" Padding="0 5"  Background="#20E9E9E9" Margin="5 5 5 0">
+                    <StackPanel HorizontalAlignment="Center">
+                        <DockPanel FlowDirection="RightToLeft" Margin="10 5">
+
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock Text="فیلتر ها" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                        </DockPanel>
+                        <WrapPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+
+                            <!-- تاریخ ورود از -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تاریخ ورود از" />
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <ui:TextBox x:Name="entryStartYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryStartMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryStartDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
+                                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
+                                    <ui:TextBox x:Name="entryStartHourTextBox" MaxLength="2" PlaceholderText="12"  Margin="2 0" />
+                                    <TextBlock Text=":" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryStartMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- تاریخ ورود تا -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تاریخ ورود تا" />
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <ui:TextBox x:Name="entryEndYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryEndMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryEndDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
+                                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
+                                    <ui:TextBox x:Name="entryEndHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0" />
+                                    <TextBlock Text=":" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="entryEndMinutesTextBox" MaxLength="2" PlaceholderText="00"  Margin="2 0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- تاریخ خروج از -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تاریخ خروج از" />
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <ui:TextBox x:Name="exitStartYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitStartMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitStartDayTextBox" MaxLength="2" PlaceholderText="29"  Margin="2 0" />
+                                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
+                                    <ui:TextBox x:Name="exitStartHourTextBox" MaxLength="2" PlaceholderText="12"  Margin="2 0" />
+                                    <TextBlock Text=":" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitStartMinutesTextBox" MaxLength="2" PlaceholderText="00"  Margin="2 0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- تاریخ خروج تا -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تاریخ خروج تا" />
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <ui:TextBox x:Name="exitEndYearTextBox" MaxLength="4" PlaceholderText="1403"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitEndMountTextBox" MaxLength="2" PlaceholderText="06"  Margin="2 0" />
+                                    <TextBlock Text="/" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitEndDayTextBox" MaxLength="2" PlaceholderText="29" Margin="2 0" />
+                                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0" />
+                                    <ui:TextBox x:Name="exitEndHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0" />
+                                    <TextBlock Text=":" VerticalAlignment="Center" />
+                                    <ui:TextBox x:Name="exitEndMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- پلاک -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="پلاک" />
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <ui:TextBox MaxLength="2" PlaceholderText="_ _" x:Name="leftNumbersNumberTextBox" Margin="2 0" />
+                                    <ui:TextBox MaxLength="3" PlaceholderText="ب" x:Name="plateCharacter" Margin="2 0" />
+                                    <ui:TextBox MaxLength="3" PlaceholderText="_ _ _" x:Name="rightNumbersNumberTextBox" Margin="2 0" />
+                                    <TextBlock Text="|" VerticalAlignment="Center" Margin="2 0" />
+                                    <ui:TextBox MaxLength="2" PlaceholderText="_ _" x:Name="irNumberTextBox" Margin="2 0" />
+                                </StackPanel>
+                            </StackPanel>
+                            <!-- نوع خودرو -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="نوع خودرو" />
+                                <ComboBox x:Name="vehicleSegmentList"
+                  SelectedIndex="0"
+                  Width="200"
+                  ItemTemplate="{StaticResource ComboBoxItemTemplate}"
+                  SelectionChanged="vehicleSegmentList_SelectionChanged" />
+                            </StackPanel>
+                            <!-- نوع گیت -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="نوع گیت" />
+                                <ComboBox x:Name="GateType"
+              SelectedIndex="0"
+              Width="200"
+              SelectionChanged="GateType_SelectionChanged">
+                                    <ComboBoxItem Content="همه" Tag="" />
+                                    <ComboBoxItem Content="ورودی" Tag="EntranceGate" />
+                                    <ComboBoxItem Content="خروجی" Tag="ExitGate" />
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- نوع پرداخت -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="نوع پرداخت" />
+                                <ComboBox x:Name="Payment_Type"
+              SelectedIndex="0"
+              Width="200"
+              SelectionChanged="GateType_SelectionChanged">
+                                    <ComboBoxItem Content="همه" Tag="همه" />
+                                    <ComboBoxItem Content="نقدی" Tag="Naghdi" />
+                                    <ComboBoxItem Content="کارت خوان" Tag="POS" />
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- وضعیت پرداخت -->
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="وضغیت پرداخت" />
+                                <ComboBox x:Name="isPaid"
+              SelectedIndex="0"
+              Width="200"
+              SelectionChanged="GateType_SelectionChanged">
+                                    <ComboBoxItem Content="همه" Tag="" />
+
+                                    <ComboBoxItem Content="پرداخت شده" Tag="True" />
+                                    <ComboBoxItem Content="پرداخت نشده" Tag="False" />
+                                </ComboBox>
+                            </StackPanel>
+
+
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="وضعیت خودرو" />
+                                <ComboBox x:Name="VehicleStatus"
+                                        SelectedIndex="0"
+                                        Width="200"
+                                        SelectionChanged="VehicleStatus_SelectionChanged">
+                                    <ComboBoxItem Content="همه" Tag="" />
+                                    <ComboBoxItem Content="وارد شده " Tag="0" />
+                                    <ComboBoxItem Content="خارج شده" Tag="1" />
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Margin="10 5">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                                    <StackPanel Margin="0,0,10,0">
+                                        <TextBlock Text="قیمت از" Margin="0,0,0,2"/>
+                                        <TextBox x:Name="PriceFrom"
+                     Width="90"
+                     HorizontalContentAlignment="Right"
+                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                    </StackPanel>
+
+                                    <StackPanel>
+                                        <TextBlock Text="قیمت تا" Margin="0,0,0,2"/>
+                                        <TextBox x:Name="PriceTo"
+                     Width="90"
+                     HorizontalContentAlignment="Right"
+                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                    </StackPanel>
+
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="ثبت کننده ورود" />
+                                <ComboBox x:Name="EntryRegistrarCombo"
+              Width="200"
+              SelectedIndex="0" />
+                            </StackPanel>
+
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="ثبت کننده خروج" />
+                                <ComboBox x:Name="ExitRegistrarCombo"
+              Width="200"
+              SelectedIndex="0" />
+                            </StackPanel>
+
+                            <StackPanel Margin="10 5">
+                                <CheckBox x:Name="DiscrepancyCheckBox"
+              Content="دارای مغایرت"
+              IsChecked="False"
+              Margin="0,5,0,0"/>
+                            </StackPanel>
+
+
+                            <!-- دکمه پاک کردن -->
+                            <StackPanel Margin="0 5">
+                                <TextBlock Text=" " />
+                                <ui:Button x:Name="ClearBtn"
+                   Click="ClearBtn_Click"
+                   HorizontalAlignment="Center"
+                   IsDefault="True"
+                   Appearance="Secondary"
+                   Padding="5"
+                   Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}"
+                   FontSize="22" />
+                            </StackPanel>
+
+                            <!-- دکمه جستجو -->
+                            <StackPanel Margin="10 5" MinWidth="100">
+                                <TextBlock Text=" " />
+                                <ui:Button x:Name="SearchBtn"
+                   Appearance="Primary"
+                   Content="جستجو"
+                   Click="SearchBtn_Click"
+                   Icon="{ui:SymbolIcon Symbol=Search20}"
+                   VerticalAlignment="Stretch"
+                   FontSize="21"
+                   HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                        </WrapPanel>
+
+                    </StackPanel>
+
+                </Border>
+                <ProgressBar x:Name="progressBar" Margin="10 0"/>
+            </StackPanel>
+            <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" >
+                    <TextBlock Text="{Binding TotalCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="resultCount"  FontWeight="Bold" Margin="5 0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="عدد" />
+                </StackPanel>
+                <TextBlock Text="نتایج" FontWeight="Bold" DockPanel.Dock="Left"/>
+            </DockPanel>
+            <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
+                <components:PaginationControl 
+                FlowDirection="LeftToRight"
+                        CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
+                        TotalPages="{Binding TotalPages}"
+                        PageChanged="PaginationControl_PageChanged"
+                                     DockPanel.Dock="Left" Loaded="PaginationControl_Loaded"/>
+            </DockPanel>
+
+        </StackPanel>
+        <ScrollViewer CanContentScroll="True" 
+                      IsManipulationEnabled="True"
+                      HorizontalScrollBarVisibility="Visible" 
+                      VerticalScrollBarVisibility="Auto">
+
+            <DataGrid CellStyle="{StaticResource MyDataGridCell}"  
+                      FlowDirection="RightToLeft"  
+                      IsReadOnly="True" 
+                      AutoGenerateColumns="False"  
+                      RowHeight="50"  
+                      x:Name="ticketsDataGrid"
+                      MouseDoubleClick="TicketsDataGrid_MouseDoubleClick"  >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding LicensePlate}" Header="پلاک">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding StartTimeString}" Header="تاریخ ورود">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding StartTimeOnlyString}" Header="ساعت ورود">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding EndTimeString}" Header="تاریخ خروج">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding EndTimeOnlyString}" Header="ساعت خروج">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding TotalAmount, StringFormat=N0}" Header=" مبلغ کل(ريال)">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding DiscountPercent}" Header="درصد تخفیف">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding PaidAmount}" Header="مبلغ پرداخت شده">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Binding="{Binding RefId}" Header="شماره پیگیری پرداخت">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="TextAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="5" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </ScrollViewer>
+
+    </DockPanel>
+</Page>

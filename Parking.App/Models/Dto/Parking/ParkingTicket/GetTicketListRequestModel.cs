@@ -1,5 +1,4 @@
-﻿using Parking.App.Models.Dto.Card;
-using Parking.Domain.General;
+﻿using Parking.Domain.General;
 using System.ComponentModel;
 
 public class GetTicketListRequestModel : INotifyPropertyChanged
@@ -24,6 +23,12 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
     private DateTime? _entryTo;
     private DateTime? _exitFrom;
     private DateTime? _exitTo;
+    private decimal? _priceFrom;
+    private decimal? _priceTo;
+    private string? _entryRegistrar;
+    private string? _exitRegistrar;
+    private bool? _hasDiscrepancy;
+
     private TicketStatus? _ticketStatus;
     private VehicleStatus? _vehicleStatus;
 
@@ -307,7 +312,6 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
             }
         }
     }
-
     public VehicleStatus? VehicleStatus
     {
         get => _vehicleStatus;
@@ -321,7 +325,73 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
         }
     }
 
-    // Pagination properties:
+    public decimal? PriceFrom
+    {
+        get => _priceFrom;
+        set
+        {
+            if (_priceFrom != value)
+            {
+                _priceFrom = value;
+                OnPropertyChanged(nameof(PriceFrom));
+            }
+        }
+    }
+
+    public decimal? PriceTo
+    {
+        get => _priceTo;
+        set
+        {
+            if (_priceTo != value)
+            {
+                _priceTo = value;
+                OnPropertyChanged(nameof(PriceTo));
+            }
+        }
+    }
+
+    public string? EntryRegistrar
+    {
+        get => _entryRegistrar;
+        set
+        {
+            if (_entryRegistrar != value)
+            {
+                _entryRegistrar = value;
+                OnPropertyChanged(nameof(EntryRegistrar));
+            }
+        }
+    }
+
+    public string? ExitRegistrar
+    {
+        get => _exitRegistrar;
+        set
+        {
+            if (_exitRegistrar != value)
+            {
+                _exitRegistrar = value;
+                OnPropertyChanged(nameof(ExitRegistrar));
+            }
+        }
+    }
+
+
+
+    public bool? HasDiscrepancy
+    {
+        get => _hasDiscrepancy;
+        set
+        {
+            if (_hasDiscrepancy != value)
+            {
+                _hasDiscrepancy = value;
+                OnPropertyChanged(nameof(HasDiscrepancy));
+            }
+        }
+    }
+
     public int CurrentPage
     {
         get => _currentPage;

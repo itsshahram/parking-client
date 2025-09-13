@@ -49,6 +49,9 @@ public interface IParkingService
     bool SetTicketPaidInfo(TicketPaidInfoModel request);
     LicensePlateGroup? GetLicensePlateGroupById(Guid id);
 
+    List<string?> GetEntryRegistrars();
+    List<string?> GetExitRegistrars();
+
     #region Cards
     decimal GetCardCreditAsync(long cardSerialNo);
     CardModel? GetCardInfo(long cardSerialNo);
