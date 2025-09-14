@@ -12,6 +12,8 @@ using Parking.Domain.General;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using ZXing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -1024,7 +1026,7 @@ public class ParkingService : IParkingService
             }
             else
             {
-                return ticket;
+                    return ticket;
             }
 
         }
@@ -1380,7 +1382,12 @@ public class ParkingService : IParkingService
             tickets.Where(x => x.ExitGate == request.ExitRegistrar);
 
         if (request.HasDiscrepancy == true)
-            tickets = tickets.Where(x => x.TotalAmount != x.PaidAmount || x.Discount > 0 && x.IsExited == true);
+        {
+            tickets = tickets.Where(x =>
+                x.IsExited == true &&
+                (x.TotalAmount != x.PaidAmount || x.DiscountPercent > 0) &&
+                x.IsPaid == true);
+        }
 
         if (request.VehicleStatus != null)
         {
@@ -1388,7 +1395,6 @@ public class ParkingService : IParkingService
             request.VehicleStatus == VehicleStatus.Entered ? x.IsExited.Value == false : x.IsExited.Value;
 
             tickets = tickets.Where(expression);
-
         }
 
         return tickets;
@@ -1460,9 +1466,12 @@ public class ParkingService : IParkingService
                                              LicensePlateGroupId = s.LicensePlateGroupId,
                                              MerchantNumber = s.MerchantNumber,
                                              PaidDate = s.PaidDate,
+                                             ParkingName = ParkingLotInfoStore.ParkingInfo.Name,
                                              ParkingLotId = s.ParkingLotId,
                                              TraceNo = s.TraceNo,
                                              RRN = s.RRN,
+                                             EntranceGate = s.EntranceGate,
+                                             ExitGate = s.ExitGate,
                                          });
     }
     #endregion
@@ -3120,5 +3129,71 @@ public class ParkingService : IParkingService
             .Select(t => t.ExitGate)
             .Distinct()
             .ToList();
+    }
+
+    public TicketSummaryReportModel GetSummaryReport(GetTicketListRequestModel request)
+    {
+        var tickets = unitOfWork.ParkingTickets.GetAll();
+        if (request.EntryFrom != null)
+            tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
+
+        if (request.EntryTo != null)
+            tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
+
+        if (request.ExitFrom != null)
+            tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
+
+        if (request.ExitTo != null)
+            tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
+
+        if (!string.IsNullOrEmpty(request.EntryRegistrar))
+            tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
+
+        if (!string.IsNullOrEmpty(request.ExitRegistrar))
+            tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+
+        var result = new TicketSummaryReportModel()
+        {
+            TotalTickets = tickets.Count(),
+            TotalAmount = string.Format("{0:N0} ریال", Math.Round(tickets.Sum(x => x.TotalAmount), 0)),
+            TotalPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets.Sum(x => x.PaidAmount), 0)),
+            CurrentlyInside = tickets.Count(x => !x.IsExited),
+            TotalCreditPaid = tickets.Count(x => x.IsPaid && x.PaidType == "NAGHDI"),
+            TotalPosPaid = tickets.Count(x => x.IsPaid && x.PaidType == "POS"),
+            TotalCreditPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets
+            .Where(x => x.IsPaid && x.PaidType == "NAGHDI")
+            .Sum(x => x.PaidAmount), 0)),
+            TotalPosPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets
+            .Where(x => x.IsPaid && x.PaidType == "POS")
+            .Sum(x => x.PaidAmount), 0)),
+            TotalDiscountAmount = string.Format("{0:N0} ریال", Math.Round(tickets
+            .Where(x => x.IsPaid)
+            .Sum(x => (x.TotalAmount * x.DiscountPercent) / 100), 0)),
+            TotalEntries = tickets.Count(x => !x.IsExited),
+            TotalExits = tickets.Count(x => x.IsExited)
+        };
+
+
+        return result;
+    }
+
+    public async Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListReportAsync(GetTicketListRequestModel request)
+    {
+        try
+        {
+            IQueryable<TicketsListViewModel> tickets = TicketListBaseQuery();
+
+            tickets = ApplyTicketListFilter(request, tickets);
+
+            var totalCount = tickets.Count();
+
+            var result = await tickets.ToListAsync();
+
+            return (result, totalCount);
+        }
+        catch (Exception)
+        {
+            return (null, 0);
+        }
     }
 }

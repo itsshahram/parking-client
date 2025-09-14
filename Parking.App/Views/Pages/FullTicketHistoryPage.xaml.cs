@@ -1,4 +1,5 @@
 ﻿using Parking.App.Models.Dto.Vehicle.VehicleSegment;
+using MessageBox = Wpf.Ui.Controls.MessageBox;
 
 namespace Parking.App.Views.Pages;
 
@@ -50,8 +51,6 @@ public partial class FullTicketHistoryPage : Page
         ViewModel.TotalCount = tickets.TotalCount;
         ticketsDataGrid.ItemsSource = new ObservableCollection<TicketsListViewModel>(tickets.Data);
     }
-
-
     private void PaginationControl_Loaded(object sender, RoutedEventArgs e)
     {
     }
@@ -359,6 +358,49 @@ public partial class FullTicketHistoryPage : Page
 
         return request;
     }
+    private string BuildFilterDescription(GetTicketListRequestModel request)
+    {
+        var filters = new List<string>();
+
+        if (request.EntryFrom != null || request.EntryTo != null)
+            filters.Add($"ورود از {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} تا {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}");
+
+        if (request.ExitFrom != null || request.ExitTo != null)
+            filters.Add($"خروج از {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} تا {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}");
+
+        if (request.PriceFrom != null || request.PriceTo != null)
+            filters.Add($"مبلغ از {request.PriceFrom?.ToString("#,0")} تا {request.PriceTo?.ToString("#,0")} ریال");
+
+        if (request.IsPaid != null)
+            filters.Add($"وضعیت پرداخت: {(request.IsPaid == true ? "پرداخت شده" : "پرداخت نشده")}");
+
+        if (!string.IsNullOrEmpty(request.PaidType))
+            filters.Add($"نوع پرداخت:{(request.PaidType == "Naghdi"? "پرداخت شده" : "پرداخت نشده")}");
+
+        if (!string.IsNullOrEmpty(request.GateType))
+            filters.Add($"نوع درگاه: {request.GateType}");
+
+        if (request.VehicleStatus != null)
+            filters.Add($"وضعیت خودرو: {(request.VehicleStatus == Domain.General.VehicleStatus.Entered ? "داخل" : "خارج شده")}");
+
+        if (!string.IsNullOrEmpty(request.LicensePlate))
+            filters.Add($"پلاک: {request.LicensePlate}");
+
+
+        if (request.VehicleSegmentId != null)
+            filters.Add($"سگمنت خودرو: {request.VehicleSegmentId}");
+
+        if (!string.IsNullOrEmpty(request.EntryRegistrar))
+            filters.Add($"ثبت‌کننده ورود: {request.EntryRegistrar}");
+
+        if (!string.IsNullOrEmpty(request.ExitRegistrar))
+            filters.Add($"ثبت‌کننده خروج: {request.ExitRegistrar}");
+
+        if (request.HasDiscrepancy != null && request.HasDiscrepancy == true)
+            filters.Add("فقط با مغایرت");
+
+        return filters.Count > 0 ? string.Join(" | ", filters) : "بدون فیلتر";
+    }
 
     private async void TicketsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
@@ -421,6 +463,8 @@ public partial class FullTicketHistoryPage : Page
         GateType.SelectedIndex = 0;
         Payment_Type.SelectedIndex = 0;
         isPaid.SelectedIndex = 0;
+
+        
     }
 
     private void VehicleStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -429,5 +473,71 @@ public partial class FullTicketHistoryPage : Page
     private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
         e.Handled = !e.Text.All(char.IsDigit);
+    }
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        GetTicketListRequestModel request = FillParameters();
+
+        string filterDescription = BuildFilterDescription(request);
+        var report = await _parkingService.GetTicketListReportAsync(request);
+
+        var data = report.Data.Select(x => new TicketSummaryReportItem()
+        {
+            StartTime = x.StartTime.ToShamsi(),
+            EndTime = x.EndTime?.ToShamsi(),
+            LicensePlate = x.LicensePlate,
+            VehicleSegmentName = x.VehicleSegmentName,
+            ParkingName = x.ParkingName,
+            EntranceGate = x.EntranceGate,
+            ExitGate = x.ExitGate,
+            DurationMinutes = x.DurationMinutes,
+            TotalAmount = x.TotalAmount,
+            Discount = x.Discount,
+            PaidAmount = x.PaidAmount,
+            PaidType = x.PaidType == "Naghdi" ? "نقدی" : "پوز",
+            PaidCreditCard = x.PaidCreditCard,
+            IsPaid = x.IsPaid.Value == true ? "پرداخت شده" : "پرداخت نشده",
+            IsExited = x.IsExited.Value == true ? "خارج شده" : "وارد شده"
+        }).ToList();
+
+
+        byte[] fileBytes = ExcelHelper.ExportToExcel(data, "FullReport", true, filterDescription);
+
+        var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+            FileName = "FulReport.xlsx"
+        };
+
+        if (saveFileDialog.ShowDialog() == true)
+        {
+            File.WriteAllBytes(saveFileDialog.FileName, fileBytes);
+            ShowMessage("موفق", "فایل با موفقیت ذخیره شد.");
+        }
+    }
+    private async void ShowMessage(string title, string message)
+    {
+        try
+        {
+            if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
+            {
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    MessageBox ms = new MessageBox();
+                    ms.FlowDirection = System.Windows.FlowDirection.RightToLeft;
+                    ms.Title = title;
+                    ms.Content = message;
+                    ms.IsPrimaryButtonEnabled = false;
+                    ms.IsSecondaryButtonEnabled = false;
+                    ms.CloseButtonText = "متوجه شدم";
+                    await ms.ShowDialogAsync();
+                });
+
+            }
+        }
+        catch
+        {
+            System.Windows.MessageBox.Show(message, title);
+        }
     }
 }

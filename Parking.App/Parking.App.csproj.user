@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_LastSelectedProfileId>D:\repos\Parking-WindowsApp-V2.2\Parking.App\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
+    <_LastSelectedProfileId>C:\Users\Mehdi\Desktop\Projects\avaparsi\Parking-WindowsApp-V2\Parking.App\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="Views\Components\ExitedStatusBorder.xaml.cs">
@@ -14,6 +14,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Components\SeizedPlateItemComponent.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Components\SummaryReport.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Components\TicketDetails.xaml.cs">
@@ -32,6 +35,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Pages\CardsPageChilds\AddCardHistoryPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\FullTicketHistoryPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Pages\InformationPage.xaml.cs">

@@ -8,7 +8,8 @@ using Parking.Domain.Entities.Vehicles;
 
 namespace Parking.App.Services.Interfaces;
 
-public interface IParkingService
+public interface 
+    IParkingService
 {
     TServiceResponse<ParkingLotModel> GetParkingLotDetails();
     Task<List<VehicleSegmentPriceListItemModel>> GetVehicleSegmentPriceList();
@@ -33,6 +34,7 @@ public interface IParkingService
     TServiceResponse<Guid> CreateTicket(CreateParkingTicketModel request, string? StartImage);
     (List<TicketsListViewModel> Data, int TotalCount) GetTicketList(GetTicketListRequestModel request);
     Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListAsync(GetTicketListRequestModel request);
+    Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListReportAsync(GetTicketListRequestModel request);
     bool ExitRequest(Guid ticketId);
     void PaymentAmountCalculation(Guid ticketId);
     Task PaymentAmountCalculationAsync(Guid ticketId);
@@ -71,8 +73,6 @@ public interface IParkingService
     int GetDiscountedCardsCount();
     bool IsCardInUse(long cardSerialNo);
     Guid? GetNotExitedTicketIdByCardSerialNo(long cardSerialNo);
-
-
     (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request);
     (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
 
@@ -99,5 +99,7 @@ public interface IParkingService
     bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request);
     bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
     bool DeleteTicketDescriptionItem(int id);
+    TicketSummaryReportModel GetSummaryReport(GetTicketListRequestModel request);
+
     #endregion
 }

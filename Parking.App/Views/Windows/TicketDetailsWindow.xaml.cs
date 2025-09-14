@@ -533,7 +533,7 @@ namespace Parking.App.Views.Windows
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                             {
-                                PaidAmount = ViewModel.Item.TotalAmount,
+                                PaidAmount = ViewModel.Item.PaidAmount,
                                 TotalAmount = ViewModel.Item.TotalAmount,
                                 PaidCreditCard = "",
                                 PaidType = "Naghdi",
@@ -686,7 +686,6 @@ namespace Parking.App.Views.Windows
             if (result == true)
             {
                 ViewModel.Item.PaidAmount = customAmountPaymentModalWindow.ViewModel.Amount;
-                ViewModel.Item.TotalAmount = customAmountPaymentModalWindow.ViewModel.Amount;
                 CashPayment();
             }
         }
