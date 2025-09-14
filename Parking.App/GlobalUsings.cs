@@ -17,7 +17,6 @@ global using Parking.App.Models.Tickets;
 global using Parking.App.Services;
 global using Parking.App.Services.Interfaces;
 global using Parking.App.Utilities;
-global using Parking.App.ViewModels.Componens;
 global using Parking.App.ViewModels.Components;
 global using Parking.App.ViewModels.Pages;
 global using Parking.App.ViewModels.Windows;

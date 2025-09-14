@@ -1,7 +1,4 @@
-﻿
-using Parking.App.ViewModels.Componens;
-
-namespace Parking.App.Views.Components
+﻿namespace Parking.App.Views.Components
 {
     /// <summary>
     /// Interaction logic for TicketDetails.xaml

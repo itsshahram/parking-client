@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Parking.App.ViewModels.Componens;
+namespace Parking.App.ViewModels.Components;
 
 public class TicketDetailsViewModel : INotifyPropertyChanged
 {
