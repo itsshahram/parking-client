@@ -67,6 +67,7 @@ public partial class App : Application
 
                 services.AddScoped<MainWindow>();
                 services.AddTransient<LoginWindow>();
+                services.AddTransient<DatabaseErrorWindow>();
 
                 services.AddScoped<MainPage>();
                 services.AddScoped<MainWindowViewModel>();
@@ -234,6 +235,13 @@ public partial class App : Application
             {
                 using (var context = new ApplicationDbContext(optionsBuilder.Options))
                 {
+                    if (!context.Database.CanConnect())
+                    {
+                        var dbWindow = new DatabaseErrorWindow(Settings.Default.Application_DbHostAddress);
+                        dbWindow.Show();
+                        return;
+                    }
+
                     context.Database.Migrate();
                 }
                 //_host.Start();

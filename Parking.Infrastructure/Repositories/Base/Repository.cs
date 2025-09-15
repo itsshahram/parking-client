@@ -2,121 +2,197 @@
 using Microsoft.EntityFrameworkCore.Query;
 using Parking.Domain.Contracts.Base;
 using Parking.Infrastructure.Context;
+using Polly;
+using Polly.Retry;
+using System.Data.Common;
 using System.Linq.Expressions;
 
 public class Repository<T> : IRepository<T> where T : class
 {
-    private readonly ApplicationDbContext _context;
-    private readonly DbSet<T> _dbSet;
+    private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-    public Repository(ApplicationDbContext context)
+    private static readonly AsyncRetryPolicy _retryPolicy = Policy
+        .Handle<DbException>()
+        .Or<TimeoutException>()
+        .WaitAndRetryAsync(
+            3,
+            attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+            (exception, timespan, retryCount, context) =>
+            {
+                Console.WriteLine($"Retry {retryCount} after {timespan.TotalSeconds}s due to {exception.Message}");
+            });
+
+    public Repository(IDbContextFactory<ApplicationDbContext> dbContextFactory)
     {
-        _context = context;
-        _dbSet = _context.Set<T>();
+        _dbContextFactory = dbContextFactory;
     }
 
+    // ----------------- Helpers -----------------
+    private async Task<TResult> ExecuteAsync<TResult>(Func<ApplicationDbContext, Task<TResult>> action)
+    {
+        try
+        {
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+                return await action(context);
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Repository operation failed: {ex.Message}");
+            return default!;
+        }
+    }
+
+    private async Task ExecuteAsync(Func<ApplicationDbContext, Task> action)
+    {
+        try
+        {
+            await _retryPolicy.ExecuteAsync(async () =>
+            {
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+                await action(context);
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Repository operation failed: {ex.Message}");
+        }
+    }
+
+    // ----------------- Read -----------------
     public IQueryable<T> GetAll()
-        => _dbSet.AsNoTracking();
+    {
+        var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking();
+    }
 
     public List<T> ToList()
-        => _dbSet.AsNoTracking().ToList();
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().ToList();
+    }
 
-    public async Task<List<T>> ToListAsync()
-        => await _dbSet.AsNoTracking().ToListAsync();
+    public Task<List<T>> ToListAsync() =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().ToListAsync());
 
     public T? GetById(Guid id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<Guid>(e, "Id") == id);
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<Guid>(e, "Id") == id);
+    }
 
-    public async Task<T?> GetByIdAsync(Guid id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
+    public Task<T?> GetByIdAsync(Guid id) =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id));
 
     public T? GetById(int id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, "Id") == id);
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, "Id") == id);
+    }
 
-    public async Task<T?> GetByIdAsync(int id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+    public Task<T?> GetByIdAsync(int id) =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id));
 
     public T? GetById(long id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<long>(e, "Id") == id);
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<long>(e, "Id") == id);
+    }
 
-    public async Task<T?> GetByIdAsync(long id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<long>(e, "Id") == id);
+    public Task<T?> GetByIdAsync(long id) =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => EF.Property<long>(e, "Id") == id));
 
     public T? FirstOrDefault()
-        => _dbSet.AsNoTracking().FirstOrDefault();
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().FirstOrDefault();
+    }
 
-    public async Task<T?> FirstOrDefaultAsync()
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync();
+    public Task<T?> FirstOrDefaultAsync() =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync());
 
     public T? FirstOrDefault(Expression<Func<T, bool>> predicate)
-        => _dbSet.AsNoTracking().FirstOrDefault(predicate);
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().FirstOrDefault(predicate);
+    }
 
-    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(predicate);
+    public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) =>
+        ExecuteAsync(ctx => ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate));
 
     public TResult? FirstOrDefault<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => _dbSet.Where(predicate).AsNoTracking().Select(selector).FirstOrDefault();
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().Where(predicate).AsNoTracking().Select(selector).FirstOrDefault();
+    }
 
-    public async Task<TResult?> FirstOrDefaultAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => await _dbSet.Where(predicate).AsNoTracking().Select(selector).FirstOrDefaultAsync();
+    public Task<TResult?> FirstOrDefaultAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector) =>
+        ExecuteAsync(ctx => ctx.Set<T>().Where(predicate).AsNoTracking().Select(selector).FirstOrDefaultAsync());
 
+    public IQueryable<T> Find(Expression<Func<T, bool>> predicate)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().AsNoTracking().Where(predicate);
+    }
+
+    // ----------------- Write -----------------
     public void Add(T entity)
     {
-        _dbSet.Add(entity);
-        _context.SaveChanges();
-        _context.Entry(entity).State = EntityState.Detached;
+        using var context = _dbContextFactory.CreateDbContext();
+        context.Set<T>().Add(entity);
+        context.SaveChanges();
     }
 
-    public async Task AddAsync(T entity)
-    {
-        await _dbSet.AddAsync(entity);
-        await _context.SaveChangesAsync();
-    }
+    public Task AddAsync(T entity) =>
+        ExecuteAsync(async ctx =>
+        {
+            await ctx.Set<T>().AddAsync(entity);
+            await ctx.SaveChangesAsync();
+        });
 
     public void Update(T entity)
     {
-        _dbSet.Update(entity);
-        _context.SaveChanges();
+        using var context = _dbContextFactory.CreateDbContext();
+        context.Set<T>().Update(entity);
+        context.SaveChanges();
     }
 
     public void Delete(T entity)
     {
-        _dbSet.Remove(entity);
-        _context.SaveChanges();
+        using var context = _dbContextFactory.CreateDbContext();
+        context.Set<T>().Remove(entity);
+        context.SaveChanges();
     }
 
     public void ExecuteUpdate(Expression<Func<T, bool>> query, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> expression)
     {
-        _dbSet.Where(query).ExecuteUpdate(expression);
+        using var context = _dbContextFactory.CreateDbContext();
+        context.Set<T>().Where(query).ExecuteUpdate(expression);
     }
 
-    public async Task ExecuteUpdateAsync(Expression<Func<T, bool>> query, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> expression)
-    {
-        await _dbSet.Where(query).ExecuteUpdateAsync(expression);
-    }
+    public Task ExecuteUpdateAsync(Expression<Func<T, bool>> query, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> expression) =>
+        ExecuteAsync(ctx => ctx.Set<T>().Where(query).ExecuteUpdateAsync(expression));
 
     public int ExecuteDelete(Expression<Func<T, bool>> filter)
     {
-        return _dbSet.Where(filter).ExecuteDelete();
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Set<T>().Where(filter).ExecuteDelete();
     }
 
-    public async Task<int> ExecuteDeleteAsync(Expression<Func<T, bool>> filter)
-    {
-        return await _dbSet.Where(filter).ExecuteDeleteAsync();
-    }
-
-    public IQueryable<T> Find(Expression<Func<T, bool>> predicate)
-    {
-        return _dbSet.AsNoTracking().Where(predicate);
-    }
-
-    public async Task<int> CommitAsync()
-    {
-        return await _context.SaveChangesAsync();
-    }
+    public Task<int> ExecuteDeleteAsync(Expression<Func<T, bool>> filter) =>
+        ExecuteAsync(ctx => ctx.Set<T>().Where(filter).ExecuteDeleteAsync());
 
     public int Commit()
     {
-        return _context.SaveChanges();
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.SaveChanges();
     }
+
+    public Task<int> CommitAsync() =>
+        ExecuteAsync(ctx => ctx.SaveChangesAsync());
 }
+
+
+

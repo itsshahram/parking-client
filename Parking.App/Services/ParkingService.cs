@@ -35,11 +35,8 @@ public class ParkingService : IParkingService
     public List<VehicleSegment> _vehicleSegmentsList;
     public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory, ITicketQueueService ticketQueueService)
     {
-        //this.unitOfWork = unitOfWork;
-        //_unitOfWorkFactory = unitOfWorkFactory;                                     Remove All Comments
         _logger = logger;
         _ticketQueueService = ticketQueueService;
-
         _httpClientFactory = httpClientFactory;
         client = _httpClientFactory.CreateClient();
         unitOfWork = _unitOfWork;
