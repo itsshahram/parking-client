@@ -290,14 +290,6 @@ public partial class FullTicketHistoryPage : Page
                 int.Parse(exitEndHourTextBox.Text),
                 int.Parse(exitEndMinutesTextBox.Text));
         }
-
-        if (!string.IsNullOrEmpty(PriceFrom.Text))
-            request.PriceFrom = int.Parse(PriceFrom.Text);
-
-        if (!string.IsNullOrEmpty(PriceTo.Text))
-            request.PriceTo = int.Parse(PriceTo.Text);
-
-
         // وضعیت پرداخت
         if (isPaid.SelectedItem is ComboBoxItem selectedItem &&
             bool.TryParse(selectedItem.Tag?.ToString(), out bool result))
@@ -352,6 +344,12 @@ public partial class FullTicketHistoryPage : Page
         if (vehicleSegmentList.SelectedItem is VehicleSegmentModel segment)
             request.VehicleSegmentId = segment.Id == 0 ? null : segment.Id;
 
+        if (!string.IsNullOrEmpty(PriceFrom.Text))
+            request.PriceFrom = int.Parse(PriceFrom.Text);
+
+        if (!string.IsNullOrEmpty(PriceTo.Text))
+            request.PriceTo = int.Parse(PriceTo.Text);
+
         request.EntryRegistrar = EntryRegistrarCombo.Text == "همه" ? null : EntryRegistrarCombo.Text;
         request.ExitRegistrar = ExitRegistrarCombo.Text == "همه" ? null : ExitRegistrarCombo.Text;
         request.HasDiscrepancy = DiscrepancyCheckBox.IsChecked == true ? true : null;
@@ -375,7 +373,7 @@ public partial class FullTicketHistoryPage : Page
             filters.Add($"وضعیت پرداخت: {(request.IsPaid == true ? "پرداخت شده" : "پرداخت نشده")}");
 
         if (!string.IsNullOrEmpty(request.PaidType))
-            filters.Add($"نوع پرداخت:{(request.PaidType == "Naghdi"? "پرداخت شده" : "پرداخت نشده")}");
+            filters.Add($"نوع پرداخت:{(request.PaidType == "Naghdi" ? "پرداخت شده" : "پرداخت نشده")}");
 
         if (!string.IsNullOrEmpty(request.GateType))
             filters.Add($"نوع درگاه: {request.GateType}");
@@ -463,8 +461,9 @@ public partial class FullTicketHistoryPage : Page
         GateType.SelectedIndex = 0;
         Payment_Type.SelectedIndex = 0;
         isPaid.SelectedIndex = 0;
-
-        
+        PriceTo.Text = "";
+        PriceFrom.Text = "";
+        DiscrepancyCheckBox.IsChecked = false;
     }
 
     private void VehicleStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)

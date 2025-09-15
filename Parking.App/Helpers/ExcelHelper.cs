@@ -17,7 +17,7 @@ public static class ExcelHelper
             {
                 string filterText = $"🔍 فیلتر گزارش: {filterInfo}";
 
-                var filterRange = worksheet.Range(currentRow, 1, currentRow + 1, 5);
+                var filterRange = worksheet.Range(currentRow, 1, currentRow + 1, 12);
                 filterRange.Merge();
 
                 filterRange.Value = filterText;

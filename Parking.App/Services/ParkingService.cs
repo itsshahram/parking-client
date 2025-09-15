@@ -1026,7 +1026,7 @@ public class ParkingService : IParkingService
             }
             else
             {
-                    return ticket;
+                return ticket;
             }
 
         }
@@ -1384,10 +1384,16 @@ public class ParkingService : IParkingService
         if (request.HasDiscrepancy == true)
         {
             tickets = tickets.Where(x =>
-                x.IsExited == true &&
-                (x.TotalAmount != x.PaidAmount || x.DiscountPercent > 0) &&
-                x.IsPaid == true);
+            x.IsExited == true &&
+            x.IsPaid.Value == true &&
+            !(
+            x.TotalAmount == 0m &&
+            x.DiscountPercent == 100 &&
+            x.PaidAmount == 0m
+            ) &&
+            x.PaidAmount != (x.TotalAmount * (1 - (x.DiscountPercent / 100m))));
         }
+
 
         if (request.VehicleStatus != null)
         {
@@ -3172,7 +3178,6 @@ public class ParkingService : IParkingService
             TotalEntries = tickets.Count(x => !x.IsExited),
             TotalExits = tickets.Count(x => x.IsExited)
         };
-
 
         return result;
     }

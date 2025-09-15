@@ -153,17 +153,17 @@
 
                         <StackPanel Margin="10 5">
                             <TextBlock Text="مبلغ کل:"/>
-                            <TextBlock Text="{Binding Report.TotalAmount, StringFormat={}{0:N0} ریال}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Report.TotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Margin="10 5">
                             <TextBlock Text="مبلغ پرداخت شده:"/>
-                            <TextBlock Text="{Binding Report.TotalPaidAmount, StringFormat={}{0:N0} ریال}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Report.TotalPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Margin="10 5">
                             <TextBlock Text="مبلغ تخفیف:"/>
-                            <TextBlock Text="{Binding Report.TotalDiscountAmount, StringFormat={}{0:N0} ریال}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Report.TotalDiscountAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Margin="10 5">
@@ -178,12 +178,12 @@
 
                         <StackPanel Margin="10 5">
                             <TextBlock Text="مبلغ پرداخت نقدی:"/>
-                            <TextBlock Text="{Binding Report.TotalCreditPaidAmount, StringFormat={}{0:N0} ریال}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Report.TotalCreditPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Margin="10 5">
                             <TextBlock Text="مبلغ پرداخت با کارت:"/>
-                            <TextBlock Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0} ریال}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                         </StackPanel>
 
                         <StackPanel Margin="10 5">
