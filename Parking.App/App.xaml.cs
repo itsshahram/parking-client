@@ -237,7 +237,7 @@ public partial class App : Application
                 {
                     if (!context.Database.CanConnect())
                     {
-                        var dbWindow = new DatabaseErrorWindow(Settings.Default.Application_DbHostAddress);
+                        var dbWindow = new DatabaseErrorWindow($"{Settings.Default.Application_DbHostAddress}");
                         dbWindow.Show();
                         return;
                     }

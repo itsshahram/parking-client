@@ -3,8 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="Database Connection" Height="250" Width="500"
+        Title="اتصال پایگاه داده"
+        Height="250"
+        Width="500"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow">
@@ -13,23 +16,25 @@
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
 
             <TextBlock x:Name="TitleText"
-                       Text="Checking database connection..."
+                       Text="در حال بررسی اتصال به پایگاه داده..."
                        FontSize="16"
                        FontWeight="Bold"
-                       TextAlignment="Center"/>
+                       TextAlignment="Center"
+                       Margin="0,0,0,15"/>
 
             <ProgressBar x:Name="StatusBar"
                          Width="300" Height="25"
                          Minimum="0" Maximum="1"
                          IsIndeterminate="False"
-                         Value="0"/>
+                         Value="0"
+                         Margin="0,0,0,15"/>
 
-            <Button x:Name="RetryButton"
-                    Content="Retry Now"
-                    Width="120"
-                    Height="30"
-                    Click="RetryButton_Click"
-                    IsEnabled="False"/>
+            <ui:Button x:Name="RetryButton"
+                       Content="تلاش مجدد"
+                       Width="140"
+                       Height="35"
+                       Click="RetryButton_Click"
+                       IsEnabled="False"/>
         </StackPanel>
     </Grid>
 </Window>

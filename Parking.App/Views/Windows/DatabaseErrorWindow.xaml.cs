@@ -1,13 +1,8 @@
-﻿using System.Net.NetworkInformation;
-using Brushes = System.Windows.Media.Brushes;
+﻿using Brushes = System.Windows.Media.Brushes;
 using Timer = System.Threading.Timer;
-
 
 namespace Parking.App.Views.Windows
 {
-    /// <summary>
-    /// Interaction logic for DatabaseErrorWindow.xaml
-    /// </summary>
     public partial class DatabaseErrorWindow : Window
     {
         private readonly string _dbHost;
@@ -20,38 +15,37 @@ namespace Parking.App.Views.Windows
             InitializeComponent();
             _dbHost = dbHost;
 
-            _pingTimer = new Timer(async _ => await PingDatabase(), null, 0, 5000);
+            _pingTimer = new Timer(async _ => await CheckDatabaseAvailability(), null, 0, 5000);
         }
 
-        private async Task PingDatabase()
+        private async Task CheckDatabaseAvailability()
         {
             try
             {
-                using var ping = new Ping();
-                var reply = await ping.SendPingAsync(_dbHost, 1000);
+                using (var context = App.GetService<ApplicationDbContext>())
+                {
+                    if (await context.Database.CanConnectAsync())
+                    {
+                        _dbReachable = true;
+                        Dispatcher.Invoke(() =>
+                        {
+                            StatusBar.Value = 1;
+                            StatusBar.Foreground = Brushes.Green;
+                            TitleText.Text = "اتصال به پایگاه داده برقرار شد ✅";
+                            RetryButton.IsEnabled = true;
+                        });
+                        return;
+                    }
+                }
 
-                if (reply.Status == IPStatus.Success)
+                _dbReachable = false;
+                Dispatcher.Invoke(() =>
                 {
-                    _dbReachable = true;
-                    Dispatcher.Invoke(() =>
-                    {
-                        StatusBar.Value = 1;
-                        StatusBar.Foreground = Brushes.Green;
-                        TitleText.Text = "Database Connected!";
-                        RetryButton.IsEnabled = true;
-                    });
-                }
-                else
-                {
-                    _dbReachable = false;
-                    Dispatcher.Invoke(() =>
-                    {
-                        StatusBar.Value = 1;
-                        StatusBar.Foreground = Brushes.Red;
-                        TitleText.Text = "Database unreachable.";
-                        RetryButton.IsEnabled = false;
-                    });
-                }
+                    StatusBar.Value = 1;
+                    StatusBar.Foreground = Brushes.Red;
+                    TitleText.Text = "ارتباط با پایگاه داده برقرار نشد";
+                    RetryButton.IsEnabled = false;
+                });
             }
             catch
             {
@@ -60,7 +54,7 @@ namespace Parking.App.Views.Windows
                 {
                     StatusBar.Value = 1;
                     StatusBar.Foreground = Brushes.Red;
-                    TitleText.Text = "Database unreachable.";
+                    TitleText.Text = "ارتباط با پایگاه داده برقرار نشد";
                     RetryButton.IsEnabled = false;
                 });
             }
@@ -70,17 +64,15 @@ namespace Parking.App.Views.Windows
         {
             if (_dbReachable)
             {
-                // Stop the ping timer
                 _pingTimer?.Dispose();
 
-                // Close this window and show the login
                 var login = App.GetService<LoginWindow>();
                 login?.Show();
                 this.Close();
             }
             else
             {
-                System.Windows.MessageBox.Show("Database is still unreachable. Please check network or server.");
+                System.Windows.MessageBox.Show("پایگاه داده هنوز در دسترس نیست. لطفاً شبکه یا سرور را بررسی کنید.");
             }
         }
 
