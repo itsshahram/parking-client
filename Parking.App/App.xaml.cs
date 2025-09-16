@@ -25,16 +25,10 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/logging
     private static readonly IHost _host = Host
         .CreateDefaultBuilder()
-        //.ConfigureAppConfiguration((context, config) =>
-        //{
-        //    config.SetBasePath(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location));
-        //    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-        //})
         .ConfigureServices((context, services) =>
         {
             if (Settings.Default.Application_DbActiveStatus)
             {
-                // var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
                 var connectionString = $"Server={Settings.Default.Application_DbHostAddress};Database={Settings.Default.Application_DbName};User Id={Settings.Default.Application_DbUsername};Password={Settings.Default.Application_DbPassword};TrustServerCertificate=true;MultipleActiveResultSets=True;";
                 services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString), ServiceLifetime.Transient);
                 services.AddIdentity<ApplicationUser, ApplicationRole>()
@@ -44,9 +38,6 @@ public partial class App : Application
                 services.AddHttpClient();
 
                 services.AddTransient<IUnitOfWork, UnitOfWork>();
-                //services.AddScoped<Func<IUnitOfWork>>(provider => () => provider.GetRequiredService<IUnitOfWork>());
-                //services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
-
 
                 services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 
@@ -64,25 +55,19 @@ public partial class App : Application
 
                 services.AddScheduler();
                 services.AddTransient<BackgroundTask>();
-
                 services.AddScoped<MainWindow>();
                 services.AddTransient<LoginWindow>();
                 services.AddTransient<DatabaseErrorWindow>();
-
                 services.AddScoped<MainPage>();
                 services.AddScoped<MainWindowViewModel>();
                 services.AddTransient<TicketDetailsWindow>();
                 services.AddTransient<CustomAmountPaymentModalWindow>();
                 services.AddScoped<SettingsPageViewModel>();
-
                 services.AddScoped<LicensePlateGroupPage>();
                 services.AddScoped<LicensePlateGroupViewModel>();
-
                 services.AddScoped<AddCardPage>();
                 services.AddScoped<AddCardPageViewModel>();
-
                 services.AddScoped<UserManager<ApplicationUser>>();
-                // services.AddScoped<RoleManager<ApplicationRole>>();
                 services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 
 
@@ -219,13 +204,6 @@ public partial class App : Application
                 Shutdown();
                 return;
             }
-
-            //var builder = new ConfigurationBuilder()
-            //   .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location))
-            //   .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            //Configuration = builder.Build();
-            //var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var connectionString = $"Server={Settings.Default.Application_DbHostAddress};Database={Settings.Default.Application_DbName};User Id={Settings.Default.Application_DbUsername};Password={Settings.Default.Application_DbPassword};TrustServerCertificate=true;MultipleActiveResultSets=True;";
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
@@ -235,7 +213,11 @@ public partial class App : Application
             {
                 using (var context = new ApplicationDbContext(optionsBuilder.Options))
                 {
-                    if (!context.Database.CanConnect())
+                    var connectTask = Task.Run(() => context.Database.CanConnect());
+
+                    bool canConnect = connectTask.Wait(TimeSpan.FromSeconds(3)) && connectTask.Result;
+
+                    if (!canConnect)
                     {
                         var dbWindow = new DatabaseErrorWindow($"{Settings.Default.Application_DbHostAddress}");
                         dbWindow.Show();
@@ -244,33 +226,11 @@ public partial class App : Application
 
                     context.Database.Migrate();
                 }
-                //_host.Start();
-                //const string mutexName = "Global\\Parking.App";
-
-                // ایجاد Mutex
-                //mutex = new Mutex(true, mutexName, out bool isNewInstance);
-
-
-                //mainWindow = _host.Services.GetRequiredService<MainWindow>();
-                //Application.Current.MainWindow = mainWindow;
-                //SingleInstanceApp.SetMainWindow(mainWindow);
-
-                //mainWindow.Show();
-                //_host.Services.UseScheduler(s => s.Schedule<BackgroundTask>().EverySeconds(Settings.Default.Application_Sync_Interval_CountOfTake));
-
 
                 _host.Start();
                 var login = _host.Services.GetRequiredService<LoginWindow>();
 
                 login.Show();
-                //    if (!isNewInstance)
-                //{
-                //    // اگر برنامه از قبل اجرا شده باشد
-                //    MessageBox.Show("برنامه در حال حاضر در حال اجراست.");
-                //    Environment.Exit(0); // خروج از برنامه
-                //}
-
-                //base.OnStartup(e);
             }
             catch (Exception ex)
             {
@@ -288,9 +248,6 @@ public partial class App : Application
     {
         if (mainWindow != null)
         {
-            //App.GlobalCancellationTokenSource.Cancel();
-            //App.GlobalCancellationTokenSource.Dispose();
-
             Application.Current.MainWindow = mainWindow;
             mainWindow.Close();
         }
@@ -300,9 +257,6 @@ public partial class App : Application
     {
         if (mainWindow != null)
         {
-            //App.GlobalCancellationTokenSource.Cancel();
-            //App.GlobalCancellationTokenSource.Dispose();
-
             Application.Current.MainWindow = mainWindow;
             mainWindow.Close();
         }
