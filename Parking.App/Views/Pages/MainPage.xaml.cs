@@ -230,6 +230,8 @@ namespace Parking.App.Views.Pages
             var plateChars = LicensePlateHelper.GetChars();
             plateCharsCombo.ItemsSource = plateChars.Select(p => p.PlateFa).ToList();
             #endregion
+
+            UpdateCreateTicketButton();
         }
         #region سوئیچ ها قسمت ثبت قبض
         private void CustomDateToggle_Checked(object sender, RoutedEventArgs e)
@@ -1423,5 +1425,35 @@ namespace Parking.App.Views.Pages
                 ViewModel.DriverDescription = text;
             }
         }
+
+        private void UpdateCreateTicketButton()
+        {
+            var gateType = Settings.Default.Application_GateType.ToString();
+
+            if (gateType == "10") 
+            {
+                CreateTicketBtn.Visibility = Visibility.Visible;
+                CreateTicketBtn.Content = "ثبت ورود / خروج";
+                CreateTicketBtn.Appearance = ControlAppearance.Success;
+
+            }
+            else if (gateType.Contains("1"))
+            {
+                CreateTicketBtn.Visibility = Visibility.Visible;
+                CreateTicketBtn.Content = "ثبت خروج";
+                CreateTicketBtn.Appearance = ControlAppearance.Caution;
+            }
+            else if (gateType.Contains("0"))
+            {
+                CreateTicketBtn.Visibility = Visibility.Visible;
+                CreateTicketBtn.Content = "ثبت ورود";
+                CreateTicketBtn.Appearance = ControlAppearance.Primary;
+            }
+            else
+            {
+                CreateTicketBtn.Visibility = Visibility.Collapsed;
+            }
+        }
+
     }
 }

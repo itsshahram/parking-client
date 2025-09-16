@@ -18,7 +18,7 @@
                 <StackPanel HorizontalAlignment="Center">
                     <DockPanel FlowDirection="RightToLeft" Margin="10 5">
                         <StackPanel DockPanel.Dock="Left">
-                            <TextBlock Text="فیلتر ها" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <TextBlock Text="فیلتر ها" FontWeight="Bold" Margin="0 8 0 0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DockPanel>
 
@@ -117,7 +117,7 @@
                             <TextBlock Text="" />
                             <ui:Button x:Name="SearchBtn"
                                        Appearance="Primary"
-                                       Content="جستجو"
+                                       Content="نمایش"
                                        Click="SearchBtn_Click"
                                        Icon="{ui:SymbolIcon Symbol=Search20}"
                                        FontSize="21"
@@ -143,64 +143,118 @@
             <!-- Report Summary -->
             <Border CornerRadius="6" Padding="10" Background="#20E9E9E9" Margin="5 5 5 0">
                 <StackPanel>
-                    <TextBlock Text="خلاصه گزارش" FontWeight="Bold" FontSize="16" Margin="0 0 0 10"/>
+                    <TextBlock Text="خلاصه گزارش" FontWeight="Bold"  FontSize="16" Margin="0 0 0 10"/>
 
                     <WrapPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تعداد کل تیکت‌ها:"/>
-                            <TextBlock Text="{Binding Report.TotalTickets}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- تعداد کل تیکت‌ها -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تعداد کل تیکت‌ها" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.TotalTickets}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="مبلغ کل:"/>
-                            <TextBlock Text="{Binding Report.TotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- مبلغ کل -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="مبلغ کل" HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
+                <Run Text="{Binding Report.TotalAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                <LineBreak/>
+                <Run Text="ريال" FontSize="14"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="مبلغ پرداخت شده:"/>
-                            <TextBlock Text="{Binding Report.TotalPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- مبلغ پرداخت شده -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="مبلغ پرداخت شده" HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
+                <Run Text="{Binding Report.TotalPaidAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                <LineBreak/>
+                <Run Text="ريال" FontSize="14"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="مبلغ تخفیف:"/>
-                            <TextBlock Text="{Binding Report.TotalDiscountAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- مبلغ تخفیف -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="مبلغ تخفیف" HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
+                <Run Text="{Binding Report.TotalDiscountAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                <LineBreak/>
+                <Run Text="ريال" FontSize="14"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تعداد پرداخت نقدی:"/>
-                            <TextBlock Text="{Binding Report.TotalCreditPaid}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- تعداد پرداخت نقدی -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تعداد پرداخت نقدی" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.TotalCreditPaid}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تعداد پرداخت با کارت:"/>
-                            <TextBlock Text="{Binding Report.TotalPosPaid}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- تعداد پرداخت با کارت -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تعداد پرداخت با کارت" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.TotalPosPaid}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="مبلغ پرداخت نقدی:"/>
-                            <TextBlock Text="{Binding Report.TotalCreditPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- مبلغ پرداخت نقدی -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="مبلغ پرداخت نقدی" HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
+                <Run Text="{Binding Report.TotalCreditPaidAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                <LineBreak/>
+                <Run Text="ريال" FontSize="14"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="مبلغ پرداخت با کارت:"/>
-                            <TextBlock Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- مبلغ پرداخت با کارت -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="مبلغ پرداخت با کارت" HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
+                <Run Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                <LineBreak/>
+                <Run Text="ريال" FontSize="14"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تعداد ورود‌ها:"/>
-                            <TextBlock Text="{Binding Report.TotalEntries}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- تعداد ورود‌ها -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تعداد ورود‌ها" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.TotalEntries}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تعداد خروج‌ها:"/>
-                            <TextBlock Text="{Binding Report.TotalExits}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- تعداد خروج‌ها -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="تعداد خروج‌ها" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.TotalExits}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="در حال حاضر داخل پارکینگ:"/>
-                            <TextBlock Text="{Binding Report.CurrentlyInside}" FontWeight="Bold"/>
-                        </StackPanel>
+                        <!-- در حال حاضر داخل پارکینگ -->
+                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
+                            <StackPanel Margin="10 5">
+                                <TextBlock Text="در حال حاضر داخل پارکینگ" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding Report.CurrentlyInside}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                     </WrapPanel>
+
                 </StackPanel>
             </Border>
         </StackPanel>

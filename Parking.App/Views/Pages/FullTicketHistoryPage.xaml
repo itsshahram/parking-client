@@ -10,6 +10,7 @@
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       d:DesignHeight="450" d:DesignWidth="800"
       Title="FullTicketHistoryPage">
+
     <Page.Resources>
         <Style x:Key="MyDataGridCell" TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -21,8 +22,38 @@
                 <TextBlock Text="{Binding NameFa}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
+
+        <!-- TabItem Style with bottom bar -->
+        <Style TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid>
+                            <Border x:Name="Bd" Background="Transparent" Padding="10 5">
+                                <ContentPresenter x:Name="Content"
+                                                  ContentSource="Header"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="BottomBar" Height="3" Background="Transparent" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="BottomBar" Property="Background" Value="#FF007ACC"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#10CCCCCC"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#20CCCCCC"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
-    <TabControl FlowDirection="RightToLeft">
+
+    <TabControl FlowDirection="RightToLeft" Background="Transparent" BorderThickness="0">
+
         <TabItem Header="گزارش قبض ها">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top" FlowDirection="RightToLeft">
@@ -241,13 +272,13 @@
                                     <StackPanel Margin="10 5" MinWidth="100">
                                         <TextBlock Text=" " />
                                         <ui:Button x:Name="ExportButton"
-Appearance="Success"
-Content="خروجی اکسل"
-Icon="{ui:SymbolIcon Symbol=ArrowExit20}"
-VerticalAlignment="Stretch"
-                                                   Click="ExportButton_Click"
-FontSize="21"
-HorizontalAlignment="Stretch" />
+                                            Appearance="Success"
+                                            Content="خروجی اکسل"
+                                            Icon="{ui:SymbolIcon Symbol=ArrowExit20}"
+                                            VerticalAlignment="Stretch"
+                                            Click="ExportButton_Click"
+                                            FontSize="21"
+                                            HorizontalAlignment="Stretch" />
                                     </StackPanel>
                                 </WrapPanel>
                             </StackPanel>
@@ -381,6 +412,7 @@ HorizontalAlignment="Stretch" />
             </DockPanel>
 
         </TabItem>
+
         <TabItem Header="گزارشات سرجمع">
             <WrapPanel>
                 <components:SummaryReport x:Name="summaryReportControl"/>

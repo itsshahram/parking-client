@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.OAuth;
-using Parking.App.Models.Dto.Vehicle.VehicleSegment;
-using Parking.Domain.General;
-using MessageBox = Wpf.Ui.Controls.MessageBox;
-using MessageBoxButton = Wpf.Ui.Controls.MessageBoxButton;
+﻿using MessageBox = Wpf.Ui.Controls.MessageBox;
 
 namespace Parking.App.Views.Components;
 
@@ -20,17 +16,9 @@ public partial class SummaryReport : UserControl
         _parkingService = App.GetService<IParkingService>();
         ViewModel = new SummaryReportViewModel();
         DataContext = ViewModel;
-        LoadData();
         SetDefaultParameter();
     }
 
-    public void LoadData()
-    {
-        var request = FillParameters();
-
-        var report = _parkingService.GetSummaryReport(request);
-        ViewModel.Report = report;
-    }
 
 
     private void SetDefaultParameter()
@@ -110,47 +98,105 @@ public partial class SummaryReport : UserControl
         return request;
     }
 
+    private void SetFieldsEnabled(bool isEnabled)
+    {
+        var textBoxes = new[]
+        {
+        entryStartYearTextBox, entryStartMonthTextBox, entryStartDayTextBox, entryStartHourTextBox, entryStartMinutesTextBox,
+        entryEndYearTextBox, entryEndMonthTextBox, entryEndDayTextBox, entryEndHourTextBox, entryEndMinutesTextBox,
+        exitStartYearTextBox, exitStartMonthTextBox, exitStartDayTextBox, exitStartHourTextBox, exitStartMinutesTextBox,
+        exitEndYearTextBox, exitEndMonthTextBox, exitEndDayTextBox, exitEndHourTextBox, exitEndMinutesTextBox
+    };
+
+        foreach (var tb in textBoxes)
+            tb.IsEnabled = isEnabled;
+
+        var comboBoxes = new[]
+        {
+        EntryRegistrarCombo,
+        ExitRegistrarCombo
+    };
+
+
+        foreach (var cb in comboBoxes)
+            cb.IsEnabled = isEnabled;
+
+        var buttons = new[]
+        {
+            ExportButton, SearchBtn
+        };
+        foreach (var btn in buttons)
+            btn.IsEnabled = isEnabled;
+    }
+
+
     private void ExportButton_Click(object sender, RoutedEventArgs e)
     {
+        try
+        {
+            progressBar.IsIndeterminate = true;
+            SetFieldsEnabled(false);
+            var request = FillParameters();
 
-        var request = FillParameters();
-
-        var filterDescription = $"ورود از: {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
-                                $"تا: {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
-                                $"خروج از: {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
-                                $"تا: {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
-                                $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
-                                $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
+            var filterDescription = $"ورود از: {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
+                                    $"تا: {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
+                                    $"خروج از: {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
+                                    $"تا: {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
+                                    $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
+                                    $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
 
 
-        var summaryData = new List<TicketSummaryReportModel>
+            var summaryData = new List<TicketSummaryReportModel>
         {
             ViewModel.Report
         };
 
 
-        byte[] fileBytes = ExcelHelper.ExportToExcel(summaryData, "SummaryReport", true, filterDescription);
+            byte[] fileBytes = ExcelHelper.ExportToExcel(summaryData, "SummaryReport", true, filterDescription);
 
-        var saveFileDialog = new Microsoft.Win32.SaveFileDialog
-        {
-            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-            FileName = "SummaryReport.xlsx"
-        };
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                FileName = "SummaryReport.xlsx"
+            };
+            progressBar.IsIndeterminate = false;
+            SetFieldsEnabled(true);
 
-        if (saveFileDialog.ShowDialog() == true)
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                File.WriteAllBytes(saveFileDialog.FileName, fileBytes);
+                ShowMessage("موفق", "فایل با موفقیت ذخیره شد.");
+            }
+        }
+        catch (Exception)
         {
-            File.WriteAllBytes(saveFileDialog.FileName, fileBytes);
-            ShowMessage("موفق", "فایل با موفقیت ذخیره شد.");
+            progressBar.IsIndeterminate = false;
+            SetFieldsEnabled(true);
+            ShowMessage("خطا", "خطایی رخ داد.");
         }
     }
 
-    private void SearchBtn_Click(object sender, RoutedEventArgs e)
+    private async void SearchBtn_Click(object sender, RoutedEventArgs e)
     {
-        var request = FillParameters();
+        try
+        {
+            SetFieldsEnabled(false);
+            progressBar.IsIndeterminate = true;
 
-        var report = _parkingService.GetSummaryReport(request);
-        ViewModel.Report = report;
+            var request = FillParameters();
+            var newReport = await _parkingService.GetSummaryReport(request);
+
+
+            ViewModel.Report = newReport;
+        }
+        finally
+        {
+            progressBar.IsIndeterminate = false;
+            SetFieldsEnabled(true);
+        }
     }
+
+
 
     private void ClearBtn_Click(object sender, RoutedEventArgs e)
     {
@@ -186,7 +232,6 @@ public partial class SummaryReport : UserControl
         // ComboBoxes reset
         EntryRegistrarCombo.SelectedIndex = 0;
         ExitRegistrarCombo.SelectedIndex = 0;
-
     }
 
     private async void ShowMessage(string title, string message)

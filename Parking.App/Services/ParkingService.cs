@@ -12,8 +12,6 @@ using Parking.Domain.General;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using ZXing;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
 
@@ -3137,9 +3135,10 @@ public class ParkingService : IParkingService
             .ToList();
     }
 
-    public TicketSummaryReportModel GetSummaryReport(GetTicketListRequestModel request)
+    public async Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request)
     {
-        var tickets = unitOfWork.ParkingTickets.GetAll();
+        var tickets = TicketListBaseQuery();
+
         if (request.EntryFrom != null)
             tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
 
@@ -3153,31 +3152,34 @@ public class ParkingService : IParkingService
             tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
 
         if (!string.IsNullOrEmpty(request.EntryRegistrar))
-            tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
+            tickets = tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
 
         if (!string.IsNullOrEmpty(request.ExitRegistrar))
-            tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+            tickets = tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+
+        var ticketList = await tickets.ToListAsync();
 
         var result = new TicketSummaryReportModel()
         {
-            TotalTickets = tickets.Count(),
-            TotalAmount = string.Format("{0:N0} ریال", Math.Round(tickets.Sum(x => x.TotalAmount), 0)),
-            TotalPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets.Sum(x => x.PaidAmount), 0)),
-            CurrentlyInside = tickets.Count(x => !x.IsExited),
-            TotalCreditPaid = tickets.Count(x => x.IsPaid && x.PaidType == "NAGHDI"),
-            TotalPosPaid = tickets.Count(x => x.IsPaid && x.PaidType == "POS"),
-            TotalCreditPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets
-            .Where(x => x.IsPaid && x.PaidType == "NAGHDI")
-            .Sum(x => x.PaidAmount), 0)),
-            TotalPosPaidAmount = string.Format("{0:N0} ریال", Math.Round(tickets
-            .Where(x => x.IsPaid && x.PaidType == "POS")
-            .Sum(x => x.PaidAmount), 0)),
-            TotalDiscountAmount = string.Format("{0:N0} ریال", Math.Round(tickets
-            .Where(x => x.IsPaid)
-            .Sum(x => (x.TotalAmount * x.DiscountPercent) / 100), 0)),
-            TotalEntries = tickets.Count(x => !x.IsExited),
-            TotalExits = tickets.Count(x => x.IsExited)
+            TotalTickets = await tickets.CountAsync(),
+            TotalAmount = Math.Round(await tickets.SumAsync(x => x.TotalAmount), 0),
+            TotalPaidAmount = Math.Round(await tickets.SumAsync(x => x.PaidAmount), 0),
+            CurrentlyInside = await tickets.CountAsync(x => !x.IsExited.Value),
+            TotalCreditPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "NAGHDI"),
+            TotalPosPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "POS"),
+            TotalCreditPaidAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value && x.PaidType == "NAGHDI")
+                .SumAsync(x => x.PaidAmount), 0),
+            TotalPosPaidAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value && x.PaidType == "POS")
+                .SumAsync(x => x.PaidAmount), 0),
+            TotalDiscountAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value)
+                .SumAsync(x => (x.TotalAmount * x.DiscountPercent) / 100), 0),
+            TotalEntries = await tickets.CountAsync(x => !x.IsExited.Value),
+            TotalExits = await tickets.CountAsync(x => x.IsExited.Value)
         };
+
 
         return result;
     }
