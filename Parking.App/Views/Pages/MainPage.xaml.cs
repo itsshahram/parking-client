@@ -38,7 +38,6 @@ namespace Parking.App.Views.Pages
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-
             DescriptionComboBox.ItemsSource = ViewModel.Descriptions;
             DescriptionComboBox.SelectedIndex = 0;
         }

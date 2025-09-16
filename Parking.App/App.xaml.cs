@@ -168,16 +168,10 @@ public partial class App : Application
                 await context.Database.MigrateAsync();
             }
 
-            // Initialize DatabaseMonitor globally
             DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
             DatabaseMonitor.DatabaseLost += () => Dispatcher.Invoke(ShowDatabaseErrorWindow);
-            DatabaseMonitor.DatabaseRestored += () => Dispatcher.Invoke(() =>
-            {
-                MessageBox.Show("ارتباط با پایگاه داده برقرار شد ✅");
-            });
             DatabaseMonitor.StartMonitoring();
 
-            // Start host & show login window
             _host.Start();
             var login = _host.Services.GetRequiredService<LoginWindow>();
             login.Show();

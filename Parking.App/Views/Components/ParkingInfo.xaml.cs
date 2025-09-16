@@ -134,7 +134,6 @@
             if (App.DatabaseMonitor != null)
                 return App.DatabaseMonitor.IsReachable;
 
-            // Fallback: quick fail-fast DB check (3 seconds)
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             optionsBuilder.UseSqlServer(Settings.Default.Application_DbHostAddress);
 
