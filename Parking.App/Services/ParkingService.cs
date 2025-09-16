@@ -27,7 +27,6 @@ public class ParkingService : IParkingService
     private IHttpClientFactory _httpClientFactory;
     private ITicketQueueService _ticketQueueService;
 
-
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
