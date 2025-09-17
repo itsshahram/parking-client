@@ -38,7 +38,6 @@ namespace Parking.App.Views.Pages
             this.Unloaded += Page_Unloaded;
             this.PreviewKeyUp += Window_PreviewKeyUp;
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
-
             DescriptionComboBox.ItemsSource = ViewModel.Descriptions;
             DescriptionComboBox.SelectedIndex = 0;
         }
@@ -153,39 +152,47 @@ namespace Parking.App.Views.Pages
                 _refreshDataTimer.Start();
             }
         }
-        private async Task RefreshDataTimerAsync()
+
+        private bool _isRefreshing = false;
+
+        private async void RefreshDataTimer_Tick(object sender, EventArgs e)
         {
+            if (_isRefreshing) return;
+            _isRefreshing = true;
+
             try
             {
-                if (Settings.Default.Appearance_ShowLatestEntry)
+                await Task.Run(async () =>
                 {
-                    var entries = await _parkingService.GetLatestTicketsAsync(TicketType.Entrance, 10);
-                    await Dispatcher.InvokeAsync(() =>
+                    if (Settings.Default.Appearance_ShowLatestEntry)
                     {
-                        ViewModel.LatestEntryListItems = new ObservableCollection<TicketsListViewModel>(entries);
-                    });
-                }
+                        var entries = await _parkingService.GetLatestTicketsAsync(TicketType.Entrance, 10);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            ViewModel.LatestEntryListItems = new ObservableCollection<TicketsListViewModel>(entries);
+                        });
+                    }
 
-                if (Settings.Default.Appearance_ShowLatestExited)
-                {
-                    var exits = await _parkingService.GetLatestTicketsAsync(TicketType.Exit, 10);
-                    await Dispatcher.InvokeAsync(() =>
+                    if (Settings.Default.Appearance_ShowLatestExited)
                     {
-                        ViewModel.LatestExitedListItems = new ObservableCollection<TicketsListViewModel>(exits);
-                    });
-                }
+                        var exits = await _parkingService.GetLatestTicketsAsync(TicketType.Exit, 10);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            ViewModel.LatestExitedListItems = new ObservableCollection<TicketsListViewModel>(exits);
+                        });
+                    }
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
+                _logger.LogError(ex, "Failed to refresh ticket data");
+            }
+            finally
+            {
+                _isRefreshing = false;
             }
         }
 
-        // Then for the event handler
-        private void RefreshDataTimer_Tick(object sender, EventArgs e)
-        {
-            _ = RefreshDataTimerAsync(); // Fire and forget, but better to handle exceptions
-        }
         private void PagePreparation()
         {
             #region مدیریت ستون های ورودی و خروجی

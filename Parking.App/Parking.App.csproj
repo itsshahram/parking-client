@@ -22,12 +22,15 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 	<ItemGroup>
+		<None Remove="Assets\connection.png" />
 		<None Remove="Assets\database.png" />
 		<None Remove="Assets\Fonts\IRANYekanXFaNum-Bold.ttf" />
 		<None Remove="Assets\Fonts\IRANYekanXFaNum-Regular.ttf" />
 		<None Remove="Assets\iran.png" />
+		<None Remove="Assets\loading-bar.png" />
 		<None Remove="Assets\Madaar-Logo.png" />
 		<None Remove="Assets\nfc.png" />
+		<None Remove="Assets\no-internet.png" />
 		<None Remove="Assets\placeholder.png" />
 		<None Remove="Assets\profile.png" />
 		<None Remove="Assets\Splash.png" />
@@ -35,9 +38,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="Assets\database.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
+		<Resource Include="Assets\database.png">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
 		<Content Include="Assets\Madaar-Logo.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
@@ -107,6 +110,15 @@
 		<Content Include="Assets\iran.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+		<Resource Include="Assets\connection.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\loading-bar.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Assets\no-internet.png">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Resource>
 		<Resource Include="Assets\wpfui-icon-256.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Resource>

@@ -1,4 +1,6 @@
-﻿namespace Parking.App.Helpers;
+﻿using DocumentFormat.OpenXml.Bibliography;
+
+namespace Parking.App.Helpers;
 
 public static class TokenStore
 {
@@ -12,6 +14,7 @@ public static class TokenStore
     private static DateTime _expirationDateTime;
     private static string _userName;
     private static string _roleName;
+    private static bool _isAuthenticated;
 
     public static event EventHandler RoleChanged;
 
@@ -66,6 +69,11 @@ public static class TokenStore
     {
         get => _fullName;
         set => _fullName = value;
+    }
+    public static bool IsAuthenticated
+    {
+        get => !string.IsNullOrWhiteSpace(_fullName);
+        set{}
     }
 
 

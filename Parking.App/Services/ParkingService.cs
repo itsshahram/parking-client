@@ -25,7 +25,6 @@ public class ParkingService : IParkingService
     private IHttpClientFactory _httpClientFactory;
     private ITicketQueueService _ticketQueueService;
 
-
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
@@ -33,11 +32,8 @@ public class ParkingService : IParkingService
     public List<VehicleSegment> _vehicleSegmentsList;
     public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory, ITicketQueueService ticketQueueService)
     {
-        //this.unitOfWork = unitOfWork;
-        //_unitOfWorkFactory = unitOfWorkFactory;                                     Remove All Comments
         _logger = logger;
         _ticketQueueService = ticketQueueService;
-
         _httpClientFactory = httpClientFactory;
         client = _httpClientFactory.CreateClient();
         unitOfWork = _unitOfWork;
