@@ -119,7 +119,6 @@ public partial class App : Application
 
     private async void OnStartup(object sender, StartupEventArgs e)
     {
-        // First run upgrade
         if (Settings.Default.IsFirstRun)
         {
             Settings.Default.Upgrade();
@@ -127,19 +126,16 @@ public partial class App : Application
             Settings.Default.Save();
         }
 
-        // Configure logging
         ConfigureLogging();
         Log.Information("Application Started.");
 
         if (!Settings.Default.Application_DbActiveStatus)
         {
-            // Show DB config window if DB is not active
             var dbWindow = _host.Services.GetRequiredService<ConfigDatabaseWindow>();
             dbWindow.Show();
             return;
         }
 
-        // Ensure single instance
         if (!SingleInstanceApp.IsFirstInstance())
         {
             SingleInstanceApp.ActivatePreviousInstance();
@@ -147,14 +143,12 @@ public partial class App : Application
             return;
         }
 
-        // Build DbContext options
         var connectionString = BuildConnectionString();
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseSqlServer(connectionString);
 
         try
         {
-            // Fail-fast DB connectivity check
             bool canConnect = await CanConnectToDatabaseAsync(optionsBuilder.Options, TimeSpan.FromSeconds(3));
             if (!canConnect)
             {
@@ -162,7 +156,6 @@ public partial class App : Application
                 return;
             }
 
-            // Apply migrations
             using (var context = new ApplicationDbContext(optionsBuilder.Options))
             {
                 await context.Database.MigrateAsync();
@@ -191,11 +184,36 @@ public partial class App : Application
                $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
     }
 
+    private static bool _dbErrorWindowOpen = false;
+
     private static void ShowDatabaseErrorWindow()
     {
-        var dbWindow = new DatabaseErrorWindow(Settings.Default.Application_DbHostAddress);
-        dbWindow.Show();
+        if (_dbErrorWindowOpen) return;
+
+        _dbErrorWindowOpen = true;
+        try
+        {
+            var dbWindow = new DatabaseErrorWindow(Settings.Default.Application_DbHostAddress)
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+
+            if (Application.Current.MainWindow is not null
+                && Application.Current.MainWindow != dbWindow
+                && Application.Current.MainWindow is not LoginWindow)
+            {
+                dbWindow.Owner = Application.Current.MainWindow;
+                dbWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            }
+
+            dbWindow.ShowDialog();
+        }
+        finally
+        {
+            _dbErrorWindowOpen = false;
+        }
     }
+
 
     private static async Task<bool> CanConnectToDatabaseAsync(DbContextOptions<ApplicationDbContext> options, TimeSpan timeout)
     {
@@ -297,9 +315,6 @@ public partial class App : Application
         mainWindow.Activate();
     }
 
-    /// <summary>
-    /// Occurs when an exception is thrown by an application but not handled.
-    /// </summary>
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0

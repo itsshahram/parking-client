@@ -78,8 +78,12 @@ namespace Parking.App.Views.Windows
             if (_dbReachable)
             {
                 _pingTimer?.Dispose();
-                var login = App.GetService<LoginWindow>();
-                login?.Show();
+                if (!TokenStore.IsAuthenticated)
+                {
+                    var login = App.GetService<LoginWindow>();
+                    login?.Show();
+                }
+            
                 this.Close();
             }
             else
