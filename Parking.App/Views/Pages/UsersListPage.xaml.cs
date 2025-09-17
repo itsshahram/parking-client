@@ -1,4 +1,5 @@
 ﻿using Parking.App.Models.Dto.User;
+using Parking.Domain.Entities.User;
 using System.ComponentModel;
 using Button = Wpf.Ui.Controls.Button;
 
@@ -13,18 +14,14 @@ namespace Parking.App.Views.Pages
         private UsersListPageViewModel ViewModel { get; set; } = new();
         private readonly Logger<UsersListPage> logger;
         private readonly IUserService _userService;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         public UsersListPage()
         {
+            InitializeComponent();
             DataContext = ViewModel;
             _userService = App.GetService<IUserService>();
-            var item = _userService.GetAllUsersAsync().Result;
-            
-            ViewModel.Items = new ObservableCollection<UserListItemModel>(item);
-            foreach (var user in ViewModel.Items)
-            {
-                user.PropertyChanged += User_PropertyChanged;
-            }
-            InitializeComponent();
+
+            _ = LoadUsersAsync();
         }
         private async void User_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -46,6 +43,26 @@ namespace Parking.App.Views.Pages
             }
         }
 
+        private async Task LoadUsersAsync()
+        {
+            try
+            {
+                var users = await _userService.GetAllUsersAsync();
+                var filteredUsers = users.Where(u => u.Id != TokenStore.UserId);
+
+
+                ViewModel.Items = new ObservableCollection<UserListItemModel>(filteredUsers);
+
+                foreach (var user in ViewModel.Items)
+                {
+                    user.PropertyChanged += User_PropertyChanged;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("خطا", $"خطا در بارگذاری کاربران: {ex.Message}");
+            }
+        }
 
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -89,6 +106,31 @@ namespace Parking.App.Views.Pages
             catch
             {
                 System.Windows.MessageBox.Show(message, title);
+            }
+        }
+
+        private async void AddUser_Click(object sender, RoutedEventArgs e)
+        {
+            var addUserWindow = new AddUserWindow();
+            addUserWindow.Owner = Application.Current.MainWindow;
+
+            if (addUserWindow.ShowDialog() == true)
+            {
+                var newUser = addUserWindow.ViewModel;
+
+
+                await _userService.CreateUser(new ApplicationUser()
+                {
+                    Firstname = newUser.FirstName,
+                    Lastname = newUser.LastName,
+                    UserName = newUser.Username,
+                    IsActive = true,
+                    RegisterDate = DateTime.Now,
+                }, newUser.Role, newUser.Password);
+
+                await LoadUsersAsync();
+
+                ShowMessage("موفقیت", $"کاربر {newUser.Username} با موفقیت ایجاد شد.");
             }
         }
     }

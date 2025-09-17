@@ -1,4 +1,5 @@
-﻿using Timer = System.Threading.Timer;
+﻿using System.Diagnostics;
+using Timer = System.Threading.Timer;
 
 namespace Parking.App.Views.Windows
 {
@@ -80,8 +81,9 @@ namespace Parking.App.Views.Windows
                 _pingTimer?.Dispose();
                 if (!TokenStore.IsAuthenticated)
                 {
-                    var login = App.GetService<LoginWindow>();
-                    login?.Show();
+                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    Process.Start(exePath);
+                    Application.Current.Shutdown();
                 }
             
                 this.Close();

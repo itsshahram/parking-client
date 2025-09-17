@@ -192,6 +192,27 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return false;
         }
     }
+    public async Task<bool> CreateUser(ApplicationUser user, string role, string password)
+    {
+        try
+        {
+            var result = await _usermanager.CreateAsync(user, password);
+            if (!result.Succeeded)
+                return false;
+
+            var roleResult = await _usermanager.AddToRoleAsync(user, role);
+            if (!roleResult.Succeeded)
+                return false;
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+
 
     public bool UpdateUser(ApplicationUser user)
     {
@@ -226,4 +247,5 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
 
         return true;
     }
+
 }

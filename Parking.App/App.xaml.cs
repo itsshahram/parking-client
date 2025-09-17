@@ -59,6 +59,7 @@ public partial class App : Application
                 services.AddScoped<MainWindow>();
                 services.AddTransient<LoginWindow>();
                 services.AddTransient<DatabaseErrorWindow>();
+                services.AddTransient<AddUserWindow>();
                 services.AddScoped<MainPage>();
                 services.AddScoped<MainWindowViewModel>();
                 services.AddTransient<TicketDetailsWindow>();
