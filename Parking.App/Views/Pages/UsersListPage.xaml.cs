@@ -51,18 +51,23 @@ namespace Parking.App.Views.Pages
             try
             {
                 var users = await _userService.GetAllUsersAsync();
-                ViewModel.Items = new ObservableCollection<UserListItemModel>(users);
 
-                foreach (var user in ViewModel.Items)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    user.PropertyChanged += User_PropertyChanged;
-                }
+                    ViewModel.Items.Clear(); 
+                    foreach (var user in users)
+                    {
+                        user.PropertyChanged += User_PropertyChanged;
+                        ViewModel.Items.Add(user);
+                    }
+                });
             }
             catch (Exception ex)
             {
                 ShowMessage("خطا", $"خطا در بارگذاری کاربران: {ex.Message}");
             }
         }
+
 
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
