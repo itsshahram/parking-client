@@ -1463,6 +1463,5 @@ namespace Parking.App.Views.Pages
                 CreateTicketBtn.Visibility = Visibility.Collapsed;
             }
         }
-
     }
 }

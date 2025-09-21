@@ -1,6 +1,6 @@
 ﻿namespace Parking.App.Views.Windows
 {
-    public partial class AddUserWindow : Window
+    public partial class AddUserWindow : FluentWindow
     {
         public AddUserWindowViewModel ViewModel { get; private set; }
 
@@ -12,8 +12,8 @@
 
             ViewModel.Roles = new List<RoleItem>
             {
-                new RoleItem { DisplayName = "مدیر", Value = "PARKINGMANAGER" },
-                new RoleItem { DisplayName = "کاربر", Value = "PARKINGAGENT" }
+                new RoleItem { DisplayName = "مدیر پارکینگ", Value = "PARKINGMANAGER" },
+                new RoleItem { DisplayName = "مسئول پارکینگ", Value = "PARKINGAGENT" }
             };
 
             DataContext = ViewModel;

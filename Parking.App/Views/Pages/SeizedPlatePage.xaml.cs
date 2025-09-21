@@ -1,23 +1,4 @@
-﻿using Parking.App.Models.Dto.Vehicle.LicensePlate;
-using Parking.App.Models.Dto.Vehicle.VehicleSegment;
-using Parking.App.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-namespace Parking.App.Views.Pages
+﻿namespace Parking.App.Views.Pages
 {
     /// <summary>
     /// Interaction logic for SeizedPlatePage.xaml
@@ -35,6 +16,7 @@ namespace Parking.App.Views.Pages
             {
                 SeizedPlateList = new ObservableCollection<SeizedLicensePlateModel>(_parkingService.GetSeizedLicensePlatesList());
                 DataContext = this;
+                LoadAddSizedButtonBasedOnRole();
             }
             catch
             {
@@ -48,6 +30,30 @@ namespace Parking.App.Views.Pages
                 return;
             }
 
+        }
+
+        private void LoadAddSizedButtonBasedOnRole()
+        {
+            if (TokenStore.RoleName == "ParkingManager")
+                Add_Seized_Button.Visibility = Visibility.Visible;
+            else
+                Add_Seized_Button.Visibility = Visibility.Collapsed;
+        }
+
+        private void Add_Seized_Click(object sender, RoutedEventArgs e)
+        {
+            AddSeizedPelakWindow addSeizedPelakWindow = new AddSeizedPelakWindow(() =>
+            {
+                var updatedList = _parkingService.GetSeizedLicensePlatesList();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    SeizedPlateList.Clear();
+                    foreach (var plate in updatedList)
+                        SeizedPlateList.Add(plate);
+                });
+            });
+            addSeizedPelakWindow.Owner = Application.Current.MainWindow;
+            addSeizedPelakWindow.ShowDialog();
         }
     }
 }

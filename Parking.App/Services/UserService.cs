@@ -192,23 +192,26 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return false;
         }
     }
-    public async Task<bool> CreateUser(ApplicationUser user, string role, string password)
+    public async Task<(bool IsSuccess, bool IsExist)> CreateUser(ApplicationUser user, string role, string password)
     {
         try
         {
+            var isExsist = await _usermanager.FindByEmailAsync(user.UserName);
+            if (isExsist != null)
+                return (false, true);
             var result = await _usermanager.CreateAsync(user, password);
             if (!result.Succeeded)
-                return false;
+                return (false, false);
 
             var roleResult = await _usermanager.AddToRoleAsync(user, role);
             if (!roleResult.Succeeded)
-                return false;
+                return (false, false);
 
-            return true;
+            return (true, false);
         }
         catch (Exception ex)
         {
-            return false;
+            return (false, false);
         }
     }
 

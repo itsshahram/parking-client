@@ -1,13 +1,25 @@
-﻿<Window x:Class="Parking.App.Views.Windows.AddUserWindow"
+﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.AddUserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="افزودن کاربر" Height="500" Width="500"
-        FontFamily="{StaticResource IranYekanFont}" 
+        xmlns:local="clr-namespace:Parking.App.Views.Windows"
+        mc:Ignorable="d"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        FontFamily="{StaticResource IranYekanFont}"  
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        Title="افزودن کاربر"
         FlowDirection="RightToLeft"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner" Height="550" Width="400">
 
     <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="289*"/>
+            <ColumnDefinition Width="71*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -17,10 +29,10 @@
         <!-- Header -->
         <TextBlock Text="افزودن کاربر جدید" 
                    FontWeight="Bold" FontSize="16" 
-                   HorizontalAlignment="Center" Margin="0 0 0 20"/>
+                   HorizontalAlignment="Left" Margin="121,0,0,20"/>
 
         <!-- Form -->
-        <StackPanel Grid.Row="1" VerticalAlignment="Top">
+        <StackPanel Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2">
 
             <!-- First Name -->
             <StackPanel Margin="0 0 0 10">
@@ -91,9 +103,9 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20 0 0">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="70,20,0,0" Grid.ColumnSpan="2">
             <ui:Button Content="ذخیره" Width="100" Margin="5 0" Click="SaveButton_Click"/>
             <ui:Button Content="انصراف" Width="100" Margin="5 0" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>
-</Window>
+</ui:FluentWindow>

@@ -177,7 +177,7 @@
                         <StackPanel>
                             <DockPanel  Margin="10">
                                 <ui:ToggleSwitch DockPanel.Dock="Right"  FlowDirection="LeftToRight" OffContent="غیر فعال" OnContent="فعال" Click="ExtraInfoToggleSwitch_Click"/>
-                                <Label Content="اطلاعات اضافه" VerticalAlignment="Center" DockPanel.Dock="Left" />
+                                <Label Content="اطلاعات بیشتر" VerticalAlignment="Center" DockPanel.Dock="Left" />
                             </DockPanel>
                             <Border Background="#33828FA8" Visibility="Collapsed" CornerRadius="7" Margin="5" Padding="10" x:Name="extraInfoBox" >
                                 <StackPanel>

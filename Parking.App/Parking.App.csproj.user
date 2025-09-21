@@ -82,6 +82,9 @@
     <Compile Update="Views\Pages\UsersListPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\AddSeizedPelakWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\ChangePasswordWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -13,9 +13,10 @@
       Title="SeizedPlatePage">
 
     <DockPanel>
-        <StackPanel  DockPanel.Dock="Top">
+        <StackPanel  FlowDirection="RightToLeft" DockPanel.Dock="Top">
             <components:ParkingInfo />
             <TextBlock Text="توقیفی ها" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="20" Margin="10 10 10 0"/>
+            <ui:Button x:Name="Add_Seized_Button" Content="افزودن توقیفی" Click="Add_Seized_Click" Margin="10 0"/>
         </StackPanel>
         <ScrollViewer
             VerticalScrollBarVisibility="Auto" 
@@ -39,9 +40,5 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-
-
-
-
     </DockPanel>
 </Page>

@@ -8,8 +8,7 @@ using Parking.Domain.Entities.Vehicles;
 
 namespace Parking.App.Services.Interfaces;
 
-public interface
-    IParkingService
+public interface IParkingService
 {
     TServiceResponse<ParkingLotModel> GetParkingLotDetails();
     Task<List<VehicleSegmentPriceListItemModel>> GetVehicleSegmentPriceList();
@@ -100,6 +99,7 @@ public interface
     bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
     bool DeleteTicketDescriptionItem(int id);
     Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
+    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
 
     #endregion
 }

@@ -3199,4 +3199,31 @@ public class ParkingService : IParkingService
             return (null, 0);
         }
     }
+
+    public async Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason)
+    {
+        if (string.IsNullOrWhiteSpace(plate))
+            return (false, false);
+
+        var existingPlate = unitOfWork.SeizedLicensePlates
+            .FirstOrDefault(x => x.EnLicensePlate == plate);
+
+        if (existingPlate != null)
+            return (true, false);
+
+        var parsePlate = plate.ParsePlate();
+        var seizedPlate = new SeizedLicensePlate
+        {
+            CreatorUserId = TokenStore.UserId,
+            CreateDate = DateTime.Now,
+            SeizedReason = reason,
+            EnLicensePlate = plate,
+            FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ")
+      + parsePlate.LeftTwoDigits
+    : parsePlate.OriginalPlate
+        };
+
+        await unitOfWork.SeizedLicensePlates.AddAsync(seizedPlate);
+        return (false, true);
+    }
 }
