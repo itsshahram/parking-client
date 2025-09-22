@@ -1,11 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Parking.App.Models.Tickets;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Parking.App.ViewModels.Windows;
 

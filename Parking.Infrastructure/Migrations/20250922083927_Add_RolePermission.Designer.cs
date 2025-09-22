@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Parking.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using Parking.Infrastructure.Context;
 namespace Parking.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250922083927_Add_RolePermission")]
+    partial class Add_RolePermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -684,15 +687,17 @@ namespace Parking.Infrastructure.Migrations
                     b.ToTable("ParkingVehicleSegmentVariablePrices");
                 });
 
-            modelBuilder.Entity("Parking.Domain.Entities.Permission", b =>
+            modelBuilder.Entity("Parking.Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("FaName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("ApplicationRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -700,29 +705,7 @@ namespace Parking.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions");
-                });
-
-            modelBuilder.Entity("Parking.Domain.Entities.RolePermission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicationRoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("ApplicationRoleId");
-
-                    b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions");
                 });
@@ -1098,20 +1081,10 @@ namespace Parking.Infrastructure.Migrations
             modelBuilder.Entity("Parking.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("Parking.Domain.Entities.User.ApplicationRole", "ApplicationRole")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("ApplicationRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Parking.Domain.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("ApplicationRoleId");
 
                     b.Navigation("ApplicationRole");
-
-                    b.Navigation("Permission");
                 });
 
             modelBuilder.Entity("Parking.Domain.Entities.Vehicles.LicensePlate", b =>
@@ -1121,16 +1094,6 @@ namespace Parking.Infrastructure.Migrations
                         .HasForeignKey("GroupId");
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("Parking.Domain.Entities.Permission", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("Parking.Domain.Entities.User.ApplicationRole", b =>
-                {
-                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("Parking.Domain.Entities.Vehicles.LicensePlateGroup", b =>

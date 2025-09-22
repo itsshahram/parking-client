@@ -1,25 +1,21 @@
 ﻿using Parking.App.Models.Dto.User;
-using System;
-using System.Collections.Generic;
+using Parking.Domain.Entities.User;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parking.App.ViewModels.Pages;
 
-public class UsersListPageViewModel : INotifyPropertyChanged
+public class RolePageViewModel : INotifyPropertyChanged
 {
-    private ObservableCollection<UserListItemModel> _items = new();
+    private ObservableCollection<ApplicationRole> _items = new();
 
-    public ObservableCollection<UserListItemModel> Items
+    public ObservableCollection<ApplicationRole> Items
     {
         get => _items;
         set
         {
             if (_items != value)
             {
-                _items = value ?? new ObservableCollection<UserListItemModel>();
+                _items = value ?? new ObservableCollection<ApplicationRole>();
                 OnPropertyChanged(nameof(Items));
             }
         }

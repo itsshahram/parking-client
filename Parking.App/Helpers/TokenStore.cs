@@ -1,10 +1,9 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
+﻿using Parking.Domain.Entities;
 
 namespace Parking.App.Helpers;
 
 public static class TokenStore
 {
-
     private static bool _serverStatus;
     private static string _bearerToken;
     private static string _baseUrl;
@@ -17,6 +16,20 @@ public static class TokenStore
     private static bool _isAuthenticated;
 
     public static event EventHandler RoleChanged;
+
+    private static List<string> _permissions = new List<string>();
+    public static IReadOnlyList<string> Permissions => _permissions.AsReadOnly();
+
+    public static void SetPermissions(IEnumerable<string> permissions)
+    {
+        _permissions = permissions?.ToList() ?? new List<string>();
+        PermissionManager.Instance.SetUserPermissions(_permissions);
+    }
+
+    public static void LoadUserPermissions(string roleName, List<RolePermission> permissions)
+    {
+        SetPermissions(permissions.Select(x => x.Permission.Name));
+    }
 
     public static bool ServerStatus
     {
@@ -73,7 +86,7 @@ public static class TokenStore
     public static bool IsAuthenticated
     {
         get => !string.IsNullOrWhiteSpace(_fullName);
-        set{}
+        set { }
     }
 
 

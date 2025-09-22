@@ -74,6 +74,15 @@ public static class PermissionHelper
                 _ => false
             };
         }
+        if (action == "AccessManagement")
+        {
+            result = enRoleName.ToUpper() switch
+            {
+                "PARKINGMANAGER" => true,
+                "PARKINGAGENT" => false,
+                _ => false
+            };
+        }
         return result;
     }
 }

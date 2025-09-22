@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Parking.Domain.Entities;
 using Parking.Domain.Entities.Parkings;
 using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.User;
@@ -37,33 +38,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<TicketDescriptionItem> TicketDescriptionItems { get; set; }
     public DbSet<TicketQueueItem> TicketQueueItems { get; set; }
     public DbSet<TicketQueueResetPolicy> TicketQueueResetPolicies { get; set; }
-
-
-
+    public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-     //   modelBuilder.Entity<ParkingLot>()
-     //.Property(p => p.Id)
-     //.ValueGeneratedOnAdd();
         modelBuilder.Entity<ParkingLot>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<VehicleSegment>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<ParkingVehicleSegmentPrice>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<ParkingVehicleSegmentVariablePrice>().Property(x => x.Id).ValueGeneratedNever();
-
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("AspNetUserRoles");
-        //modelBuilder.Entity<ApplicationRole>().ToTable("AspNetUserRoles");
         modelBuilder.Entity<ApplicationUserRole>().HasNoKey();
-
-        //modelBuilder.Entity<ParkingTicketExtraImage>().HasNoKey();
-
-
-        //modelBuilder.Entity<ParkingLot>()
-        //            .Property(e => e.CreateDate)
-        //            .HasConversion(
-        //                v => v,
-        //                v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
-        //            .HasColumnType("timestamp with time zone");
     }
 }

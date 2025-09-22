@@ -74,6 +74,15 @@ public partial class MainWindowViewModel : ObservableObject
                 TargetPageType = typeof(UsersListPage)
             });
         }
+        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AccessManagement"))
+        {
+            MenuItems.Add(new NavigationViewItem()
+            {
+                Content = "نقش ها",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Accessibility20 },
+                TargetPageType = typeof(RolePage)
+            });
+        }
 
         if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AddCards")
             && Settings.Default.Application_EntryCardRequirement)

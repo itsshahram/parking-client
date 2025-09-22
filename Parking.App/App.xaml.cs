@@ -1,5 +1,6 @@
 ﻿using Coravel;
 using Parking.Domain.Contracts.Base;
+using Parking.Domain.Entities;
 using Parking.Domain.Entities.User;
 using Serilog;
 using Serilog.Events;
@@ -43,6 +44,7 @@ public partial class App : Application
                 services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 
                 services.AddTransient<IParkingService, ParkingService>();
+                services.AddTransient<IRoleService, RoleService>();
                 services.AddTransient<ISynchronizationService, SynchronizationService>();
                 services.AddTransient<IUserService, UserService>();
                 services.AddTransient<ITicketQueueService, TicketQueueService>();
@@ -165,7 +167,7 @@ public partial class App : Application
             DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
             DatabaseMonitor.DatabaseLost += () => Dispatcher.Invoke(ShowDatabaseErrorWindow);
             DatabaseMonitor.StartMonitoring();
-
+            SyncPermissionsWithDatabase(optionsBuilder.Options);
             _host.Start();
             var login = _host.Services.GetRequiredService<LoginWindow>();
             login.Show();
@@ -318,7 +320,28 @@ public partial class App : Application
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+
+    }
+
+    private async void SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
+    {
+        var discoveredPermissions = PermissionScanner.GetAllPermissions();
+
+        using var context = new ApplicationDbContext(options);
+
+        var existingNames = await context.Permissions
+            .Select(x => x.Name)
+            .ToListAsync();
+
+        var newPermissions = discoveredPermissions
+            .Where(p => !existingNames.Contains(p.Name))
+            .ToList();
+
+        if (newPermissions.Any())
+        {
+            await context.Permissions.AddRangeAsync(newPermissions);
+            await context.SaveChangesAsync();
+        }
     }
 
     private void Application_Exit(object sender, ExitEventArgs e)

@@ -13,6 +13,7 @@ namespace Parking.App.Views.Windows
         private readonly IUserService? _userService;
         private readonly ISynchronizationService? _synchronizationService;
         private readonly IParkingService? _parkingService;
+        private readonly IRoleService _roleService;
         private readonly ILogger<LoginWindow> _logger;
 
         public LoginWindow()
@@ -23,6 +24,7 @@ namespace Parking.App.Views.Windows
             _logger = App.GetService<ILogger<LoginWindow>>();
             _userService = App.GetService<IUserService>();
             _parkingService = App.GetService<IParkingService>();
+            _roleService = App.GetService<IRoleService>();
             ContentRendered += LoginWindow_ContentRendered;
         }
 
@@ -150,6 +152,8 @@ namespace Parking.App.Views.Windows
                         if (rememberMe is true)
                             SaveCredentials(username, pasword);
 
+
+
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
                         if (parking.Succeeded)
@@ -160,6 +164,11 @@ namespace Parking.App.Views.Windows
                         TokenStore.Username = username;
                         TokenStore.RoleName = _userService.GetUserRoleByUserId(user.Id);
                         TokenStore.UserId = user.Id;
+
+                        var role = await _roleService.GetRoleByName(TokenStore.RoleName);
+                        var rolePermissions = await _roleService.GetRolePermissions(role.Id);
+                        TokenStore.SetPermissions(rolePermissions.Select(x => x.Permission.Name));
+
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
                         SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());

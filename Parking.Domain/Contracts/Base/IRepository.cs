@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace Parking.Domain.Contracts.Base;

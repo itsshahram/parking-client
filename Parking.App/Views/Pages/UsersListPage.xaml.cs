@@ -1,4 +1,5 @@
-﻿using Parking.App.Models.Dto.User;
+﻿using Parking.App.Attributes;
+using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
 using System.ComponentModel;
 using Button = Wpf.Ui.Controls.Button;
@@ -114,6 +115,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
+        [RequiresPermission("UserAdd","ایجاد مشتری")]
         private async void AddUser_Click(object sender, RoutedEventArgs e)
         {
             var addUserWindow = new AddUserWindow();

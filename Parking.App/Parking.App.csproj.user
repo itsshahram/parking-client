@@ -49,6 +49,9 @@
     <Compile Update="Views\Pages\MainPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Pages\RolePage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Pages\SeizedPlatePage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -82,6 +85,9 @@
     <Compile Update="Views\Pages\UsersListPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\AddRoleWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\AddSeizedPelakWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -95,6 +101,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Windows\LoginWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\ManagePermissionsWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Windows\TempLoginWindows.xaml.cs">
