@@ -12,8 +12,6 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         public ObservableCollection<TicketDescriptionItemModel> Descriptions { get; set; } = new ObservableCollection<TicketDescriptionItemModel>();
         public ICommand RemoveDescriptionCommand { get; }
 
-
-
         public ApplicationSettingsPage()
         {
             RemoveDescriptionCommand = new Helpers.RelayCommand(RemoveDescription);
@@ -45,7 +43,8 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         {
             var items = _parkingService.GetAllTicketDescriptionItems();
             Descriptions.Clear();
-            foreach (var item in items) {
+            foreach (var item in items)
+            {
                 Descriptions.Add(item);
             }
         }
@@ -58,14 +57,13 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             }
         }
 
-
         private void Change_Click(object sender, RoutedEventArgs e)
         {
             Settings.Default.Save();
         }
         private void SyncConfigPage_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+            if (!PermissionHelper.CheckUserPermission("ApplicationSettings"))
                 AllDeviceTicketsToggle.Visibility = Visibility.Visible;
             else
                 AllDeviceTicketsToggle.Visibility = Visibility.Collapsed;
@@ -99,13 +97,12 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         }
         private void TextBoxes_TextChanged(object sender, TextChangedEventArgs e)
         {
-           
             Settings.Default.Save();
         }
 
         private void DeviceId_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+            if (!PermissionHelper.CheckUserPermission("ApplicationSettings"))
             {
                 System.Windows.MessageBox.Show("تنها مدیر پارکینگ می‌تواند این فیلد را تغییر دهد.");
                 return;
@@ -133,7 +130,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
 
         private void APIServerAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+            if (!PermissionHelper.CheckUserPermission("ApplicationSettings"))
             {
                 System.Windows.MessageBox.Show("تنها مدیر پارکینگ می‌تواند این فیلد را تغییر دهد.");
                 return;
@@ -149,12 +146,6 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private ModifierKeys _pressedModifiers;
 
 
-        // Retrieve the shortcut later
-        private (ModifierKeys modifiers, Key key) GetShortcut()
-        {
-            return (_pressedModifiers, _pressedKey);
-        }
-
         private void DescriptionTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -167,7 +158,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         private void AddDescription()
         {
             var text = DescriptionTextBox.Text;
-            if (!string.IsNullOrEmpty(text) )
+            if (!string.IsNullOrEmpty(text))
             {
                 if (Descriptions.Any(d => d.Text == text))
                 {
@@ -181,7 +172,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                     IsQueueEnabled = false
                 };
                 _parkingService.AddTicketDescriptionItem(newItem);
-                LoadDescriptions(); 
+                LoadDescriptions();
             }
             DescriptionTextBox.Clear();
         }
@@ -202,12 +193,5 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 _parkingService.ChangeTicketDescriptionItemQueueStatus(item.Id, newValue);
             }
         }
-
-        //private void SaveDescriptions()
-        //{
-        //    var result = string.Join(", ", Descriptions);
-        //    Settings.Default.Application_DefaultTicketDescription = result;
-        //    Settings.Default.Save();
-        //}
     }
 }

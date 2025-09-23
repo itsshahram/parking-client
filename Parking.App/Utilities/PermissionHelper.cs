@@ -2,87 +2,11 @@
 
 public static class PermissionHelper
 {
-    public static bool CheckUserPermission(string enRoleName, string action)
+    public static bool CheckUserPermission(string permission)
     {
-        bool result = false;
-        if (enRoleName == null)
-        {
+        if (string.IsNullOrWhiteSpace(permission))
             return false;
-        }
-        if (action == "UserManagement")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "ApplicationSettings")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "AddCards")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "ForceExitRequest")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
 
-        if (action == "SyncAllDeviceTickets")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-
-        if (action == "CustomAmouontPayment")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "FullReport")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "AccessManagement")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        return result;
+        return PermissionManager.Instance.HasPermission(permission);
     }
 }

@@ -45,6 +45,11 @@
                                            Click="ChangePassword_Click" 
                                            Margin="5 0"
                                            helpers:PermissionBehavior.Permission="UserChangePassword"/>
+                                <ui:Button Content="تخصیص نقش"
+                                           Command="{Binding DataContext.AssignRoleCommand,
+                                    RelativeSource={RelativeSource AncestorType=Page}}"
+                                           CommandParameter="{Binding}" 
+                                           Margin="5 0"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

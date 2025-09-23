@@ -34,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; private set; }
     public IRepository<RolePermission> RolePermissions { get; private set; }
     public IRepository<Permission> Permissions { get; private set; }
+    public IRepository<UserPermission> UserPermissions { get; private set; }
 
     public UnitOfWork(ApplicationDbContext context,
         IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices,
@@ -57,7 +58,8 @@ public class UnitOfWork : IUnitOfWork
         IRepository<TicketQueueItem> TicketQueueItems,
         IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies,
         IRepository<RolePermission> rolePermissions,
-        IRepository<Permission> permissions)
+        IRepository<Permission> permissions,
+        IRepository<UserPermission> userPermissions)
     {
 
         this.Roles = Roles;
@@ -83,6 +85,7 @@ public class UnitOfWork : IUnitOfWork
         this.TicketQueueResetPolicies = TicketQueueResetPolicies;
         RolePermissions = rolePermissions;
         Permissions = permissions;
+        UserPermissions = userPermissions;
     }
     public async Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class
     {

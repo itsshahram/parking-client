@@ -1,4 +1,5 @@
-﻿using System.Printing;
+﻿using Parking.App.Attributes;
+using System.Printing;
 using System.Windows.Markup;
 using System.Windows.Xps;
 using Border = Wpf.Ui.Controls.Border;
@@ -70,7 +71,7 @@ namespace Parking.App.Views.Windows
                     }
                     if (cardUid != null)
                     {
-                        if (cardUid == 0 && !PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ForceExitRequest"))
+                        if (cardUid == 0 && !PermissionHelper.CheckUserPermission("ForceExitRequest"))
                         {
                             PaymentPermission = false;
                         }
@@ -407,6 +408,7 @@ namespace Parking.App.Views.Windows
                 return;
             }
         }
+
         private void CashPayment_Click(object sender, RoutedEventArgs e)
         {
             CashPayment();
@@ -507,12 +509,16 @@ namespace Parking.App.Views.Windows
             }
 
         }
+
+        [RequiresPermission("PosPayment","پرداخت با پوز")]
         private void PaymentBtn_Click(object sender, RoutedEventArgs e)
         {
 
             Payment();
         }
         private string GateName { get; set; }
+
+        [RequiresPermission("CashPayment", "پرداخت نقدی")]
         public async void CashPayment()
         {
             try
@@ -669,12 +675,14 @@ namespace Parking.App.Views.Windows
             this.Close();
         }
 
+        [RequiresPermission("PrintTicket", "چاپ قبض")]
         private async void Print_Btn_Click(object sender, RoutedEventArgs e)
         {
 
             PrintTicket();
         }
 
+        [RequiresPermission("CustomAmouontPayment", "خروج با مبلغ دلخواه")]
         private void CustomPayment_Btn_Click(object sender, RoutedEventArgs e)
         {
             CustomAmountPaymentModalWindow customAmountPaymentModalWindow = new CustomAmountPaymentModalWindow(ViewModel.TicketId)
@@ -794,9 +802,10 @@ namespace Parking.App.Views.Windows
             writer.Write(fixedDoc, printTicket);
         }
 
+        [RequiresPermission("ForceExitRequest", "درخواست خروج اجباری")]
         private async void CustomPaymentCheckPermission()
         {
-            if (!PermissionHelper.CheckUserPermission(TokenStore.RoleName, "CustomAmouontPayment") && PaymentPermission)
+            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment") && PaymentPermission)
                 CustomPayment_Btn.Visibility = Visibility.Collapsed;
             else
                 CustomPayment_Btn.Visibility = Visibility.Visible;

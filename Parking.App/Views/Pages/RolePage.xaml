@@ -6,16 +6,17 @@
       xmlns:local="clr-namespace:Parking.App.Views.Pages"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:components="clr-namespace:Parking.App.Views.Components"
+      xmlns:helpers="clr-namespace:Parking.App.Helpers"
+      
       FontFamily="{StaticResource IranYekanFont}"  
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d"
       Title="RolePage" d:DesignHeight="450" d:DesignWidth="800">
 
     <StackPanel FlowDirection="RightToLeft" Margin="10">
-        <!-- Header -->
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="لیست نقش‌ها" FontWeight="Bold" FontSize="15" Margin="10 0"/>
-            <ui:Button Content="افزودن نقش" Click="AddRole_Click" Margin="10 0"/>
+            <ui:Button helpers:PermissionBehavior.Permission="AddRole" Content="افزودن نقش" Click="AddRole_Click" Margin="10 0"/>
         </StackPanel>
 
         <ui:DataGrid x:Name="RolesDataGrid"  
@@ -27,11 +28,17 @@
                      CanUserAddRows="False">
             <ui:DataGrid.Columns>
                 <DataGridTextColumn Header="نام نقش" Binding="{Binding Name, Mode=OneWay}" />
+                <DataGridTextColumn Header="نام فارسی" Binding="{Binding FaName, Mode=OneWay}" />
                 <DataGridTemplateColumn Header="عملیات">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <ui:Button Content="مدیریت دسترسی" Click="ManagePermission_Click" Margin="5 0"/>
+                                <ui:Button Content="مدیریت دسترسی"
+                                           helpers:PermissionBehavior.Permission="ManagePermission"
+                                   Command="{Binding DataContext.ManagePermissionCommand,
+                                             RelativeSource={RelativeSource AncestorType=Page}}"
+                                   CommandParameter="{Binding}" 
+                                   Margin="5 0"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

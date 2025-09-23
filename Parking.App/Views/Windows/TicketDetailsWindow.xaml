@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Parking.App"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:components="clr-namespace:Parking.App.Views.Components" 
+        xmlns:components="clr-namespace:Parking.App.Views.Components"
+        xmlns:helpers="clr-namespace:Parking.App.Helpers" 
         mc:Ignorable="d"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
@@ -68,9 +69,9 @@
                             </Border>
 
                         </StackPanel>
-                        <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
-                        <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
-                        <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
+                        <ui:Button helpers:PermissionBehavior.Permission="PosPayment" x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
+                        <ui:Button  helpers:PermissionBehavior.Permission="CashPayment" x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
+                        <ui:Button helpers:PermissionBehavior.Permission="PrintTicket"  x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
                                    Click="Print_Btn_Click"
                                    HorizontalAlignment="Stretch" 
                                    Grid.Column="2" 
@@ -78,7 +79,7 @@
                                    IsDefault="True" 
                                    Appearance="Info" 
                                    Padding="20 5 20 5" Content="چاپ رسید" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
-                        <ui:Button x:Name="ExitBtn" VerticalAlignment="Stretch" Grid.Row="1" 
+                        <ui:Button   x:Name="ExitBtn" VerticalAlignment="Stretch" Grid.Row="1" 
                                    HorizontalAlignment="Stretch"  
                                    Grid.Column="3" 
                                    Margin="3" 
@@ -87,7 +88,7 @@
                                    Padding="20 5 20 5"  
                                    Icon="{ui:SymbolIcon Symbol=Home24}" 
                                    FontSize="24" Click="ExitBtn_Click"/>
-                        <ui:Button x:Name="CustomPayment_Btn" VerticalAlignment="Stretch" 
+                        <ui:Button helpers:PermissionBehavior.Permission="CustomAmouontPayment"  x:Name="CustomPayment_Btn" VerticalAlignment="Stretch" 
                             HorizontalAlignment="Stretch"  
                             Grid.Column="3" 
                             Margin="0,1,6,1" 

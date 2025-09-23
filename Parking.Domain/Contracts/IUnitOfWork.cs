@@ -30,6 +30,8 @@ public interface IUnitOfWork
     IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; }
     IRepository<RolePermission> RolePermissions { get; }
     IRepository<Permission> Permissions { get; }
+    IRepository<UserPermission> UserPermissions { get; }
+
 
     Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class;
     List<T> ExecuteRawQuery<T>(string sql, params object[] parameters) where T : class;

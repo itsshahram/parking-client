@@ -6,6 +6,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:local="clr-namespace:Parking.App.Views.Pages"
       xmlns:components="clr-namespace:Parking.App.Views.Components"
+      xmlns:helpers="clr-namespace:Parking.App.Helpers"
       FontFamily="{StaticResource IranYekanFont}"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
@@ -16,7 +17,7 @@
         <StackPanel  FlowDirection="RightToLeft" DockPanel.Dock="Top">
             <components:ParkingInfo />
             <TextBlock Text="توقیفی ها" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="20" Margin="10 10 10 0"/>
-            <ui:Button x:Name="Add_Seized_Button" Content="افزودن توقیفی" Click="Add_Seized_Click" Margin="10 0"/>
+            <ui:Button helpers:PermissionBehavior.Permission="AddSeized" x:Name="Add_Seized_Button" Content="افزودن توقیفی" Click="Add_Seized_Click" Margin="10 0"/>
         </StackPanel>
         <ScrollViewer
             VerticalScrollBarVisibility="Auto" 

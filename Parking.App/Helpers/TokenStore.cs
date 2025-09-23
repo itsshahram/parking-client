@@ -25,6 +25,11 @@ public static class TokenStore
         _permissions = permissions?.ToList() ?? new List<string>();
         PermissionManager.Instance.SetUserPermissions(_permissions);
     }
+    public static void DeletePermissions()
+    {
+        _permissions = new List<string>();
+        PermissionManager.Instance.SetUserPermissions(_permissions);
+    }
 
     public static void LoadUserPermissions(string roleName, List<RolePermission> permissions)
     {
@@ -101,6 +106,7 @@ public static class TokenStore
         _expirationDateTime = DateTime.MinValue;
         _userName = null;
         _roleName = null;
+        _permissions.Clear();
     }
 }
 

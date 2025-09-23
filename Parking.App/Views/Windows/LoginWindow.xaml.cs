@@ -166,8 +166,15 @@ namespace Parking.App.Views.Windows
                         TokenStore.UserId = user.Id;
 
                         var role = await _roleService.GetRoleByName(TokenStore.RoleName);
+
                         var rolePermissions = await _roleService.GetRolePermissions(role.Id);
-                        TokenStore.SetPermissions(rolePermissions.Select(x => x.Permission.Name));
+                        var userPermissions = await _roleService.GetUserPermissions(role.Id, user.Id);
+
+                        var permissions = rolePermissions.Select(x => x.Permission.Name)
+                                                         .Concat(userPermissions.Select(x => x.Permission.Name))
+                                                         .Distinct();
+                        TokenStore.DeletePermissions();
+                        TokenStore.SetPermissions(permissions);
 
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;

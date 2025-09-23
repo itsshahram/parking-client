@@ -1,5 +1,6 @@
 ﻿using Nager.VideoStream;
 using Parking.App.ANPR;
+using Parking.App.Attributes;
 using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.Domain.General;
@@ -1254,6 +1255,7 @@ namespace Parking.App.Views.Pages
 
         }
 
+        [RequiresPermission("CreateTicket","ایجاد قبض")]
         private void CreateTicketBtn_Click(object sender, RoutedEventArgs e)
         {
             try

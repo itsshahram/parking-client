@@ -69,7 +69,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
-
+        [RequiresPermission("UserChangePassword","تغییر رمز عبور")]
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -115,7 +115,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
-        [RequiresPermission("UserAdd","ایجاد مشتری")]
+        [RequiresPermission("UserAdd","ایجاد کاربر")]
         private async void AddUser_Click(object sender, RoutedEventArgs e)
         {
             var addUserWindow = new AddUserWindow();

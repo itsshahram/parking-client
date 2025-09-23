@@ -1,4 +1,5 @@
-﻿using Parking.App.Views.Pages.CardsPageChilds;
+﻿using Parking.App.Attributes;
+using Parking.App.Views.Pages.CardsPageChilds;
 
 namespace Parking.App.ViewModels.Windows;
 
@@ -21,6 +22,11 @@ public partial class MainWindowViewModel : ObservableObject
         Initialize();
         TokenStore.RoleChanged += (_, __) => Initialize();
     }
+    [RequiresPermission("FullReport", "گزارش کامل")]
+    [RequiresPermission("AccessManagement", "مدیریت نقش ها")]
+    [RequiresPermission("AddCards", "مدیریت کارت")]
+    [RequiresPermission("ApplicationSettings", "تنظیمات")]
+    [RequiresPermission("UserManagement", "مدیریت کابران")]
 
     public void Initialize()
     {
@@ -44,7 +50,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Content = "گزارش",
             Icon = new SymbolIcon { Symbol = SymbolRegular.History24 },
-            TargetPageType = PermissionHelper.CheckUserPermission(TokenStore.RoleName, "FullReport") ? typeof(FullTicketHistoryPage) : typeof(TicketHistoryPage)
+            TargetPageType = PermissionHelper.CheckUserPermission("FullReport") ? typeof(FullTicketHistoryPage) : typeof(TicketHistoryPage)
         });
         MenuItems.Add(new NavigationViewItem()
         {
@@ -65,7 +71,7 @@ public partial class MainWindowViewModel : ObservableObject
             TargetPageType = typeof(InformationPage)
         });
 
-        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "UserManagement"))
+        if (PermissionHelper.CheckUserPermission("UserManagement"))
         {
             MenuItems.Add(new NavigationViewItem()
             {
@@ -74,7 +80,7 @@ public partial class MainWindowViewModel : ObservableObject
                 TargetPageType = typeof(UsersListPage)
             });
         }
-        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AccessManagement"))
+        if (PermissionHelper.CheckUserPermission("AccessManagement"))
         {
             MenuItems.Add(new NavigationViewItem()
             {
@@ -84,7 +90,7 @@ public partial class MainWindowViewModel : ObservableObject
             });
         }
 
-        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "AddCards")
+        if (PermissionHelper.CheckUserPermission("AddCards")
             && Settings.Default.Application_EntryCardRequirement)
         {
             MenuItems.Add(new NavigationViewItem()
@@ -101,7 +107,7 @@ public partial class MainWindowViewModel : ObservableObject
             });
         }
 
-        if (PermissionHelper.CheckUserPermission(TokenStore.RoleName, "ApplicationSettings"))
+        if (PermissionHelper.CheckUserPermission("ApplicationSettings"))
         {
             FooterMenuItems.Add(new NavigationViewItem()
             {
@@ -139,7 +145,6 @@ public partial class MainWindowViewModel : ObservableObject
 
         Application.Current.Dispatcher.BeginInvoke(async () =>
         {
-
             var loginWindow = App.GetService<LoginWindow>() ?? new LoginWindow();
             Application.Current.MainWindow = loginWindow;
             loginWindow.Show();

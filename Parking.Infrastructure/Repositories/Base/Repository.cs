@@ -129,6 +129,19 @@ public class Repository<T> : IRepository<T> where T : class
         return _context.SaveChanges();
     }
 
+    public async Task<bool> Delete(IEnumerable<T> entities)
+    {
+        try
+        {
+            _dbSet.RemoveRange(entities);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
 
 

@@ -28,21 +28,23 @@
                    Margin="0 0 0 20"/>
 
         <!-- Permissions List -->
-        <StackPanel Grid.Row="1">
-            <!-- Select All -->
-            <CheckBox Content="انتخاب همه"
-                      IsChecked="{Binding AreAllPermissionsSelected, Mode=TwoWay}"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Select All -->
+                <CheckBox Content="انتخاب همه"
+                          IsChecked="{Binding AreAllPermissionsSelected, Mode=TwoWay}"/>
 
-            <!-- Individual permissions -->
-            <ItemsControl ItemsSource="{Binding Permissions}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox Content="{Binding FaName}"
-                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+                <!-- Individual permissions -->
+                <ItemsControl ItemsSource="{Binding Permissions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding FaName}"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" 

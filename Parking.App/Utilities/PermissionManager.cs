@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using DocumentFormat.OpenXml.Packaging;
+using System.ComponentModel;
 
 namespace Parking.App.Utilities;
 
@@ -18,9 +19,17 @@ public class PermissionManager : INotifyPropertyChanged
         OnPropertyChanged(nameof(UserPermissions));
     }
 
-    public bool HasPermission(string permission) => _userPermissions.Contains(permission);
+    public void DeleteUserPermissions()
+    {
+        _userPermissions = new List<string>();
+        OnPropertyChanged(nameof(UserPermissions));
+    }
+
+    public bool HasPermission(string permission) =>
+        _userPermissions.Contains(permission, StringComparer.OrdinalIgnoreCase);
 
     private void OnPropertyChanged(string prop) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 }
+
 

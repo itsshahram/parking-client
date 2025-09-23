@@ -1,4 +1,6 @@
-﻿namespace Parking.App.Views.Pages
+﻿using Parking.App.Attributes;
+
+namespace Parking.App.Views.Pages
 {
     /// <summary>
     /// Interaction logic for SeizedPlatePage.xaml
@@ -16,7 +18,6 @@
             {
                 SeizedPlateList = new ObservableCollection<SeizedLicensePlateModel>(_parkingService.GetSeizedLicensePlatesList());
                 DataContext = this;
-                LoadAddSizedButtonBasedOnRole();
             }
             catch
             {
@@ -32,14 +33,8 @@
 
         }
 
-        private void LoadAddSizedButtonBasedOnRole()
-        {
-            if (TokenStore.RoleName == "ParkingManager")
-                Add_Seized_Button.Visibility = Visibility.Visible;
-            else
-                Add_Seized_Button.Visibility = Visibility.Collapsed;
-        }
 
+        [RequiresPermission("AddSeized","افزودن پلاک توقیفی")]
         private void Add_Seized_Click(object sender, RoutedEventArgs e)
         {
             AddSeizedPelakWindow addSeizedPelakWindow = new AddSeizedPelakWindow(() =>

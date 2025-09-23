@@ -40,7 +40,7 @@ public partial class RolePage : Page
         }
     }
 
-    [RequiresPermission("RoleAdd","ایجاد نقش")]
+    [RequiresPermission("RoleAdd", "ایجاد نقش")]
     private async void AddRole_Click(object sender, RoutedEventArgs e)
     {
         AddRoleWindow addRoleWindow = new AddRoleWindow();
@@ -69,16 +69,6 @@ public partial class RolePage : Page
         }
     }
 
-    private void ManagePermission_Click(object sender, RoutedEventArgs e)
-    {
-        ManagePermissionsWindow managePermissionsWindow = new ManagePermissionsWindow();
-        managePermissionsWindow.Owner = Application.Current.MainWindow;
-
-        if (managePermissionsWindow.ShowDialog() == true)
-        {
-
-        }
-    }
     private async void ShowMessage(string title, string message)
     {
         try

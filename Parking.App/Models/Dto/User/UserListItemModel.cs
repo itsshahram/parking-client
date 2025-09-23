@@ -32,6 +32,7 @@ namespace Parking.App.Models.Dto.User
         public string? Role { get; set; }
         public string? RoleFaName { get; set; }
         public string? RoleEnName { get; set; }
+        public Guid? RoleId { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

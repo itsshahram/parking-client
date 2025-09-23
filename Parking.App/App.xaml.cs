@@ -1,4 +1,6 @@
 ﻿using Coravel;
+using Microsoft.AspNetCore.Identity;
+using Parking.App.Seeds;
 using Parking.Domain.Contracts.Base;
 using Parking.Domain.Entities;
 using Parking.Domain.Entities.User;
@@ -73,12 +75,7 @@ public partial class App : Application
                 services.AddScoped<AddCardPageViewModel>();
                 services.AddScoped<UserManager<ApplicationUser>>();
                 services.AddScoped<RoleManager<IdentityRole<Guid>>>();
-
-
-
                 services.AddScoped<ChangePasswordWindow>();
-
-
                 services.AddScoped<UsersListPage>();
                 services.AddScoped<UsersListPageViewModel>();
                 services.AddScoped<AddCardHistoryPageViewModel>();
@@ -323,25 +320,11 @@ public partial class App : Application
 
     }
 
-    private async void SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
+    private async Task SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
     {
-        var discoveredPermissions = PermissionScanner.GetAllPermissions();
+        var applicationRole = App.GetService<RoleManager<ApplicationRole>>();
+        await PermissionSeeder.SeedPermissionsAsync(options, applicationRole);
 
-        using var context = new ApplicationDbContext(options);
-
-        var existingNames = await context.Permissions
-            .Select(x => x.Name)
-            .ToListAsync();
-
-        var newPermissions = discoveredPermissions
-            .Where(p => !existingNames.Contains(p.Name))
-            .ToList();
-
-        if (newPermissions.Any())
-        {
-            await context.Permissions.AddRangeAsync(newPermissions);
-            await context.SaveChangesAsync();
-        }
     }
 
     private void Application_Exit(object sender, ExitEventArgs e)

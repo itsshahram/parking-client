@@ -6,6 +6,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:local="clr-namespace:Parking.App.Views.Pages"
       xmlns:components="clr-namespace:Parking.App.Views.Components"  
+      xmlns:helpers="clr-namespace:Parking.App.Helpers"  
       mc:Ignorable="d"
       FontFamily="{StaticResource IranYekanFont}" 
       ScrollViewer.CanContentScroll="False"  
@@ -212,7 +213,7 @@
                         </StackPanel>
                     </Border>
                     <StackPanel >
-                        <ui:Button x:Name="CreateTicketBtn" Click="CreateTicketBtn_Click" HorizontalAlignment="Stretch" Height="80"  IsDefault="True" Appearance="Success" Padding="10 5 10 5"  Content="ثبت ورود" Icon="{ui:SymbolIcon Symbol=VehicleCarProfileLtrClock16}" FontSize="24"/>
+                        <ui:Button x:Name="CreateTicketBtn" Click="CreateTicketBtn_Click" HorizontalAlignment="Stretch" Height="80"  IsDefault="True" Appearance="Success" Padding="10 5 10 5"  Content="ثبت ورود" Icon="{ui:SymbolIcon Symbol=VehicleCarProfileLtrClock16}" FontSize="24" helpers:PermissionBehavior.Permission="CreateTicket"/>
 
                     </StackPanel>
 

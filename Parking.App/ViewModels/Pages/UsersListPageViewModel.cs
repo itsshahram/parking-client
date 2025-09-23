@@ -1,10 +1,5 @@
 ﻿using Parking.App.Models.Dto.User;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parking.App.ViewModels.Pages;
 
@@ -22,6 +17,44 @@ public class UsersListPageViewModel : INotifyPropertyChanged
                 _items = value ?? new ObservableCollection<UserListItemModel>();
                 OnPropertyChanged(nameof(Items));
             }
+        }
+    }
+    public ICommand ManagePermissionCommand { get; }
+    public ICommand AssignRoleCommand { get; }
+
+
+    public UsersListPageViewModel()
+    {
+        ManagePermissionCommand = new RelayCommand<UserListItemModel>(OnManagePermission);
+        AssignRoleCommand = new RelayCommand<UserListItemModel>(OnAssignRole);
+    }
+
+    private void OnAssignRole(UserListItemModel user)
+    {
+        if (user == null) return;
+
+        var assignRoleWindow = new AssignRoleWindow(user.Id)
+        {
+            Owner = App.Current.MainWindow
+        };
+
+        if (assignRoleWindow.ShowDialog() == true)
+        {
+
+        }
+    }
+    private void OnManagePermission(UserListItemModel user)
+    {
+        if (user == null) return;
+
+        var managePermissionsWindow = new ManagePermissionsWindow(user.RoleId.Value, PermissionMode.User, user.Id)
+        {
+            Owner = App.Current.MainWindow
+        };
+
+        if (managePermissionsWindow.ShowDialog() == true)
+        {
+
         }
     }
 

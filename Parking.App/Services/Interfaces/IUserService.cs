@@ -17,5 +17,6 @@ public interface IUserService
     bool UpdateUser(ApplicationUser user);
     bool DeleteUser(Guid id);
     bool ChangePassword(Guid id, string newPassword);
+    Task<ApplicationUserRole?> GetUserRole(Guid UserId);
     Task<bool> ChangeStaus(Guid id, bool status);
 }

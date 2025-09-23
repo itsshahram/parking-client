@@ -89,6 +89,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                     UserName = item.UserName,
                     RoleFaName = role?.FaName,
                     RoleEnName = role?.Name,
+                    RoleId = role?.Id,
                 });
             }
             return result;
@@ -251,4 +252,9 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         return true;
     }
 
+    public async Task<ApplicationUserRole?> GetUserRole(Guid UserId)
+    {
+        var userRole = await _unitOfWork.ExecuteRawQueryAsync<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", UserId);
+        return userRole.FirstOrDefault();
+    }
 }
