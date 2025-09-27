@@ -1,0 +1,150 @@
+﻿using MessageBox = Wpf.Ui.Controls.MessageBox;
+using TextBox = Wpf.Ui.Controls.TextBox;
+
+namespace Parking.App.Views.Pages.SettingsPageChilds;
+
+public partial class HotKeyManagment : Page
+{
+    private readonly HotKeyManagementViewModel _vm;
+
+    public HotKeyManagment()
+    {
+        InitializeComponent();
+        _vm = new HotKeyManagementViewModel();
+        DataContext = _vm;
+
+        ApplyHotkeys();
+        FillDefaultsIfMissing();
+    }
+
+    private void FillDefaultsIfMissing()
+    {
+        foreach (var config in _vm.HotKeyConfigs)
+        {
+            if (config.Key == Key.None)
+            {
+                var (mod, key, allowSingleKey) = _vm.GetDefaultShortcut(config.Type);
+                config.Key = key;
+                config.Modifiers = mod;
+                config.AllowSingleKey = allowSingleKey;
+                config.Shortcut = config.Modifiers == ModifierKeys.None ? $"{key}" : $"{mod} + {key}";
+            }
+        }
+    }
+
+    private void SaveHotkeys_Click(object sender, RoutedEventArgs e)
+    {
+        _vm.Save();
+        ApplyHotkeys();
+        ShowMessage("کلید میانبر", "کلیدهای میانبر ذخیره شد");
+    }
+
+    private async void ShowMessage(string title, string message)
+    {
+        try
+        {
+            if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
+            {
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    MessageBox ms = new MessageBox
+                    {
+                        FlowDirection = System.Windows.FlowDirection.RightToLeft,
+                        Title = title,
+                        Content = message,
+                        IsPrimaryButtonEnabled = false,
+                        IsSecondaryButtonEnabled = false,
+                        CloseButtonText = "متوجه شدم"
+                    };
+                    await ms.ShowDialogAsync();
+                });
+            }
+        }
+        catch
+        {
+            System.Windows.MessageBox.Show(message, title);
+        }
+    }
+
+    private void ShortcutTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        e.Handled = true;
+
+        Key key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.None)
+            key = e.ImeProcessedKey;
+
+        ModifierKeys modifiers = Keyboard.Modifiers;
+
+        if (IsModifierOnlyKey(key))
+            return;
+
+        if (sender is TextBox tb && tb.DataContext is HotKeyConfig config)
+        {
+            if (!config.AllowSingleKey && modifiers == ModifierKeys.None &&
+                ((key >= Key.D0 && key <= Key.D9) || (key >= Key.NumPad0 && key <= Key.NumPad9)))
+            {
+                ShowMessage("کلید میانبر", "برای اعداد باید از کلید کمکی (Ctrl/Alt/Shift) استفاده کنید.");
+                return;
+            }
+
+            bool alreadyTaken = _vm.HotKeyConfigs.Any(h =>
+                h != config &&
+                h.Key == key &&
+                h.Modifiers == modifiers);
+
+            if (alreadyTaken)
+            {
+                ShowMessage("کلید میانبر", "این ترکیب کلید از قبل استفاده شده است.");
+                return;
+            }
+
+            config.Key = key;
+            config.Modifiers = modifiers;
+            config.Shortcut = modifiers == ModifierKeys.None ? $"{key}" : $"{modifiers} + {key}";
+            tb.Text = config.Shortcut;
+        }
+    }
+
+    private void ApplyHotkeys()
+    {
+        InputBindings.Clear();
+        CommandBindings.Clear();
+
+        foreach (var config in _vm.HotKeyConfigs)
+        {
+            if (config.Key == Key.None || !IsValidKeyForGesture(config.Key))
+                continue;
+
+            try
+            {
+                var gesture = new KeyGesture(config.Key, config.Modifiers);
+                var command = new RoutedUICommand(config.Name, config.Type.ToString(), typeof(HotKeyManagment));
+
+                InputBindings.Add(new InputBinding(command, gesture));
+                CommandBindings.Add(new CommandBinding(command, (s, e) =>
+                {
+                    ShowMessage("میانبر اجرا شد", $"دستور {config.Name} فعال شد.");
+                }));
+            }
+            catch (NotSupportedException)
+            {
+            }
+        }
+    }
+
+    private bool IsValidKeyForGesture(Key key) => !IsModifierOnlyKey(key);
+
+    private bool IsModifierOnlyKey(Key key)
+    {
+        return key == Key.LeftCtrl ||
+               key == Key.RightCtrl ||
+               key == Key.LeftAlt ||
+               key == Key.RightAlt ||
+               key == Key.LeftShift ||
+               key == Key.RightShift ||
+               key == Key.LWin ||
+               key == Key.RWin ||
+               key == Key.None;
+    }
+}

@@ -10,6 +10,7 @@ using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Card = Parking.Domain.Entities.Parkings.Card;
 using RandomNumberGenerator = Parking.App.Helpers.RandomNumberGenerator;
@@ -22,16 +23,17 @@ public class ParkingService : IParkingService
     //private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IUnitOfWork unitOfWork;
     private IHttpClientFactory _httpClientFactory;
+    private ITicketQueueService _ticketQueueService;
+
     private HttpClient client = new HttpClient();
 
     private ParkingCostCalculator? _parkingCostCalculator;
-    private List<VehicleSegment> _vehicleSegmentsList;
-    public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory)
-    {
-        //this.unitOfWork = unitOfWork;
-        //_unitOfWorkFactory = unitOfWorkFactory;                                     Remove All Comments
-        _logger = logger;
 
+    public List<VehicleSegment> _vehicleSegmentsList;
+    public ParkingService(ILogger<ParkingService> logger, IUnitOfWork _unitOfWork, IHttpClientFactory httpClientFactory, ITicketQueueService ticketQueueService)
+    {
+        _logger = logger;
+        _ticketQueueService = ticketQueueService;
         _httpClientFactory = httpClientFactory;
         client = _httpClientFactory.CreateClient();
         unitOfWork = _unitOfWork;
@@ -67,8 +69,6 @@ public class ParkingService : IParkingService
                     StartWorkingHours = _localParkingInfo.StartWorkingHours,
                     Province = _localParkingInfo.Province
                 };
-                //result.Sections = GetSectionsAsync();
-                //result.ParkingSpaces = GetSpacesAsync();
                 return new TServiceResponse<ParkingLotModel>(true, "عملیات موفق", result);
             }
             else
@@ -289,12 +289,12 @@ public class ParkingService : IParkingService
             return new List<ParkingSpaceModel>();
         }
     }
-    public int GetFreeSpacesCount()
+    public int? GetFreeSpacesCount()
     {
         try
         {
-
-            var count = unitOfWork.ParkingSpaces.Find(p => p.IsOccupied == false).Count();
+            var parkingLotCapacity = GetParkingLotCapacity();
+            var count = parkingLotCapacity - unitOfWork.ParkingTickets.Find(p => p.IsExited == false).Count();
             return count;
         }
         catch (Exception ex)
@@ -303,13 +303,12 @@ public class ParkingService : IParkingService
             return 0;
         }
     }
-    public int GetSpacesCount()
+    public int? GetSpacesCount()
     {
         try
         {
-
-            var count = unitOfWork.ParkingSpaces.GetAll().Count();
-            return count;
+            var capacity = GetParkingLotCapacity();
+            return capacity;
         }
         catch (Exception ex)
         {
@@ -332,54 +331,116 @@ public class ParkingService : IParkingService
             return (null, null);
         }
     }
-    public async Task<ImageSource> GetTicketImage(Guid ticketId)
+
+    public int? GetParkingLotCapacity()
+        => unitOfWork.ParkingLots.FirstOrDefault()?.Capacity;
+    public async Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId)
     {
         try
         {
-            var ticketImage = await unitOfWork.ParkingTicketImages.FirstOrDefaultAsync(t => t.TicketId == ticketId);
+            var ticketImage = await unitOfWork.ParkingTickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            (ImageSource? StartImage, ImageSource? ExitImage) result = (null, null);
             if (ticketImage != null)
             {
-                try
+                if (ticketImage.StartImage != null)
                 {
-                    //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                    try
+                    {
+                        if (string.IsNullOrEmpty(ticketImage.StartImage))
+                        {
+                            result.StartImage = null;
+                        }
+                        else if (IsValidUrl(ticketImage.StartImage))
+                        {
+                            client = _httpClientFactory.CreateClient();
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                            var response = await client.GetAsync(new Uri(ticketImage.StartImage));
+                            response.EnsureSuccessStatusCode();
+                            var stream = await response.Content.ReadAsStreamAsync();
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = stream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            result.StartImage = bitmap;
+                        }
 
-                    //var response = await client.GetAsync(ticketImage.EntryImageAddress);
-                    var response = await client.GetAsync(new Uri(ticketImage.EntryImageAddress));
-                    response.EnsureSuccessStatusCode();
+                        else if (IsBase64(ticketImage.StartImage))
+                        {
+                            result.StartImage = ImageHelper.Base64ToImageSource(ticketImage.StartImage);
+                        }
+                        else
+                        {
+                            result.StartImage = null;
+                        }
 
-                    var stream = await response.Content.ReadAsStreamAsync();
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = stream;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-
-                    return bitmap;
-
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        result.StartImage = null;
+                    }
                 }
-                catch (HttpRequestException ex)
+                else
                 {
-                    _logger.LogError(ex.Message, ex);
-                    return null;
+                    result.StartImage = null;
                 }
-                catch (Exception ex)
+
+                //ExitImage ===================
+
+                if (ticketImage.ExitImage != null)
                 {
-                    _logger.LogError(ex.Message, ex);
-                    return null;
+                    try
+                    {
+                        if (string.IsNullOrEmpty(ticketImage.ExitImage))
+                        {
+                            result.ExitImage = null;
+                        }
+                        else if (IsValidUrl(ticketImage.ExitImage))
+                        {
+                            client = _httpClientFactory.CreateClient();
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+                            var response = await client.GetAsync(new Uri(ticketImage.ExitImage));
+                            response.EnsureSuccessStatusCode();
+                            var stream = await response.Content.ReadAsStreamAsync();
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = stream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            result.ExitImage = bitmap;
+                        }
+
+                        else if (IsBase64(ticketImage.ExitImage))
+                        {
+                            result.ExitImage = ImageHelper.Base64ToImageSource(ticketImage.ExitImage);
+                        }
+                        else
+                        {
+                            result.ExitImage = null;
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex.Message, ex);
+                        result.ExitImage = null;
+                    }
                 }
+                else
+                {
+                    result.ExitImage = null;
+                }
+                return result;
             }
-            else
-            {
-                return null;
-            }
-
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return null;
+            return (null, null);
         }
     }
     public List<TicketsListViewModel> GetLatestTickets(TicketType type, int take)
@@ -666,45 +727,44 @@ public class ParkingService : IParkingService
     {
         try
         {
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
-
-            //}
             var ticket = unitOfWork.ParkingTickets.Find(s => s.Id == ticketId)
-.OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
-{
-    Id = s.Id,
-    EndTime = s.EndTime,
-    LicensePlate = s.LicensePlate,
-    ParkingSpaceID = s.ParkingSpaceID,
-    StartTime = s.StartTime,
-    VehicleManufacturerName = s.VehicleManufacturerName,
-    VehicleSegmentId = s.VehicleSegmentId,
-    StartRelativeTimeString = s.StartTime.ToRelativeDate(),
-    StartTimeString = s.StartTime.ToLongShamsiString(),
-    StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-    EndTimeString = s.EndTime.ToLongShamsiString(),
-    Discount = s.Discount,
-    DiscountPercent = s.DiscountPercent,
-    DurationMinutes = s.DurationMinutes,
-    EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
-    IsExited = s.IsExited,
-    IsPaid = s.IsPaid,
-    PaidAmount = s.PaidAmount,
-    PaidCreditCard = s.PaidCreditCard,
-    PaidType = s.PaidType,
-    RefId = s.RefId,
-    TotalAmount = s.TotalAmount,
-    EnLicensePlate = s.EnLicensePlate,
-    ParkingLotId = s.ParkingLotId,
-    MerchantNumber = s.MerchantNumber,
-    TraceNo = s.TraceNo,
-    PaidDate = s.PaidDate,
-    RRN = s.RRN,
-    LicensePlateGroupId = s.LicensePlateGroupId,
-    Description = s.Description,
-    CardUid = s.CardUid
-}).FirstOrDefault();
+                                                  .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
+                                                  {
+                                                      Id = s.Id,
+                                                      EndTime = s.EndTime,
+                                                      LicensePlate = s.LicensePlate,
+                                                      ParkingSpaceID = s.ParkingSpaceID,
+                                                      StartTime = s.StartTime,
+                                                      VehicleManufacturerName = s.VehicleManufacturerName,
+                                                      VehicleSegmentId = s.VehicleSegmentId,
+                                                      StartRelativeTimeString = s.StartTime.ToRelativeDate(),
+                                                      StartTimeString = s.StartTime.ToLongShamsiString(),
+                                                      StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
+                                                      EndTimeString = s.EndTime.ToLongShamsiString(),
+                                                      Discount = s.Discount,
+                                                      DiscountPercent = s.DiscountPercent,
+                                                      DurationMinutes = s.DurationMinutes,
+                                                      EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+                                                      IsExited = s.IsExited,
+                                                      IsPaid = s.IsPaid,
+                                                      PaidAmount = s.PaidAmount,
+                                                      PaidCreditCard = s.PaidCreditCard,
+                                                      PaidType = s.PaidType,
+                                                      RefId = s.RefId,
+                                                      TotalAmount = s.TotalAmount,
+                                                      EnLicensePlate = s.EnLicensePlate,
+                                                      ParkingLotId = s.ParkingLotId,
+                                                      MerchantNumber = s.MerchantNumber,
+                                                      TraceNo = s.TraceNo,
+                                                      PaidDate = s.PaidDate,
+                                                      RRN = s.RRN,
+                                                      LicensePlateGroupId = s.LicensePlateGroupId,
+                                                      Description = s.Description,
+                                                      CardUid = s.CardUid,
+                                                      BarcodeId = s.BarcodeId,
+                                                      QueueNumber = s.QueueNumber,
+                                                      DriverDescription = s.DriverDescription
+                                                  }).FirstOrDefault();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 var segment = unitOfWork.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefault();
@@ -765,6 +825,9 @@ public class ParkingService : IParkingService
                             }
                         }
                     }
+                    ParkingLot? parkingLot = unitOfWork.ParkingLots.FirstOrDefault(x => x.Id == ticket.ParkingLotId);
+                    ticket.ParkingName = parkingLot?.Name;
+
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
@@ -799,9 +862,9 @@ public class ParkingService : IParkingService
     {
         try
         {
-
             var ticket = await unitOfWork.ParkingTickets.Find(s => s.Id == ticketId)
-                .OrderByDescending(s => s.StartTime).Select(s => new TicketsListViewModel
+                .OrderByDescending(s => s.StartTime)
+                .Select(s => new TicketsListViewModel
                 {
                     Id = s.Id,
                     EndTime = s.EndTime,
@@ -836,89 +899,49 @@ public class ParkingService : IParkingService
                     CardUid = s.CardUid,
                     EntranceGate = s.EntranceGate,
                     ExitGate = s.ExitGate,
+                    ExitImage = s.ExitImage,
+                    StartImage = s.StartImage,
+                    BarcodeId = s.BarcodeId,
+                    DriverDescription = s.DriverDescription
+                    ,
+                    QueueNumber = s.QueueNumber
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var segmentTask = unitOfWork.VehicleSegments.FirstOrDefaultAsync(p => p.Id == ticket.VehicleSegmentId);
-                var discountTask = GetLicensePlateDiscountPercentAsync(ticket.EnLicensePlate ?? "_");
-                var segmentPriceTask = unitOfWork.ParkingVehicleSegmentPrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                var cardTask = unitOfWork.Cards.FirstOrDefaultAsync(c => c.CardSerialNo == ticket.CardUid);
-                var segmentVariablePriceTask = unitOfWork.ParkingVehicleSegmentVariablePrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                await Task.WhenAll(segmentVariablePriceTask, segmentPriceTask, cardTask, segmentTask, discountTask);
-                var segment = segmentTask.Result;
-                var segmentPrices = segmentPriceTask.Result;
-                var segmentVariablePrice = segmentVariablePriceTask.Result;
-                var card = cardTask.Result;
+                var segment = await unitOfWork.VehicleSegments
+                    .FirstOrDefaultAsync(p => p.Id == ticket.VehicleSegmentId);
+
+                var discount = await GetLicensePlateDiscountPercentAsync(ticket.EnLicensePlate ?? "_");
+
+                var segmentPrices = await unitOfWork.ParkingVehicleSegmentPrices
+                    .Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId)
+                    .ToListAsync();
+
+                var card = await unitOfWork.Cards
+                    .FirstOrDefaultAsync(c => c.CardSerialNo == ticket.CardUid);
+
+                var segmentVariablePrice = await unitOfWork.ParkingVehicleSegmentVariablePrices
+                    .Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId)
+                    .ToListAsync();
+
                 stopwatch.Stop();
                 _logger.LogError($"GetTicketDetailsAsync  Run Time: {stopwatch.ElapsedMilliseconds} ms");
-                //var segmentTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefaultAsync();
-                //    }
-                //});
-
-                //var segmentPriceTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.ParkingVehicleSegmentPrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                //    }
-                //});
-
-                //var discountTask = Task.Run(() => GetLicensePlateDiscountPercent(ticket.EnLicensePlate ?? "_"));
-
-                //var cardTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.Cards.Find(c => c.CardSerialNo == ticket.CardUid).FirstOrDefaultAsync();
-                //    }
-                //});
-
-                //var segmentVariablePriceTask = Task.Run(async () =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.ParkingVehicleSegmentVariablePrices.Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId).ToListAsync();
-                //    }
-                //});
-                //await Task.WhenAll(segmentTask, segmentPriceTask, discountTask, cardTask);
-
-
-
-                //var segmentTask = Task.Run(async() =>
-                //{
-                //    using (var uow = _unitOfWorkFactory.Create())
-                //    {
-                //        return await uow.VehicleSegments.Find(p => p.Id == ticket.VehicleSegmentId).FirstOrDefaultAsync();
-                //    }
-                //});
-
-
-
 
 
                 if (segmentPrices != null)
                 {
-                    List<(int, int, int)> hourlyrate = new List<(int, int, int)>(); // Initialize the list
+                    List<(int, int, int)> hourlyrate = new List<(int, int, int)>();
                     foreach (var item in segmentPrices)
                     {
                         hourlyrate.Add((item.TimeFrom.Hour, item.TimeTo.Hour, (int)item.HourlyRate));
                     }
-                    var discount = await discountTask;
-                    //var discount = GetLicensePlateDiscountPercent(ticket.EnLicensePlate ?? "_");
-
-
-
 
                     if (card != null)
                     {
-                        if (card.PercentDiscount > 0)
+                        if (card.PercentDiscount > 9)
                         {
                             discount = (short)card.PercentDiscount;
                         }
@@ -941,7 +964,6 @@ public class ParkingService : IParkingService
 
                         if (card != null)
                         {
-
                             if (card.PercentDiscount > 0)
                             {
                                 description = description + " | " + $"کارت دارای تخفیف {card.PercentDiscount} درصدی میباشد ";
@@ -961,10 +983,25 @@ public class ParkingService : IParkingService
 
                         }
                     }
+                    ParkingLot? parkingLot = await unitOfWork.ParkingLots.FirstOrDefaultAsync(x => x.Id == ticket.ParkingLotId);
+                    ticket.ParkingName = parkingLot?.Name;
                     ticket.DiscountPercent = (byte)discount;
                     ticket.TotalAmount = result.PayableAmount;
                     ticket.Description = description;
                     ticket.DurationMinutes = (int)varTime.TotalMinutes;
+                    if (ticket.LicensePlateGroupId != null)
+                    {
+                        try
+                        {
+                            ticket.LicensePlateGroupName = GetLicensePlateGroupById(ticket.LicensePlateGroupId ?? new Guid())?.Name ?? "--";
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError("Error In Get License Plate Group Nam", ex);
+                        }
+
+                    }
+
 
                     unitOfWork.ParkingTickets.ExecuteUpdate(p => p.Id == ticketId, update => update
                     .SetProperty(p => p.DurationMinutes, (int)varTime.TotalMinutes)
@@ -1149,7 +1186,7 @@ public class ParkingService : IParkingService
         try
         {
             //using (var uow = _unitOfWorkFactory.Create())
-            return unitOfWork.ParkingTickets.Find(s => s.EnLicensePlate == licenseEnPlate && s.IsExited == false).Select(s => (Guid?)s.Id).FirstOrDefault();
+            return unitOfWork.ParkingTickets.Find(s => s.EnLicensePlate == licenseEnPlate && s.IsExited == false).OrderByDescending(s => s.StartTime).Select(s => (Guid?)s.Id).FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -1165,6 +1202,9 @@ public class ParkingService : IParkingService
         {
             var groupId = GetGroupIdByEnLicensePlate(request.EnLicensePlate ?? "__-_-___");
             long barcode = RandomNumberGenerator.GenerateLongRandomNumber();
+
+            string? DriverDescription = (request.TicketDescriptionItemId != null && request.TicketDescriptionItemId > 0) ? GetTicketDescriptionItemById((int)request.TicketDescriptionItemId)?.Text : request.DriverDescription;
+
             while (unitOfWork.ParkingTickets.Find(x => x.BarcodeId == barcode).Any())
             {
                 barcode = RandomNumberGenerator.GenerateLongRandomNumber();
@@ -1196,7 +1236,8 @@ public class ParkingService : IParkingService
                 EntranceGate = request.EntranceGate,
                 BarcodeId = barcode,
                 UserId = request.CreatorUserId,
-                DriverDescription = request.DriverDescription,
+                TicketDescriptionItemId = (request.TicketDescriptionItemId > 0) ? request.TicketDescriptionItemId : null,
+                DriverDescription = DriverDescription,
                 DriverFullName = request.DriverFullName,
                 DriverPhoneNumber = request.DriverPhoneNumber,
                 DeviceId = Settings.Default.Application_DeviceId,
@@ -1204,244 +1245,237 @@ public class ParkingService : IParkingService
             };
             unitOfWork.ParkingTickets.Add(ticket);
 
-            unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(s => s.IsOccupied, true));
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, true));
+            if (Settings.Default.Application_QueueActive)
+            {
+                if (ticket.TicketDescriptionItemId != null && request.TicketDescriptionItemId > 0)
+                {
+                    try
+                    {
+                        var result = _ticketQueueService.AssignQueueNumberAsync((int)ticket.TicketDescriptionItemId, ticket.Id);
+                        unitOfWork.ParkingTickets.ExecuteUpdate(s => s.Id == ticket.Id, update => update.SetProperty(s => s.QueueNumber, result));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"خطا در ثبت نوبت قبض  {ex.Message}", ex);
+                    }
+                }
+            }
             return new TServiceResponse<Guid>() { Succeeded = true, Result = ticket.Id, Message = "بلیط بارکینگ با موفقیت ثبت شد" };
-
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new TServiceResponse<Guid>() { Succeeded = false, Message = "خطا در ثبت اطلاعات" };
-
+            return new TServiceResponse<Guid>() { Succeeded = false, Message = "خطا در ثبت قبض" };
         }
     }
 
-    public List<TicketsListViewModel> GetTicketList(GetTicketListRequestModel request)
+    #region TicketList
+    public (List<TicketsListViewModel> Data, int TotalCount) GetTicketList(GetTicketListRequestModel request)
     {
         try
         {
+            IQueryable<TicketsListViewModel> tickets = TicketListBaseQuery();
 
-            var sergments = unitOfWork.VehicleSegments.GetAll().ToList();
-            var tickets = unitOfWork.ParkingTickets.GetAll()
-                                             .Select(s => new TicketsListViewModel
-                                             {
-                                                 BarcodeId = s.BarcodeId,
-                                                 Id = s.Id,
-                                                 LicensePlate = s.LicensePlate,
-                                                 ParkingSpaceID = s.ParkingSpaceID,
-                                                 StartTime = s.StartTime,
-                                                 EndTime = (s.EndTime != s.StartTime) ? s.EndTime : null,
-                                                 VehicleManufacturerName = s.VehicleManufacturerName,
-                                                 VehicleSegmentId = s.VehicleSegmentId,
-                                                 Discount = s.Discount,
-                                                 DiscountPercent = s.DiscountPercent,
-                                                 DurationMinutes = s.DurationMinutes,
-                                                 IsExited = s.IsExited,
-                                                 IsPaid = s.IsPaid,
-                                                 PaidAmount = s.PaidAmount,
-                                                 PaidCreditCard = s.PaidCreditCard,
-                                                 PaidType = s.PaidType,
-                                                 RefId = s.RefId,
-                                                 TotalAmount = s.TotalAmount,
-                                                 EnLicensePlate = s.EnLicensePlate,
-                                                 LicensePlateGroupId = s.LicensePlateGroupId,
-                                                 MerchantNumber = s.MerchantNumber,
-                                                 PaidDate = s.PaidDate,
-                                                 ParkingLotId = s.ParkingLotId,
-                                                 TraceNo = s.TraceNo,
-                                                 RRN = s.RRN,
-                                             });
+            tickets = ApplyTicketListFilter(request, tickets);
 
-            if (request.ParkingId != null)
-                tickets = tickets.Where(t => t.ParkingLotId == request.ParkingId);
-            if (request.VehicleSegmentId != null)
-                tickets = tickets.Where(t => t.VehicleSegmentId == request.VehicleSegmentId);
-            if (request.ParkingSpaceID != null)
-                tickets = tickets.Where(t => t.ParkingSpaceID == request.ParkingSpaceID);
-            if (request.PaidType != null)
-                tickets = tickets.Where(t => t.PaidType == request.PaidType);
-            if (request.MinDurationMinutes != null)
-                tickets = tickets.Where(t => t.DurationMinutes >= request.MinDurationMinutes);
-            if (request.MaxDurationMinutes != null)
-                tickets = tickets.Where(t => t.DurationMinutes <= request.MaxDurationMinutes);
-            if (request.MinTotalAmount != null)
-                tickets = tickets.Where(t => t.TotalAmount >= request.MinTotalAmount);
-            if (request.MaxTotalAmount != null)
-                tickets = tickets.Where(t => t.TotalAmount <= request.MaxTotalAmount);
-            if (request.IsExited != null)
-                tickets = tickets.Where(t => t.IsExited == request.IsExited);
-            if (request.IsPaid != null)
-                tickets = tickets.Where(t => t.IsPaid == request.IsPaid);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime >= request.StartStartTime);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime <= request.EndStartTime);
-            if (request.BarcodeId != null)
-                tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
-            if (request.LicensePlate != null && request.LicensePlate.Length > 1)
-                tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
+            int TotalCount = tickets.Count();
+            var t = tickets
+              .Select(ToTicketListViewModelResult())
+              .Skip((request.CurrentPage - 1) * request.ItemsPerPage)
+              .Take(request.ItemsPerPage).ToList();
 
-            var t = tickets.Select(s => new TicketsListViewModel
-            {
-                Id = s.Id,
-                BarcodeId = s.BarcodeId,
-                ParkingLotId = s.ParkingLotId,
-                EndTime = s.EndTime,
-                LicensePlate = s.LicensePlate,
-                ParkingSpaceID = s.ParkingSpaceID,
-                StartTime = s.StartTime,
-                VehicleManufacturerName = s.VehicleManufacturerName,
-                VehicleSegmentId = s.VehicleSegmentId,
-                StartRelativeTimeString = s.StartTime.ToRelativeDate(),
-                StartTimeString = s.StartTime.ToLongShamsiString(),
-                StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-                EndTimeString = s.EndTime.ToLongShamsiString(),
-                Discount = s.Discount,
-                DiscountPercent = s.DiscountPercent,
-                DurationMinutes = s.DurationMinutes,
-                EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
-                StartImage = s.StartImage,
-                ExitImage = s.ExitImage,
-                IsExited = s.IsExited,
-                IsPaid = s.IsPaid,
-                PaidAmount = s.PaidAmount,
-                PaidCreditCard = s.PaidCreditCard,
-                PaidType = s.PaidType,
-                RefId = s.RefId,
-                TotalAmount = s.TotalAmount,
-                EnLicensePlate = s.EnLicensePlate,
-                ParkingName = ParkingLotInfoStore.ParkingInfo.Name,
-                LicensePlateGroupId = s.LicensePlateGroupId,
-                MerchantNumber = s.MerchantNumber,
-                RRN = s.RRN,
-                PaidDate = s.PaidDate,
-                TraceNo = s.TraceNo,
-            }).ToList();
-
-            return t;
+            return (t, TotalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<TicketsListViewModel>();
+            return (new List<TicketsListViewModel>(), 0);
         }
     }
-    public async Task<List<TicketsListViewModel>> GetTicketListAsync(GetTicketListRequestModel request)
+    public async Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListAsync(GetTicketListRequestModel request)
     {
         try
         {
+            var tickets = TicketListBaseQuery();
 
-            //var sergments = unitOfWork.VehicleSegments.GetAll().ToList();
-            //using (var uow = _unitOfWorkFactory.Create())
-            //{
+            tickets = ApplyTicketListFilter(request, tickets);
 
-            //}
-            var tickets = unitOfWork.ParkingTickets.GetAll()
-                                                 .Select(s => new TicketsListViewModel
-                                                 {
-                                                     BarcodeId = s.BarcodeId,
-                                                     Id = s.Id,
-                                                     LicensePlate = s.LicensePlate,
-                                                     ParkingSpaceID = s.ParkingSpaceID,
-                                                     StartTime = s.StartTime,
-                                                     EndTime = (s.EndTime != s.StartTime) ? s.EndTime : null,
-                                                     VehicleManufacturerName = s.VehicleManufacturerName,
-                                                     VehicleSegmentId = s.VehicleSegmentId,
-                                                     Discount = s.Discount,
-                                                     DiscountPercent = s.DiscountPercent,
-                                                     DurationMinutes = s.DurationMinutes,
-                                                     IsExited = s.IsExited,
-                                                     IsPaid = s.IsPaid,
-                                                     PaidAmount = s.PaidAmount,
-                                                     PaidCreditCard = s.PaidCreditCard,
-                                                     PaidType = s.PaidType,
-                                                     RefId = s.RefId,
-                                                     TotalAmount = s.TotalAmount,
-                                                     EnLicensePlate = s.EnLicensePlate,
-                                                     LicensePlateGroupId = s.LicensePlateGroupId,
-                                                     MerchantNumber = s.MerchantNumber,
-                                                     PaidDate = s.PaidDate,
-                                                     ParkingLotId = s.ParkingLotId,
-                                                     TraceNo = s.TraceNo,
-                                                     RRN = s.RRN,
-                                                 });
+            int TotalCount = tickets.Count();
 
-            if (request.ParkingId != null)
-                tickets = tickets.Where(t => t.ParkingLotId == request.ParkingId);
-            if (request.VehicleSegmentId != null)
-                tickets = tickets.Where(t => t.VehicleSegmentId == request.VehicleSegmentId);
-            if (request.ParkingSpaceID != null)
-                tickets = tickets.Where(t => t.ParkingSpaceID == request.ParkingSpaceID);
-            if (request.PaidType != null)
-                tickets = tickets.Where(t => t.PaidType == request.PaidType);
-            if (request.MinDurationMinutes != null)
-                tickets = tickets.Where(t => t.DurationMinutes >= request.MinDurationMinutes);
-            if (request.MaxDurationMinutes != null)
-                tickets = tickets.Where(t => t.DurationMinutes <= request.MaxDurationMinutes);
-            if (request.MinTotalAmount != null)
-                tickets = tickets.Where(t => t.TotalAmount >= request.MinTotalAmount);
-            if (request.MaxTotalAmount != null)
-                tickets = tickets.Where(t => t.TotalAmount <= request.MaxTotalAmount);
-            if (request.IsExited != null)
-                tickets = tickets.Where(t => t.IsExited == request.IsExited);
-            if (request.IsPaid != null)
-                tickets = tickets.Where(t => t.IsPaid == request.IsPaid);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime >= request.StartStartTime);
-            if (request.StartStartTime != null)
-                tickets = tickets.Where(t => t.StartTime <= request.EndStartTime);
-            if (request.BarcodeId != null)
-                tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
-            if (request.LicensePlate != null && request.LicensePlate.Length > 1)
-                tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
+            var t = await tickets
+                .Select(ToTicketListViewModelResult())
+                .Skip((request.CurrentPage - 1) * request.ItemsPerPage)
+                .Take(request.ItemsPerPage)
+                .ToListAsync();
 
-            var t = await tickets.Select(s => new TicketsListViewModel
-            {
-                Id = s.Id,
-                BarcodeId = s.BarcodeId,
-                ParkingLotId = s.ParkingLotId,
-                EndTime = s.EndTime,
-                LicensePlate = s.LicensePlate,
-                ParkingSpaceID = s.ParkingSpaceID,
-                StartTime = s.StartTime,
-                VehicleManufacturerName = s.VehicleManufacturerName,
-                VehicleSegmentId = s.VehicleSegmentId,
-                StartRelativeTimeString = s.StartTime.ToRelativeDate(),
-                StartTimeString = s.StartTime.ToLongShamsiString(),
-                StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
-                EndTimeString = s.EndTime.ToLongShamsiString(),
-                Discount = s.Discount,
-                DiscountPercent = s.DiscountPercent,
-                DurationMinutes = s.DurationMinutes,
-                EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
-                StartImage = s.StartImage,
-                ExitImage = s.ExitImage,
-                IsExited = s.IsExited,
-                IsPaid = s.IsPaid,
-                PaidAmount = s.PaidAmount,
-                PaidCreditCard = s.PaidCreditCard,
-                PaidType = s.PaidType,
-                RefId = s.RefId,
-                TotalAmount = s.TotalAmount,
-                EnLicensePlate = s.EnLicensePlate,
-                ParkingName = ParkingLotInfoStore.ParkingInfo.Name,
-                LicensePlateGroupId = s.LicensePlateGroupId,
-                MerchantNumber = s.MerchantNumber,
-                RRN = s.RRN,
-                PaidDate = s.PaidDate,
-                TraceNo = s.TraceNo,
-            }).ToListAsync();
-
-            return t;
-
+            return (t, TotalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<TicketsListViewModel>();
+            return (new List<TicketsListViewModel>(), 0);
         }
     }
+    private static IQueryable<TicketsListViewModel> ApplyTicketListFilter(GetTicketListRequestModel request, IQueryable<TicketsListViewModel> tickets)
+    {
+        if (request.ParkingId != null)
+            tickets = tickets.Where(t => t.ParkingLotId == request.ParkingId);
+        if (request.VehicleSegmentId != null)
+            tickets = tickets.Where(t => t.VehicleSegmentId == request.VehicleSegmentId);
+        if (request.ParkingSpaceID != null)
+            tickets = tickets.Where(t => t.ParkingSpaceID == request.ParkingSpaceID);
+        if (request.PaidType != null)
+            tickets = tickets.Where(t => t.PaidType == request.PaidType);
+        if (request.MinDurationMinutes != null)
+            tickets = tickets.Where(t => t.DurationMinutes >= request.MinDurationMinutes);
+        if (request.MaxDurationMinutes != null)
+            tickets = tickets.Where(t => t.DurationMinutes <= request.MaxDurationMinutes);
+        if (request.MinTotalAmount != null)
+            tickets = tickets.Where(t => t.TotalAmount >= request.MinTotalAmount);
+        if (request.MaxTotalAmount != null)
+            tickets = tickets.Where(t => t.TotalAmount <= request.MaxTotalAmount);
+        if (request.IsPaid != null)
+            tickets = tickets.Where(t => t.IsPaid == request.IsPaid);
+
+        if (request.EntryFrom != null)
+            tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
+
+        if (request.EntryTo != null)
+            tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
+
+        if (request.ExitFrom != null)
+            tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
+
+        if (request.ExitTo != null)
+            tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
+
+        if (!string.IsNullOrEmpty(request.GateType))
+        {
+            if (request.GateType == "EntranceGate")
+                tickets = tickets.Where(t => t.EntranceGate != null && t.EntranceGate != "");
+            else if (request.GateType == "ExitGate")
+                tickets = tickets.Where(t => t.ExitGate != null && t.ExitGate != "");
+        }
+
+        if (request.BarcodeId != null)
+            tickets = tickets.Where(t => t.BarcodeId == request.BarcodeId);
+        if (request.LicensePlate != null && request.LicensePlate.Length > 1)
+            tickets = tickets.Where(t => t.EnLicensePlate.Contains(request.LicensePlate));
+
+        if (request.PriceFrom != null)
+            tickets = tickets.Where(x => x.TotalAmount >= request.PriceFrom);
+
+        if (request.PriceTo != null)
+            tickets = tickets.Where(x => x.TotalAmount <= request.PriceTo);
+
+        if (!string.IsNullOrEmpty(request.EntryRegistrar))
+            tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
+
+        if (!string.IsNullOrEmpty(request.ExitRegistrar))
+            tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+
+        if (request.HasDiscrepancy == true)
+        {
+            tickets = tickets.Where(x =>
+            x.IsExited == true &&
+            x.IsPaid.Value == true &&
+            !(
+            x.TotalAmount == 0m &&
+            x.DiscountPercent == 100 &&
+            x.PaidAmount == 0m
+            ) &&
+            x.PaidAmount != (x.TotalAmount * (1 - (x.DiscountPercent / 100m))));
+        }
+
+
+        if (request.VehicleStatus != null)
+        {
+            Expression<Func<TicketsListViewModel, bool>> expression = x =>
+            request.VehicleStatus == VehicleStatus.Entered ? x.IsExited.Value == false : x.IsExited.Value;
+
+            tickets = tickets.Where(expression);
+        }
+
+        return tickets;
+    }
+    private static Expression<Func<TicketsListViewModel, TicketsListViewModel>> ToTicketListViewModelResult()
+    {
+        return s => new TicketsListViewModel
+        {
+            Id = s.Id,
+            BarcodeId = s.BarcodeId,
+            ParkingLotId = s.ParkingLotId,
+            EndTime = s.EndTime,
+            LicensePlate = s.LicensePlate,
+            ParkingSpaceID = s.ParkingSpaceID,
+            StartTime = s.StartTime,
+            VehicleManufacturerName = s.VehicleManufacturerName,
+            VehicleSegmentId = s.VehicleSegmentId,
+            StartRelativeTimeString = s.StartTime.ToRelativeDate(),
+            StartTimeString = s.StartTime.ToLongShamsiString(),
+            StartTimeOnlyString = s.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ"),
+            EndTimeString = s.EndTime.ToLongShamsiString(),
+            Discount = s.Discount,
+            DiscountPercent = s.DiscountPercent,
+            DurationMinutes = s.DurationMinutes,
+            EndTimeOnlyString = (s.EndTime != null) ? ((DateTime)s.EndTime).ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ") : "",
+            StartImage = s.StartImage,
+            ExitImage = s.ExitImage,
+            IsExited = s.IsExited,
+            IsPaid = s.IsPaid,
+            PaidAmount = s.PaidAmount,
+            PaidCreditCard = s.PaidCreditCard,
+            PaidType = s.PaidType,
+            RefId = s.RefId,
+            TotalAmount = s.TotalAmount,
+            EnLicensePlate = s.EnLicensePlate,
+            ParkingName = ParkingLotInfoStore.ParkingInfo.Name,
+            LicensePlateGroupId = s.LicensePlateGroupId,
+            MerchantNumber = s.MerchantNumber,
+            RRN = s.RRN,
+            PaidDate = s.PaidDate,
+            TraceNo = s.TraceNo,
+        };
+    }
+
+    private IQueryable<TicketsListViewModel> TicketListBaseQuery()
+    {
+        return unitOfWork.ParkingTickets.GetAll()
+                                         .Select(s => new TicketsListViewModel
+                                         {
+                                             BarcodeId = s.BarcodeId,
+                                             Id = s.Id,
+                                             LicensePlate = s.LicensePlate,
+                                             ParkingSpaceID = s.ParkingSpaceID,
+                                             StartTime = s.StartTime,
+                                             EndTime = (s.EndTime != s.StartTime) ? s.EndTime : null,
+                                             VehicleManufacturerName = s.VehicleManufacturerName,
+                                             VehicleSegmentId = s.VehicleSegmentId,
+                                             Discount = s.Discount,
+                                             DiscountPercent = s.DiscountPercent,
+                                             DurationMinutes = s.DurationMinutes,
+                                             IsExited = s.IsExited,
+                                             IsPaid = s.IsPaid,
+                                             PaidAmount = s.PaidAmount,
+                                             PaidCreditCard = s.PaidCreditCard,
+                                             PaidType = s.PaidType,
+                                             RefId = s.RefId,
+                                             TotalAmount = s.TotalAmount,
+                                             EnLicensePlate = s.EnLicensePlate,
+                                             LicensePlateGroupId = s.LicensePlateGroupId,
+                                             MerchantNumber = s.MerchantNumber,
+                                             PaidDate = s.PaidDate,
+                                             ParkingName = ParkingLotInfoStore.ParkingInfo.Name,
+                                             ParkingLotId = s.ParkingLotId,
+                                             TraceNo = s.TraceNo,
+                                             RRN = s.RRN,
+                                             EntranceGate = s.EntranceGate,
+                                             ExitGate = s.ExitGate,
+                                         });
+    }
+    #endregion
+
     public bool ExitRequest(Guid ticketId)
     {
         try
@@ -1765,7 +1799,9 @@ public class ParkingService : IParkingService
             {
                 return 0;
             }
-            var licensePlateGroup = await unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId /*&& l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now*/).FirstOrDefaultAsync();
+            var licensePlateGroup = await unitOfWork.LicensePlateGroups
+                .Find(l => l.Id == licensePlate.GroupId && l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now)
+                .FirstOrDefaultAsync();
             if (licensePlateGroup == null)
             {
                 return 0;
@@ -1906,31 +1942,45 @@ public class ParkingService : IParkingService
         }
     }
 
-    public List<LicensePlateListItemViewModel> GetLicensePlateGroupList()
+    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize)
     {
         try
         {
-
             var licensePlateGroupList = unitOfWork
-                .LicensePlateGroups
-                .GetAll()
-                .Select(l => new LicensePlateGroupModel
-                {
-                    Id = l.Id,
-                    DiscountPercent = l.DiscountPercent,
-                    CreatorUserId = l.CreatorUserId,
-                    Description = l.Description,
-                    EndDate = l.EndDate,
-                    IsActive = l.IsActive,
-                    Name = l.Name,
-                    StartDate = l.StartDate
-                }).ToList();
+               .LicensePlateGroups
+               .GetAll()
+               .Select(l => new LicensePlateGroupModel
+               {
+                   Id = l.Id,
+                   DiscountPercent = l.DiscountPercent,
+                   CreatorUserId = l.CreatorUserId,
+                   Description = l.Description,
+                   EndDate = l.EndDate,
+                   IsActive = l.IsActive,
+                   Name = l.Name,
+                   StartDate = l.StartDate,
+                   LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
+                   {
+                       Id = ll.Id,
+                       EnLicensePlate = ll.EnLicensePlate,
+                       FaLicensePlate = ll.FaLicensePlate,
+                       GroupId = (Guid)ll.GroupId
+                   }).ToList()
+               });
+
+            if (EnLicensePlate != null)
+            {
+
+                licensePlateGroupList = licensePlateGroupList.Where(g => g.LicensePlates.Any(lp => lp.EnLicensePlate == EnLicensePlate));
+            }
+
+            var x = licensePlateGroupList.ToList();
             List<LicensePlateListItemViewModel> list = new List<LicensePlateListItemViewModel>();
             foreach (var item in licensePlateGroupList)
             {
-                var licensePlates = unitOfWork.LicensePlates.Find(p => p.GroupId == item.Id).ToList();
 
-                foreach (var sub in licensePlates)
+
+                foreach (var sub in item?.LicensePlates)
                 {
                     list.Add(new LicensePlateListItemViewModel
                     {
@@ -1947,12 +1997,22 @@ public class ParkingService : IParkingService
                 }
             }
 
-            return list;
+
+            int TotalCount = list.Count();
+
+            list = list.Skip((Page - 1) * PageSize)
+                       .Take(PageSize)
+                       .ToList();
+
+
+            return (list, TotalCount);
+
+
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return new List<LicensePlateListItemViewModel>();
+            return (new List<LicensePlateListItemViewModel>(), 0);
         }
     }
 
@@ -2005,7 +2065,12 @@ public class ParkingService : IParkingService
             var licensePlate = unitOfWork.LicensePlates.Find(g => g.EnLicensePlate == enLicensePlate).FirstOrDefault();
             if (licensePlate != null)
             {
-                return licensePlate.GroupId;
+                var group = unitOfWork.LicensePlateGroups.Find(g => g.Id == licensePlate.GroupId && g.StartDate < DateTime.Now && g.EndDate > DateTime.Now).FirstOrDefault();
+                if (group != null)
+                {
+                    return group.Id;
+                }
+                return null;
             }
             return null;
         }
@@ -2022,36 +2087,26 @@ public class ParkingService : IParkingService
         {
 
             unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == request.TicketId, update => update
-                                                .SetProperty(product => product.IsExited, product => true)
-                                                .SetProperty(product => product.EndTime, product => DateTime.Now)
-                                                .SetProperty(product => product.IsPaid, product => true)
-                                                .SetProperty(product => product.PaidAmount, product => request.PaidAmount)
-                                                .SetProperty(product => product.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
-                                                .SetProperty(product => product.RefId, product => request.RefId)
-                                                .SetProperty(product => product.PaidType, product => request.PaidType)
-                                                .SetProperty(product => product.PaidDate, product => request.PaidDate)
-                                                .SetProperty(product => product.RRN, product => request.RRN)
-                                                .SetProperty(product => product.TraceNo, product => request.TraceNo)
-                                                .SetProperty(product => product.DeviceId, product => Settings.Default.Application_DeviceId)
-                                                .SetProperty(product => product.MerchantNumber, product => request.MerchantNumber)
-                                                .SetProperty(product => product.ExitGate, product => request.ExitGate)
-                                                .SetProperty(product => product.ExitImage, product => request.ExitImage)
-                                                .SetProperty(product => product.IsCardMissing, product => request.IsMissingCard)
-                                                .SetProperty(product => product.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
-                                                .SetProperty(product => product.TicketStatus, product => TicketStatus.Unsynced));
+                                                .SetProperty(ticket => ticket.IsExited, product => true)
+                                                .SetProperty(ticket => ticket.EndTime, product => DateTime.Now)
+                                                .SetProperty(ticket => ticket.IsPaid, product => true)
+                                                .SetProperty(ticket => ticket.PaidAmount, product => request.PaidAmount)
+                                                .SetProperty(ticket => ticket.TotalAmount, ticket => request.TotalAmount ?? ticket.TotalAmount)
+                                                .SetProperty(ticket => ticket.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
+                                                .SetProperty(ticket => ticket.RefId, product => request.RefId)
+                                                .SetProperty(ticket => ticket.PaidType, product => request.PaidType)
+                                                .SetProperty(ticket => ticket.PaidDate, product => request.PaidDate)
+                                                .SetProperty(ticket => ticket.RRN, product => request.RRN)
+                                                .SetProperty(ticket => ticket.TraceNo, product => request.TraceNo)
+                                                .SetProperty(ticket => ticket.DeviceId, product => Settings.Default.Application_DeviceId)
+                                                .SetProperty(ticket => ticket.MerchantNumber, product => request.MerchantNumber)
+                                                .SetProperty(ticket => ticket.ExitGate, product => request.ExitGate)
+                                                .SetProperty(ticket => ticket.ExitImage, product => request.ExitImage)
+                                                .SetProperty(ticket => ticket.IsCardMissing, product => request.IsMissingCard)
+                                                .SetProperty(ticket => ticket.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
+                                                .SetProperty(ticket => ticket.TicketStatus, product => TicketStatus.Unsynced));
             //unitOfWork.Commit();
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, false));
-
-
-            //unitOfWork.Commit();
-
-            var ticket = unitOfWork.ParkingTickets.Find(s => s.Id == request.TicketId).FirstOrDefault();
-            if (ticket != null)
-            {
-                unitOfWork.ParkingSpaces.ExecuteUpdate(s => s.Id == ticket.ParkingSpaceID, update => update.SetProperty(product => product.IsOccupied, product => false));
-
-                //unitOfWork.Commit();
-            }
             return true;
 
         }
@@ -2368,6 +2423,7 @@ public class ParkingService : IParkingService
                     OwnerFirstName = request.OwnerFirstName,
                     OwnerLastName = request.OwnerLastName,
                     OwnerNationalCode = request.OwnerNationalCode,
+                    OwnerPhoneNumber = request.OwnerPhoneNumber,
                     OwnerPic = request.OwnerPic,
                     PercentDiscount = request.PercentDiscount,
                     LicensePlateGroupId = request.LicensePlateGroupId,
@@ -2375,6 +2431,20 @@ public class ParkingService : IParkingService
                     EnLicensePlate = request.EnLicensePlate,
                 };
                 unitOfWork.Cards.Add(card);
+
+                var carditemresult = CreateAddCardHistory(new AddCardItemModel
+                {
+                    EnLicensePlate = card.EnLicensePlate,
+                    ActiveDate = card.ActiveDate,
+                    CreateDate = DateTime.Now,
+                    DeactiveDate = card.DeactiveDate,
+                    OwnerFullName = card.OwnerFirstName + " " + card.OwnerLastName,
+                    Description = $"کد ملی: {card.OwnerNationalCode} _ شماره همراه: {card.OwnerPhoneNumber} ",
+                    PercentDiscount = card.PercentDiscount,
+                    VehicleSegmentId = card.VehicleSegmentId,
+                    CardUid = (long)card.CardSerialNo
+                });
+
                 return true;
             }
             else
@@ -2399,7 +2469,23 @@ public class ParkingService : IParkingService
                 card.LicensePlateGroupId = request.LicensePlateGroupId;
                 card.VehicleSegmentId = request.VehicleSegmentId;
                 card.EnLicensePlate = request.EnLicensePlate;
+                card.OwnerPhoneNumber = request.OwnerPhoneNumber;
+
                 unitOfWork.Cards.Update(card);
+
+                var carditemresult = CreateAddCardHistory(new AddCardItemModel
+                {
+                    EnLicensePlate = card.EnLicensePlate,
+                    ActiveDate = card.ActiveDate,
+                    CreateDate = DateTime.Now,
+                    DeactiveDate = card.DeactiveDate,
+                    OwnerFullName = card.OwnerFirstName + " " + card.OwnerLastName,
+                    Description = $"کد ملی: {card.OwnerNationalCode} _ شماره همراه: {card.OwnerPhoneNumber}",
+                    PercentDiscount = card.PercentDiscount,
+                    VehicleSegmentId = card.VehicleSegmentId,
+                    CardUid = (long)card.CardSerialNo
+                });
+
                 return true;
             }
 
@@ -2450,7 +2536,8 @@ public class ParkingService : IParkingService
                 DailyRate = v.DailyRate,
                 FreeEntranceMinutes = v.FreeEntranceMinutes,
                 ParkingEntranceFixedFee = v.ParkingEntranceFixedFee,
-                ParkingLotId = v.ParkingLotId
+                ParkingLotId = v.ParkingLotId,
+                PlateType = v.PlateType
             });
             return segmentsList.ToList();
         }
@@ -2493,7 +2580,10 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var ticket = unitOfWork.ParkingTickets.Find(c => c.CardUid == cardSerialNo && c.IsExited == false).Select(c => new { Id = c.Id, IsPaid = c.IsPaid }).FirstOrDefault();
+            var ticket = unitOfWork.ParkingTickets.Find(c => c.CardUid == cardSerialNo && c.IsExited == false)
+                .OrderByDescending(c => c.StartTime)
+                .Select(c => new { Id = c.Id, IsPaid = c.IsPaid })
+                .FirstOrDefault();
             if (ticket != null) return ticket.Id;
             else return null;
         }
@@ -2774,4 +2864,366 @@ public class ParkingService : IParkingService
         return Regex.IsMatch(input, pattern) || (input.Length % 4 == 0 && Convert.TryFromBase64String(input, new Span<byte>(new byte[input.Length]), out _));
     }
 
+    public int GetDiscountedCardsCount()
+    {
+        try
+        {
+            return unitOfWork.Cards.Find(c => c.PercentDiscount > 0).Count();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return 0;
+        }
+    }
+
+    public (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request)
+    {
+        try
+        {
+            AddCardItem CardItem = new AddCardItem();
+            CardItem.OwnerFullName = request.OwnerFullName;
+            CardItem.EnLicensePlate = request.EnLicensePlate;
+            CardItem.PercentDiscount = request.PercentDiscount;
+            CardItem.Description = request.Description;
+            CardItem.ActiveDate = request.ActiveDate;
+            CardItem.DeactiveDate = request.DeactiveDate;
+            CardItem.VehicleSegmentId = request.VehicleSegmentId;
+            CardItem.CreateDate = request.CreateDate;
+            CardItem.CardUid = request.CardUid;
+
+            unitOfWork.AddCardItems.Add(CardItem);
+            unitOfWork.AddCardItems.Commit();
+            return (true, "ثبت در تاریخچه با موفقیت انجام شد");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return (false, "خطا در ثبت تاریخچه");
+        }
+    }
+
+    public (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize)
+    {
+        try
+        {
+            List<AddCardItemModel> Result = new List<AddCardItemModel>();
+
+            var result = unitOfWork.AddCardItems.GetAll()
+                .Select(a => new AddCardItemModel
+                {
+                    Id = a.Id,
+                    ActiveDate = a.ActiveDate,
+                    CreateDate = a.CreateDate,
+                    DeactiveDate = a.DeactiveDate,
+                    Description = a.Description,
+                    EnLicensePlate = a.EnLicensePlate,
+                    OwnerFullName = a.OwnerFullName,
+                    PercentDiscount = a.PercentDiscount,
+                    VehicleSegmentId = a.VehicleSegmentId,
+                    CardUid = a.CardUid
+                });
+
+            if (FullName != null)
+            {
+                result = result.Where(r => r.OwnerFullName.Contains(FullName));
+            }
+            if (Description != null)
+            {
+                result = result.Where(r => r.Description.Contains(Description));
+            }
+            if (EnLicensePlate != null)
+            {
+                result = result.Where(r => r.EnLicensePlate == EnLicensePlate);
+            }
+            if (PercentDiscount != null)
+            {
+                result = result.Where(r => r.PercentDiscount == PercentDiscount);
+            }
+            if (StartCreateDate != null)
+            {
+                result = result.Where(r => r.CreateDate >= StartCreateDate);
+            }
+            if (EndCreateDate != null)
+            {
+                EndCreateDate = EndCreateDate.Value.AddDays(1);
+                result = result.Where(r => r.CreateDate <= EndCreateDate);
+            }
+            if (CardUid != null)
+            {
+                result = result.Where(r => r.CardUid == CardUid);
+            }
+
+            return (result.Skip((Page - 1) * PageSize).Take(PageSize).ToList(), result.Count(), "جستجو در تاریخچه");
+
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return (new List<AddCardItemModel>(), 0, "خطا در جستجو در تاریخچه");
+        }
+    }
+
+    public Guid? GetTicketIdByBarcode(long barcode)
+    {
+        var ticket = unitOfWork.ParkingTickets.Find(x => x.BarcodeId == barcode).FirstOrDefault();
+        if (ticket is null)
+            return Guid.Empty;
+        return ticket.Id;
+    }
+
+    public List<TicketDescriptionItemModel> GetAllTicketDescriptionItems()
+    {
+        try
+        {
+            var items = unitOfWork.TicketDescriptionItems.GetAll().Select(t => new TicketDescriptionItemModel
+            {
+                Id = t.Id,
+                CreateDate = t.CreateDate,
+                IsQueueEnabled = t.IsQueueEnabled,
+                Text = t.Text
+            }).ToList();
+            return items;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return new List<TicketDescriptionItemModel>();
+        }
+    }
+
+    public TicketDescriptionItemModel? GetTicketDescriptionItemById(int id)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                var model = new TicketDescriptionItemModel
+                {
+                    Id = item.Id,
+                    CreateDate = item.CreateDate,
+                    IsQueueEnabled = item.IsQueueEnabled,
+                    Text = item.Text
+                };
+                return model;
+            }
+            return null;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return null;
+        }
+    }
+
+    public bool AddTicketDescriptionItem(TicketDescriptionItemModel request)
+    {
+        try
+        {
+            TicketDescriptionItem item = new TicketDescriptionItem
+            {
+                CreateDate = DateTime.Now,
+                IsQueueEnabled = request.IsQueueEnabled,
+                Text = request.Text
+            };
+            unitOfWork.TicketDescriptionItems.Add(item);
+            unitOfWork.TicketDescriptionItems.Commit();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(request.Id);
+            if (item != null)
+            {
+                unitOfWork.TicketDescriptionItems.ExecuteUpdate(p => p.Id == request.Id, update => update
+            .SetProperty(p => p.IsQueueEnabled, request.IsQueueEnabled)
+            .SetProperty(p => p.Text, request.Text)
+            );
+                //unitOfWork.TicketDescriptionItems.Update(item);
+                //unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool ChangeTicketDescriptionItemQueueStatus(int id, bool status)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                item.IsQueueEnabled = status;
+                //unitOfWork.TicketDescriptionItems.Update(item);
+                unitOfWork.TicketDescriptionItems.ExecuteUpdate(p => p.Id == id, update => update
+                            .SetProperty(p => p.IsQueueEnabled, status));
+                //_ticketQueueService.SetQueueEnabledAsync(item.Id, status);
+                if (status == true)
+                {
+                    _ticketQueueService.SetResetIntervalAsync(item.Id, 30);
+                }
+                unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public bool DeleteTicketDescriptionItem(int id)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(id);
+            if (item != null)
+            {
+                unitOfWork.TicketDescriptionItems.Delete(item);
+                unitOfWork.TicketDescriptionItems.Commit();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, ex);
+            return false;
+        }
+    }
+
+    public List<string?> GetEntryRegistrars()
+    {
+        return unitOfWork.ParkingTickets.GetAll()
+            .Where(t => !t.IsExited)
+            .Select(t => t.EntranceGate)
+            .Distinct()
+            .ToList();
+    }
+
+    public List<string?> GetExitRegistrars()
+    {
+        return unitOfWork.ParkingTickets.GetAll()
+            .Where(t => t.IsExited)
+            .Select(t => t.ExitGate)
+            .Distinct()
+            .ToList();
+    }
+
+    public async Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request)
+    {
+        var tickets = TicketListBaseQuery();
+
+        if (request.EntryFrom != null)
+            tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
+
+        if (request.EntryTo != null)
+            tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
+
+        if (request.ExitFrom != null)
+            tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
+
+        if (request.ExitTo != null)
+            tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
+
+        if (!string.IsNullOrEmpty(request.EntryRegistrar))
+            tickets = tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
+
+        if (!string.IsNullOrEmpty(request.ExitRegistrar))
+            tickets = tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+
+        var ticketList = await tickets.ToListAsync();
+
+        var result = new TicketSummaryReportModel()
+        {
+            TotalTickets = await tickets.CountAsync(),
+            TotalAmount = Math.Round(await tickets.SumAsync(x => x.TotalAmount), 0),
+            TotalPaidAmount = Math.Round(await tickets.SumAsync(x => x.PaidAmount), 0),
+            CurrentlyInside = await tickets.CountAsync(x => !x.IsExited.Value),
+            TotalCreditPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "NAGHDI"),
+            TotalPosPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "POS"),
+            TotalCreditPaidAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value && x.PaidType == "NAGHDI")
+                .SumAsync(x => x.PaidAmount), 0),
+            TotalPosPaidAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value && x.PaidType == "POS")
+                .SumAsync(x => x.PaidAmount), 0),
+            TotalDiscountAmount = Math.Round(await tickets
+                .Where(x => x.IsPaid.Value)
+                .SumAsync(x => (x.TotalAmount * x.DiscountPercent) / 100), 0),
+            TotalEntries = await tickets.CountAsync(x => !x.IsExited.Value),
+            TotalExits = await tickets.CountAsync(x => x.IsExited.Value)
+        };
+
+
+        return result;
+    }
+
+    public async Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListReportAsync(GetTicketListRequestModel request)
+    {
+        try
+        {
+            IQueryable<TicketsListViewModel> tickets = TicketListBaseQuery();
+
+            tickets = ApplyTicketListFilter(request, tickets);
+
+            var totalCount = tickets.Count();
+
+            var result = await tickets.ToListAsync();
+
+            return (result, totalCount);
+        }
+        catch (Exception)
+        {
+            return (null, 0);
+        }
+    }
+
+    public async Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason)
+    {
+        if (string.IsNullOrWhiteSpace(plate))
+            return (false, false);
+
+        var existingPlate = unitOfWork.SeizedLicensePlates
+            .FirstOrDefault(x => x.EnLicensePlate == plate);
+
+        if (existingPlate != null)
+            return (true, false);
+
+        var parsePlate = plate.ParsePlate();
+        var seizedPlate = new SeizedLicensePlate
+        {
+            CreatorUserId = TokenStore.UserId,
+            CreateDate = DateTime.Now,
+            SeizedReason = reason,
+            EnLicensePlate = plate,
+            FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ")
+      + parsePlate.LeftTwoDigits
+    : parsePlate.OriginalPlate
+        };
+
+        await unitOfWork.SeizedLicensePlates.AddAsync(seizedPlate);
+        return (false, true);
+    }
 }

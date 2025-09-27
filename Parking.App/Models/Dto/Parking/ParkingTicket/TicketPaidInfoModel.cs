@@ -20,4 +20,5 @@ public class TicketPaidInfoModel
     public bool IsMissingCard { get; set; }
     public long? CardUid { get; set; }
     public Guid? ExitRegistrarUserId { get; set; }
+    public decimal? TotalAmount { get; set; }
 }

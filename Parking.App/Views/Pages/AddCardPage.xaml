@@ -82,6 +82,23 @@
                     <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
                         <DockPanel>
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <ui:TextBox MinWidth="180" 
+                                            PlaceholderText="کد ملی" 
+                                            Text="{Binding OwnerNationalCode, Mode=TwoWay}" />
+                                <Separator Margin="2 0"/>
+                                <ui:TextBox MinWidth="150" 
+                                            PlaceholderText="شماره همراه" 
+                                            Text="{Binding OwnerPhoneNumber, Mode=TwoWay}" />
+                            </StackPanel>
+                           
+                            <TextBlock DockPanel.Dock="Left" Margin="5"  Text="کد ملی / شماره همراه" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
+                    <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                                 <ui:TextBox MinWidth="80" 
                                     PlaceholderText="0" 
                                     x:Name="PercentDiscountTextBox"        
@@ -99,7 +116,8 @@
                                 <ui:TextBox MinWidth="80" 
                                             x:Name="ValidityPeriodTextBox"
                                         PlaceholderText="3650" 
-                                        Text="{Binding ValidityPeriod, Mode=TwoWay}" />
+                                        Text="{Binding ValidityPeriod, Mode=TwoWay}" 
+                                            TextChanged="TextBox_TextChanged" />
                                 <TextBlock Text="روز"  VerticalAlignment="Center"/>
                             </StackPanel>
                             <TextBlock DockPanel.Dock="Left" Margin="5"  Text="مدت اعتبار" VerticalAlignment="Center"/>

@@ -1,8 +1,5 @@
-﻿
-
-
-using Parking.Domain.Entities.Parkings;
-using System.ComponentModel.DataAnnotations;
+﻿using Parking.Domain.Entities.Parkings;
+using Parking.Domain.General;
 
 namespace Parking.App.Models.Dto.Vehicle.VehicleSegment;
 
@@ -15,6 +12,7 @@ public class VehicleSegmentModel
     public string? Image { get; set; }
     public Guid? CreatorUserId { get; set; }
     public int ParkingLotId { get; set; }
+    public PlateType PlateType { get; set; }
     /// <summary>
     /// مبلغ ثابت ورودی پارکینگ.
     /// </summary>

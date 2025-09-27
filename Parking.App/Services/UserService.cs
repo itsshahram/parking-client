@@ -89,6 +89,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                     UserName = item.UserName,
                     RoleFaName = role?.FaName,
                     RoleEnName = role?.Name,
+                    RoleId = role?.Id,
                 });
             }
             return result;
@@ -192,6 +193,30 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return false;
         }
     }
+    public async Task<(bool IsSuccess, bool IsExist)> CreateUser(ApplicationUser user, string role, string password)
+    {
+        try
+        {
+            var isExsist = await _usermanager.FindByEmailAsync(user.UserName);
+            if (isExsist != null)
+                return (false, true);
+            var result = await _usermanager.CreateAsync(user, password);
+            if (!result.Succeeded)
+                return (false, false);
+
+            var roleResult = await _usermanager.AddToRoleAsync(user, role);
+            if (!roleResult.Succeeded)
+                return (false, false);
+
+            return (true, false);
+        }
+        catch (Exception ex)
+        {
+            return (false, false);
+        }
+    }
+
+
 
     public bool UpdateUser(ApplicationUser user)
     {
@@ -225,5 +250,11 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
         await _usermanager.UpdateAsync(existingUser);
 
         return true;
+    }
+
+    public async Task<ApplicationUserRole?> GetUserRole(Guid UserId)
+    {
+        var userRole = await _unitOfWork.ExecuteRawQueryAsync<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", UserId);
+        return userRole.FirstOrDefault();
     }
 }

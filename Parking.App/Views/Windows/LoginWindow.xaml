@@ -44,6 +44,10 @@
                 <TextBlock Text="رمز عبور" />
                 <ui:PasswordBox x:Name="passwordBox" TextChanged="passwordBox_TextChanged" FlowDirection="LeftToRight"/>
             </StackPanel>
+            <StackPanel Width="300" Margin="5">
+                <CheckBox x:Name="chkRemember" Content="مرا به خاطر بسپار"
+                  Grid.Row="2" Margin="0,15,0,0"/>
+            </StackPanel>
             <Grid >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -53,16 +57,15 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <ui:Button   Grid.Column="1"      Grid.Row="0" 
+                <ui:Button  Grid.Column="1" Grid.Row="0" 
                                            x:Name="LoginBtn"
-                                 Click="LoginBtn_Click"
-                             
+                                           Click="LoginBtn_Click" 
                                            IsEnabled="False" 
                                            Icon="{ui:SymbolIcon Symbol=AppFolder24}" 
                                            Content="ورود" 
                                            Height="40" 
                                            Margin="10 0"
-                               Appearance="Success"
+                                           Appearance="Success"
                                            HorizontalAlignment="Stretch"/>
                 <ui:Button Appearance="Transparent"  Grid.Column="0"     Grid.Row="0" 
                                x:Name="ExitBtn"
@@ -88,7 +91,7 @@
                     <ui:TextBlock DockPanel.Dock="Left"  Text="دریافت لیست گروه ها" />
                 </DockPanel>
             </StackPanel>
-            
+
         </StackPanel>
 
     </StackPanel>

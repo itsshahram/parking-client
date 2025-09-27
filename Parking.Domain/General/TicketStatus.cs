@@ -6,3 +6,9 @@ public enum TicketStatus
     Synced = 1
 }
 
+public enum VehicleStatus
+{
+    Entered,
+    Exited
+}
+

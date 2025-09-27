@@ -45,9 +45,14 @@ public static class LicensePlateHelper
     }
     public static string ConvertEnCharToFaCharIndex(this string character)
     {
-        int index = charclassnames_en.ToList().IndexOf(character);
+        if (character.Length > 0)
+        {
+            int index = charclassnames_en.ToList().IndexOf(character);
 
-        return charclassnames_fa[index];
+            return charclassnames_fa[index];
+        }
+        return string.Empty;
+
     }
     public static List<LicensePlateStringModel> GetChars()
     {

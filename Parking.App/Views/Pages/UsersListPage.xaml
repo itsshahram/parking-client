@@ -1,43 +1,60 @@
 ﻿<Page x:Class="Parking.App.Views.Pages.UsersListPage"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Parking.App.Views.Pages"
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:components="clr-namespace:Parking.App.Views.Components"
-        FontFamily="{StaticResource IranYekanFont}"  
-        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-        mc:Ignorable="d"
-        Title="UsersListPage" d:DesignHeight="450" d:DesignWidth="800">
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:local="clr-namespace:Parking.App.Views.Pages"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:components="clr-namespace:Parking.App.Views.Components"
+      xmlns:helpers="clr-namespace:Parking.App.Helpers"
+      FontFamily="{StaticResource IranYekanFont}"  
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      mc:Ignorable="d"
+      Title="UsersListPage" d:DesignHeight="450" d:DesignWidth="800">
+
     <StackPanel FlowDirection="RightToLeft" Margin="10">
-        <TextBlock Text="لیست کاربران" Grid.Row="0"  FontWeight="Bold" FontSize="15"    Margin="10"  />
-        
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="لیست کاربران" FontWeight="Bold" FontSize="15" Margin="10 0"/>
+
+            <ui:Button Content="افزودن کاربر" 
+                       Click="AddUser_Click" 
+                       Margin="10 0"
+                       helpers:PermissionBehavior.Permission="UserAdd"/>
+        </StackPanel>
+
         <ui:DataGrid x:Name="UsersDataGrid"  
                      Margin="0 10" 
                      FlowDirection="RightToLeft" 
-                     AutoGenerateColumns="False" IsReadOnly="True" 
+                     AutoGenerateColumns="False" 
+                     IsReadOnly="True" 
                      ItemsSource="{Binding Items, Mode=OneWay}"
-                             CanUserAddRows="False">
+                     CanUserAddRows="False">
+
             <ui:DataGrid.Columns>
                 <DataGridTextColumn Header="نام" Binding="{Binding Firstname, Mode=OneWay}" />
                 <DataGridTextColumn Header="نام خانوادگی" Binding="{Binding Lastname, Mode=OneWay}" />
                 <DataGridTextColumn Header="نام کاربری" Binding="{Binding UserName, Mode=OneWay}" />
                 <DataGridTextColumn Header="نقش" Binding="{Binding RoleFaName, Mode=OneWay}" />
                 <DataGridCheckBoxColumn Header="فعال" 
-                        Binding="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        Binding="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridTemplateColumn Header="عملیات">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <ui:Button Content="تغییر رمز عبور" Click="ChangePassword_Click" Margin="5 0"/>
-                                <!--<ui:Button Appearance="Danger" Icon="{ui:SymbolIcon Symbol=Delete16}" />-->
+                                <ui:Button Content="تغییر رمز عبور" 
+                                           Click="ChangePassword_Click" 
+                                           Margin="5 0"
+                                           helpers:PermissionBehavior.Permission="UserChangePassword"/>
+                                <ui:Button Content="تخصیص نقش"
+                                           Command="{Binding DataContext.AssignRoleCommand,
+                                    RelativeSource={RelativeSource AncestorType=Page}}"
+                                           CommandParameter="{Binding}" 
+                                           Margin="5 0"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </ui:DataGrid.Columns>
         </ui:DataGrid>
-
     </StackPanel>
 </Page>

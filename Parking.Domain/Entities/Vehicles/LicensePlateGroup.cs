@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Parking.Domain.Entities.Vehicles;
 
@@ -19,4 +14,5 @@ public class LicensePlateGroup
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public Guid CreatorUserId { get; set; }
+    public virtual List<LicensePlate>? LicensePlates { get; set; }
 }

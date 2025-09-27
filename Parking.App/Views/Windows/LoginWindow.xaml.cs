@@ -1,6 +1,4 @@
-﻿
-using Microsoft.VisualBasic.ApplicationServices;
-using Parking.App.Models.GeneralServiceResponse;
+﻿using Parking.App.Models.GeneralServiceResponse;
 using Parking.Domain.Entities.User;
 
 
@@ -15,6 +13,7 @@ namespace Parking.App.Views.Windows
         private readonly IUserService? _userService;
         private readonly ISynchronizationService? _synchronizationService;
         private readonly IParkingService? _parkingService;
+        private readonly IRoleService _roleService;
         private readonly ILogger<LoginWindow> _logger;
 
         public LoginWindow()
@@ -25,6 +24,25 @@ namespace Parking.App.Views.Windows
             _logger = App.GetService<ILogger<LoginWindow>>();
             _userService = App.GetService<IUserService>();
             _parkingService = App.GetService<IParkingService>();
+            _roleService = App.GetService<IRoleService>();
+            ContentRendered += LoginWindow_ContentRendered;
+        }
+
+        private void LoginWindow_ContentRendered(object sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var creds = LoadCredentials();
+
+                if (creds != null)
+                {
+                    usernameBox.Text = creds.Value.Username;
+                    passwordBox.Password = creds.Value.Password;
+
+                    Login();
+                }
+            }), DispatcherPriority.ApplicationIdle);
+
         }
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
@@ -41,7 +59,6 @@ namespace Parking.App.Views.Windows
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in LoginBtn_Click");
-
             }
         }
 
@@ -89,13 +106,22 @@ namespace Parking.App.Views.Windows
             ExitBtn.IsEnabled = false;
             LoginBtn.IsEnabled = false;
             LoginProgressBar.Visibility = Visibility.Visible;
+            bool rememberMe = chkRemember.IsChecked.Value;
+
             if (CheckUsers())
             {
                 if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
                 {
+                    //if (!IsInternetAvailable())
+                    //{
+                    //    Settings.Default.Application_Sync_Enable = false;
+                    //    Settings.Default.Save();
+                    //}
+
                     var username = usernameBox.Text;
                     var pasword = passwordBox.Password;
                     var result = _userService?.Login(username, pasword);
+
 
                     if (result == Domain.General.LoginStatus.NotActice)
                     {
@@ -123,6 +149,11 @@ namespace Parking.App.Views.Windows
 
                     if (result == Domain.General.LoginStatus.Success && syncStatus)
                     {
+                        if (rememberMe is true)
+                            SaveCredentials(username, pasword);
+
+
+
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
                         if (parking.Succeeded)
@@ -133,10 +164,21 @@ namespace Parking.App.Views.Windows
                         TokenStore.Username = username;
                         TokenStore.RoleName = _userService.GetUserRoleByUserId(user.Id);
                         TokenStore.UserId = user.Id;
+
+                        var role = await _roleService.GetRoleByName(TokenStore.RoleName);
+
+                        var rolePermissions = await _roleService.GetRolePermissions(role.Id);
+                        var userPermissions = await _roleService.GetUserPermissions(role.Id, user.Id);
+
+                        var permissions = rolePermissions.Select(x => x.Permission.Name)
+                                                         .Concat(userPermissions.Select(x => x.Permission.Name))
+                                                         .Distinct();
+                        TokenStore.DeletePermissions();
+                        TokenStore.SetPermissions(permissions);
+
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
                         SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
-
 
                         mainWindow?.Show();
                         this.Close();
@@ -162,11 +204,14 @@ namespace Parking.App.Views.Windows
                     var result = await _synchronizationService?.CheckTokenAsync(username, pasword);
                     if (result.Succeeded)
                     {
+
+                        if (rememberMe is true)
+                            SaveCredentials(username, pasword);
+
                         var syncResult = await StartSyncJobs();
 
                         if (syncResult)
                         {
-
                             var mainWindow = App.GetService<MainWindow>();
                             Application.Current.MainWindow = mainWindow;
                             SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
@@ -219,6 +264,7 @@ namespace Parking.App.Views.Windows
             }
             ExitBtn.IsEnabled = true;
             LoginBtn.IsEnabled = true;
+            passwordBox.Text = "";
             LoginProgressBar.Visibility = Visibility.Collapsed;
         }
         private bool CheckUsers() => _userManager.Users.Any();
@@ -349,6 +395,43 @@ namespace Parking.App.Views.Windows
             };
         }
 
+        public static void SaveCredentials(string username, string password)
+        {
+            Directory.CreateDirectory(Constants.AppDataFolder);
+            byte[] key = GetOrCreateKey();
+            string combined = $"{username}:{password}";
+            byte[] encrypted = AesEncryption.Encrypt(combined, key);
+            File.WriteAllBytes(Constants.CredentialsPath, encrypted);
+        }
+
+
+        public static (string Username, string Password)? LoadCredentials()
+        {
+            if (!File.Exists(Constants.CredentialsPath))
+                return null;
+
+            byte[] key = GetOrCreateKey();
+            byte[] encrypted = File.ReadAllBytes(Constants.CredentialsPath);
+            string decrypted = AesEncryption.Decrypt(encrypted, key);
+
+
+            string[] parts = decrypted.Split(':');
+            if (parts.Length == 2)
+                return (parts[0].Trim(), parts[1].Trim());
+
+            return null;
+        }
+
+        private static byte[] GetOrCreateKey()
+        {
+            if (!File.Exists(Constants.KeyPath))
+            {
+                var key = AesEncryption.GenerateKey();
+                AesEncryption.SaveKey(key, Constants.KeyPath);
+                return key;
+            }
+            return AesEncryption.LoadKey(Constants.KeyPath);
+        }
         private enum JobState
         {
             None, Syncing, Success, Failed

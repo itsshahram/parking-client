@@ -13,10 +13,10 @@ public interface IUserService
     ApplicationUser GetUserById(Guid id);
     string GetUserRoleByUserId(Guid userId);
     ApplicationUser GetUserByUsername(string username);
+    Task<(bool IsSuccess, bool IsExist)> CreateUser(ApplicationUser user, string role, string password);
     bool UpdateUser(ApplicationUser user);
     bool DeleteUser(Guid id);
     bool ChangePassword(Guid id, string newPassword);
+    Task<ApplicationUserRole?> GetUserRole(Guid UserId);
     Task<bool> ChangeStaus(Guid id, bool status);
-
-
 }

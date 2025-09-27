@@ -10,5 +10,7 @@ public class ApplicationRole : IdentityRole<Guid>
     }
     public required string FaName { get; set; }
 
+    public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+
 }
 

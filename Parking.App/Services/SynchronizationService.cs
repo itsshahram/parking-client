@@ -1,13 +1,10 @@
-﻿using Parking.App.Models;
-using Parking.App.Models.Dto.Parking.ParkingLot;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
+﻿using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingTicketExtraImage;
 using Parking.App.Models.Dto.User;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
 using Parking.App.Models.Login;
 using Parking.Domain.Entities.Parkings;
-using Parking.Domain.Entities.ParkingTicket;
 using Parking.Domain.Entities.User;
 using Parking.Domain.Entities.Vehicles;
 using Parking.Domain.General;
@@ -143,7 +140,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         Message = "نام کاربری یا رمز عبور اشتباه است"
                     };
                 }
-
+                    
             }
             else
             {
@@ -1029,10 +1026,14 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             else
                             {
                                 licensePlate = unitOfWork.LicensePlates.GetById(subitem.Id);
-                                licensePlate.GroupId = subitem.GroupId;
-                                licensePlate.EnLicensePlate = subitem.EnLicensePlate;
-                                licensePlate.FaLicensePlate = subitem.FaLicensePlate;
-                                unitOfWork.LicensePlates.Update(licensePlate);
+                                if (licensePlate != null)
+                                {
+                                    licensePlate.GroupId = subitem.GroupId;
+                                    licensePlate.EnLicensePlate = subitem.EnLicensePlate;
+                                    licensePlate.FaLicensePlate = subitem.FaLicensePlate;
+                                    unitOfWork.LicensePlates.Update(licensePlate);
+                                }
+
                                 //await unitOfWork.CommitAsync(default);
                             }
                         }
@@ -1071,11 +1072,15 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             else
                             {
                                 licensePlate = unitOfWork.LicensePlates.GetById(subitem.Id);
-                                licensePlate.GroupId = subitem.GroupId;
-                                licensePlate.EnLicensePlate = subitem.EnLicensePlate;
-                                licensePlate.FaLicensePlate = subitem.FaLicensePlate;
-                                unitOfWork.LicensePlates.Update(licensePlate);
-                                //await unitOfWork.CommitAsync(default);
+                                if (licensePlate != null)
+                                {
+                                    licensePlate.GroupId = subitem.GroupId;
+                                    licensePlate.EnLicensePlate = subitem.EnLicensePlate;
+                                    licensePlate.FaLicensePlate = subitem.FaLicensePlate;
+                                    unitOfWork.LicensePlates.Update(licensePlate);
+                                    //await unitOfWork.CommitAsync(default);
+
+                                }
                             }
                         }
                     }
@@ -1200,6 +1205,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         segment.ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay;
                         segment.ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays;
                         segment.DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold;
+                        segment.PlateType = vehicleSegment.PlateType;
                         segment.Image = vehicleSegment.Image;
                         unitOfWork.VehicleSegments.Update(segment);
                         //unitOfWork.Commit();
@@ -1225,7 +1231,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold,
                             TaxPercentage = vehicleSegment.TaxPercentage,
                             ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay,
-                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays
+                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays,
+                            PlateType = vehicleSegment.PlateType,
                         };
 
                         unitOfWork.VehicleSegments.Add(vs);
@@ -1320,8 +1327,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         segment.ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays;
                         segment.DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold;
                         segment.Image = vehicleSegment.Image;
+                        segment.PlateType = vehicleSegment.PlateType;
                         unitOfWork.VehicleSegments.Update(segment);
-                        //await unitOfWork.CommitAsync(default);
 
                         foreach (var item in vehicleSegment.VehicleSegmentPrices)
                         {
@@ -1344,11 +1351,11 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             DailyPriceAfterCrossingThreshold = vehicleSegment.DailyPriceAfterCrossingThreshold,
                             TaxPercentage = vehicleSegment.TaxPercentage,
                             ThresholdHoursPerDay = vehicleSegment.ThresholdHoursPerDay,
-                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays
+                            ThresholdNumberOfDays = vehicleSegment.ThresholdNumberOfDays,
+                            PlateType = vehicleSegment.PlateType
                         };
 
                         unitOfWork.VehicleSegments.Add(vs);
-                        //await unitOfWork.CommitAsync(default);
 
                         foreach (var item in vehicleSegment.VehicleSegmentPrices)
                         {
@@ -1356,7 +1363,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         }
                     }
                     var vehicleSegmentsResult = CreateVehicleSegmentsPrice(pricesList);
-
 
 
                     foreach (var variable in vehicleSegment.VehicleSegmentVariablePrices)
@@ -1374,7 +1380,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 variablePrice.Price = variable.Price;
 
                                 unitOfWork.ParkingVehicleSegmentVariablePrices.Update(variablePrice);
-                                //await unitOfWork.CommitAsync(default);
                             }
                             else
                             {
@@ -1388,21 +1393,23 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                     Price = variable.Price
                                 };
                                 unitOfWork.ParkingVehicleSegmentVariablePrices.Add(newVariablePrice);
-                                //await unitOfWork.CommitAsync(default);
                             }
                         }
                         catch (Exception ex)
                         {
                             Console.Write(ex.Message);
                         }
-
                     }
-
-
                 }
-
-
             }
+
+
+            if (result != null && result.Data != null)
+            {
+                await unitOfWork.VehicleSegments.ExecuteDeleteAsync(x =>
+                !result.Data.Select(y => y.Id).Contains(x.Id));
+            }
+
             return new TServiceResponse<bool>(true, "عملیات موفق", true);
         }
         catch (Exception ex)
@@ -1418,9 +1425,16 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var localUnsyncedTickets = unitOfWork
-                .ParkingTickets
-                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+
+            var query = unitOfWork.ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced);
+
+            bool syncAllDeviceTickets = Settings.Default.Application_Sync_AllDeviceTickets;
+
+            if (!syncAllDeviceTickets)
+                query = query.Where(p => p.DeviceId == Settings.Default.Application_DeviceId);
+
+            var localUnsyncedTickets = query
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .ToList();
 
@@ -1476,8 +1490,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     if (result?.StatusCode == 200)
                     {
                         unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == ticket.Id, update => update
-                                        .SetProperty(ticket => ticket.TicketStatus, ticket => TicketStatus.Synced)
-                                       .SetProperty(ticket => ticket.StartImage, ticket => null));
+                                        .SetProperty(ticket => ticket.TicketStatus, ticket => TicketStatus.Synced));
                         //unitOfWork.Commit();
                     }
                 }
@@ -1496,11 +1509,18 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
     {
         try
         {
-            var localUnsyncedTickets = unitOfWork
-                .ParkingTickets
-                .Find(p => p.TicketStatus == TicketStatus.Unsynced && p.DeviceId == Settings.Default.Application_DeviceId)
+            var query = unitOfWork.ParkingTickets
+                .Find(p => p.TicketStatus == TicketStatus.Unsynced);
+
+            bool syncAllDeviceTickets = Settings.Default.Application_Sync_AllDeviceTickets;
+
+            if (!syncAllDeviceTickets)
+                query = query.Where(p => p.DeviceId == Settings.Default.Application_DeviceId);
+
+            var localUnsyncedTickets = query
                 .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .ToList();
+
             foreach (var ticket in localUnsyncedTickets)
             {
                 SyncTicketRequestModel requestInfo = new SyncTicketRequestModel()
@@ -1514,7 +1534,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     DurationMinutes = ticket.DurationMinutes,
                     EndTime = ticket.EndTime,
                     EnLicensePlate = ticket.EnLicensePlate,
-                    ExitImage = ticket.ExitImage,
                     IsPaid = ticket.IsPaid,
                     LicensePlate = ticket.LicensePlate,
                     PaidAmount = ticket.PaidAmount,
@@ -1546,7 +1565,10 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 {
                     requestInfo.StartImage = ticket.StartImage;
                 }
-
+                if (ticket?.ExitImage?.Length > 5 && !ticket.ExitImage.StartsWith("http"))
+                {
+                    requestInfo.ExitImage = ticket.ExitImage;
+                }
                 var client = httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
                 var response = await client.PostAsJsonAsync($"{TokenStore.BaseUrl}/Ticket/sync-ticket", requestInfo);
@@ -1559,8 +1581,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     if (result?.StatusCode == 200)
                     {
                         unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == ticket.Id, update => update
-                                        .SetProperty(ticket => ticket.TicketStatus, ticket => TicketStatus.Synced)
-                                       .SetProperty(ticket => ticket.StartImage, ticket => null));
+                                        .SetProperty(ticket => ticket.TicketStatus, ticket => TicketStatus.Synced));
                         //await unitOfWork.CommitAsync(default);
                     }
                 }
@@ -1581,7 +1602,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var tickets = unitOfWork.ParkingTickets.Find(p => p.StartImage == null && p.TicketStatus == TicketStatus.Synced).Take(Settings.Default.Application_Sync_Interval_CountOfTake)
+            var tickets = unitOfWork.ParkingTickets
+                .Find(p => p.StartImage.Length > 10 && !p.StartImage.StartsWith("http") && p.TicketStatus == TicketStatus.Synced)
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .Select(p => new { p.Id }).ToList();
             foreach (var item in tickets)
             {
@@ -1589,31 +1612,32 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
                 if (result?.Data != null)
                 {
-                    if (!unitOfWork.ParkingTicketImages.Find(t => t.TicketId == item.Id).Any())
-                    {
-                        unitOfWork.ParkingTicketImages.Add(new ParkingTicketImage
-                        {
-                            TicketId = item.Id,
-                            CreateDateTime = DateTime.Now,
-                            EntryImageAddress = result.Data
-                        });
-                        //unitOfWork.Commit();
+                    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                                update => update
+                                .SetProperty(ticket => ticket.StartImage, ticket => result.Data)
+                                );
+                    //if (!unitOfWork.ParkingTicketImages.Find(t => t.TicketId == item.Id).Any())
+                    //{
+                    //    unitOfWork.ParkingTicketImages.Add(new ParkingTicketImage
+                    //    {
+                    //        TicketId = item.Id,
+                    //        CreateDateTime = DateTime.Now,
+                    //        EntryImageAddress = result.Data
+                    //    });
+                    //    //unitOfWork.Commit();
 
 
-                        unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                            update => update
-                            .SetProperty(ticket => ticket.StartImage, ticket => "0")
-                            );
-                        //unitOfWork.Commit();
-                    }
-                    else
-                    {
-                        unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                                                update => update
-                                                .SetProperty(ticket => ticket.StartImage, ticket => "0")
-                                                );
-                        //unitOfWork.Commit();
-                    }
+
+                    //    //unitOfWork.Commit();
+                    //}
+                    //else
+                    //{
+                    //    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                    //                            update => update
+                    //                            .SetProperty(ticket => ticket.StartImage, ticket => "0")
+                    //                            );
+                    //    //unitOfWork.Commit();
+                    //}
 
                 }
             }
@@ -1631,9 +1655,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var tickets = unitOfWork.ParkingTicketImages.Find(p => p.ExitImageAddress == null)
-                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
-                .Select(p => new { Id = p.TicketId }).ToList();
+            var tickets = unitOfWork.ParkingTickets
+                .Find(p => p.ExitImage != null && !p.ExitImage.StartsWith("http"))
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake).ToList();
             foreach (var item in tickets)
             {
                 var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-exit-image/{item.Id}").Result;
@@ -1642,14 +1666,18 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 {
                     if (result?.Data != null)
                     {
-                        unitOfWork.ParkingTicketImages.ExecuteUpdate(g => g.TicketId == item.Id,
-                                    update => update
-                                    .SetProperty(image => image.ExitImageAddress, image => result.Data)
-                                    );
                         unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                            update => update
-                            .SetProperty(ticket => ticket.ExitImage, ticket => "0")
-                            );
+                                                    update => update
+                                                    .SetProperty(ticket => ticket.ExitImage, ticket => result.Data)
+                                                    );
+                        //unitOfWork.ParkingTicketImages.ExecuteUpdate(g => g.TicketId == item.Id,
+                        //            update => update
+                        //            .SetProperty(image => image.ExitImageAddress, image => result.Data)
+                        //            );
+                        //unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                        //    update => update
+                        //    .SetProperty(ticket => ticket.ExitImage, ticket => "0")
+                        //    );
                     }
                 }
 
@@ -1668,7 +1696,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
-            var tickets = unitOfWork.ParkingTickets.Find(p => p.StartImage == null && p.TicketStatus == TicketStatus.Synced).Take(Settings.Default.Application_Sync_Interval_CountOfTake)
+            var tickets = unitOfWork.ParkingTickets
+                 .Find(p => p.StartImage.Length > 10 && !p.StartImage.StartsWith("http") && p.TicketStatus == TicketStatus.Synced)
+                .Take(Settings.Default.Application_Sync_Interval_CountOfTake)
                 .Select(p => new { Id = p.Id }).ToList();
             foreach (var item in tickets)
             {
@@ -1676,31 +1706,35 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
                 if (result?.Data != null)
                 {
-                    if (!unitOfWork.ParkingTicketImages.Find(t => t.TicketId == item.Id).Any())
-                    {
-                        unitOfWork.ParkingTicketImages.Add(new ParkingTicketImage
-                        {
-                            TicketId = item.Id,
-                            CreateDateTime = DateTime.Now,
-                            EntryImageAddress = result.Data
-                        });
-                        //await unitOfWork.CommitAsync(default);
+                    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+            update => update
+            .SetProperty(ticket => ticket.StartImage, ticket => result.Data)
+            );
+                    //if (!unitOfWork.ParkingTicketImages.Find(t => t.TicketId == item.Id).Any())
+                    //{
+                    //    unitOfWork.ParkingTicketImages.Add(new ParkingTicketImage
+                    //    {
+                    //        TicketId = item.Id,
+                    //        CreateDateTime = DateTime.Now,
+                    //        EntryImageAddress = result.Data
+                    //    });
+                    //    //await unitOfWork.CommitAsync(default);
 
 
-                        unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                            update => update
-                            .SetProperty(ticket => ticket.StartImage, ticket => "0")
-                            );
-                        //await unitOfWork.CommitAsync(default);
-                    }
-                    else
-                    {
-                        unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                                                update => update
-                                                .SetProperty(ticket => ticket.StartImage, ticket => "0")
-                                                );
-                        //await unitOfWork.CommitAsync(default);
-                    }
+                    //    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                    //        update => update
+                    //        .SetProperty(ticket => ticket.StartImage, ticket => "0")
+                    //        );
+                    //    //await unitOfWork.CommitAsync(default);
+                    //}
+                    //else
+                    //{
+                    //    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
+                    //                            update => update
+                    //                            .SetProperty(ticket => ticket.StartImage, ticket => "0")
+                    //                            );
+                    //    //await unitOfWork.CommitAsync(default);
+                    //}
 
                 }
             }
@@ -1736,8 +1770,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             return false;
         }
     }
-
-
 
     public async Task SyncTicketExtraImagesAsync()
     {

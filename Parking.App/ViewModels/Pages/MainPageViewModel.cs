@@ -1,14 +1,39 @@
-﻿
-
-using Parking.App.Models;
-using Parking.App.Models.Tickets;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace Parking.App.ViewModels.Pages;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
+    private readonly IParkingService _parkingService;
+    public MainPageViewModel()
+    {
+
+        LatestEntryListItems = new ObservableCollection<TicketsListViewModel>();
+        LatestExitedListItems = new ObservableCollection<TicketsListViewModel>();
+        _parkingService = App.GetService<IParkingService>();
+
+        //if (!string.IsNullOrEmpty(saved))
+        //{
+        //    foreach (var desc in saved.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        //        Descriptions.Add(desc.Trim());
+        //}
+
+        //Descriptions.Insert(0, "توضیحات دلخواه");
+        LoadDescriptions();
+    }
+    private void LoadDescriptions()
+    {
+        var items = _parkingService.GetAllTicketDescriptionItems();
+        Descriptions.Clear();
+        Descriptions.Add(new TicketDescriptionItemModel { Id = 0, IsQueueEnabled = false, CreateDate = DateTime.Now, Text = "توضیحات دلخواه" });
+
+        SelectedDescription = Descriptions.FirstOrDefault();
+
+        foreach (var item in items)
+        {
+            Descriptions.Add(item);
+        }
+    }
     private ComboBoxItem _selectedVehicleSegmentItem;
     public ComboBoxItem SelectedVehicleSegmentItem
     {
@@ -75,6 +100,56 @@ public class MainPageViewModel : INotifyPropertyChanged
         }
     }
 
+    private string _ticketDescription;
+    public string TicketDescription
+    {
+        get => _ticketDescription;
+        set
+        {
+            if (_ticketDescription != value)
+            {
+                _ticketDescription = value;
+                OnPropertyChanged(nameof(TicketDescription));
+            }
+        }
+    }
+
+
+    private ObservableCollection<TicketDescriptionItemModel> _descriptions = new ObservableCollection<TicketDescriptionItemModel>();
+    public ObservableCollection<TicketDescriptionItemModel> Descriptions
+    {
+        get => _descriptions;
+        set { _descriptions = value; OnPropertyChanged(nameof(Descriptions)); }
+    }
+
+    private TicketDescriptionItemModel _selectedDescription;
+    public TicketDescriptionItemModel SelectedDescription
+    {
+        get => _selectedDescription;
+        set
+        {
+            if (_selectedDescription != value)
+            {
+                _selectedDescription = value;
+                OnPropertyChanged(nameof(SelectedDescription));
+
+                IsCustomDescriptionVisible = _selectedDescription.Id == 0;
+
+                if (!IsCustomDescriptionVisible)
+                {
+                    TicketDescription = _selectedDescription.Text;
+                }
+            }
+        }
+    }
+
+    private bool _isCustomDescriptionVisible;
+    public bool IsCustomDescriptionVisible
+    {
+        get => _isCustomDescriptionVisible;
+        set { _isCustomDescriptionVisible = value; OnPropertyChanged(nameof(IsCustomDescriptionVisible)); }
+    }
+
 
     private ObservableCollection<TicketsListViewModel> latestEntryListItems;
     public ObservableCollection<TicketsListViewModel> LatestEntryListItems
@@ -106,12 +181,5 @@ public class MainPageViewModel : INotifyPropertyChanged
     protected virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public MainPageViewModel()
-    {
-
-        LatestEntryListItems = new ObservableCollection<TicketsListViewModel>();
-        LatestExitedListItems = new ObservableCollection<TicketsListViewModel>();
     }
 }

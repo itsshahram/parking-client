@@ -1,4 +1,6 @@
-﻿using Parking.App.Models.Dto.User;
+﻿using Parking.App.Attributes;
+using Parking.App.Models.Dto.User;
+using Parking.Domain.Entities.User;
 using System.ComponentModel;
 using Button = Wpf.Ui.Controls.Button;
 
@@ -13,18 +15,14 @@ namespace Parking.App.Views.Pages
         private UsersListPageViewModel ViewModel { get; set; } = new();
         private readonly Logger<UsersListPage> logger;
         private readonly IUserService _userService;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         public UsersListPage()
         {
+            InitializeComponent();
             DataContext = ViewModel;
             _userService = App.GetService<IUserService>();
-            var item = _userService.GetAllUsersAsync().Result;
-            
-            ViewModel.Items = new ObservableCollection<UserListItemModel>(item);
-            foreach (var user in ViewModel.Items)
-            {
-                user.PropertyChanged += User_PropertyChanged;
-            }
-            InitializeComponent();
+
+            _ = LoadUsersAsync();
         }
         private async void User_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -35,8 +33,11 @@ namespace Parking.App.Views.Pages
                 {
                     try
                     {
-                        await _userService.ChangeStaus(user.Id, user.IsActive);
-                        ShowMessage("موفقیت", $"وضعیت کاربر {user.UserName} بروزرسانی شد.");
+                        if (user.Id != TokenStore.UserId)
+                        {
+                            await _userService.ChangeStaus(user.Id, user.IsActive);
+                            ShowMessage("موفقیت", $"وضعیت کاربر {user.UserName} بروزرسانی شد.");
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -46,7 +47,29 @@ namespace Parking.App.Views.Pages
             }
         }
 
+        private async Task LoadUsersAsync()
+        {
+            try
+            {
+                var users = await _userService.GetAllUsersAsync();
 
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ViewModel.Items.Clear(); 
+                    foreach (var user in users)
+                    {
+                        user.PropertyChanged += User_PropertyChanged;
+                        ViewModel.Items.Add(user);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("خطا", $"خطا در بارگذاری کاربران: {ex.Message}");
+            }
+        }
+
+        [RequiresPermission("UserChangePassword","تغییر رمز عبور")]
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -89,6 +112,40 @@ namespace Parking.App.Views.Pages
             catch
             {
                 System.Windows.MessageBox.Show(message, title);
+            }
+        }
+
+        [RequiresPermission("UserAdd","ایجاد کاربر")]
+        private async void AddUser_Click(object sender, RoutedEventArgs e)
+        {
+            var addUserWindow = new AddUserWindow();
+            addUserWindow.Owner = Application.Current.MainWindow;
+
+            if (addUserWindow.ShowDialog() == true)
+            {
+                var newUser = addUserWindow.ViewModel;
+
+
+                var result = await _userService.CreateUser(new ApplicationUser()
+                {
+                    Firstname = newUser.FirstName,
+                    Lastname = newUser.LastName,
+                    UserName = newUser.Username,
+                    IsActive = true,
+                    RegisterDate = DateTime.Now,
+                }, newUser.Role, newUser.Password);
+
+                if (result.IsExist)
+                {
+                    ShowMessage("خطا", $"کاربر {newUser.Username} از قبل ثبت شده است");
+                    return;
+                }
+
+
+                await LoadUsersAsync();
+
+                ShowMessage("موفقیت", $"کاربر {newUser.Username} با موفقیت ایجاد شد.");
+                addUserWindow.DialogResult = true;
             }
         }
     }

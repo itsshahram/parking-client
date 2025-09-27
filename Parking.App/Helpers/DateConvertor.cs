@@ -17,7 +17,7 @@ public static class DateConvertor
     public static string ToShamsi(this DateTime Value)
     {
         PersianCalendar pc = new PersianCalendar();
-        return pc.GetYear(Value) + " / " + pc.GetMonth(Value).ToString("00") + " / " + pc.GetDayOfMonth(Value).ToString("00");
+        return pc.GetYear(Value) + "/" + pc.GetMonth(Value).ToString("00") + "/" + pc.GetDayOfMonth(Value).ToString("00");
     }
     public static string ToLongShamsiString(this DateTime? Value)
     {

@@ -18,47 +18,59 @@ public class Repository<T> : IRepository<T> where T : class
     public IQueryable<T> GetAll()
         => _dbSet.AsNoTracking();
 
-    public List<T> ToList()
-        => _dbSet.AsNoTracking().ToList();
-
     public async Task<List<T>> ToListAsync()
-        => await _dbSet.AsNoTracking().ToListAsync();
+        => await _dbSet.ToListAsync();
+    public List<T>? ToList()
+    => _dbSet.ToList();
 
     public T? GetById(Guid id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<Guid>(e, "Id") == id);
-
+    {
+        return _dbSet.Find(id);
+    }
     public async Task<T?> GetByIdAsync(Guid id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
-
+    {
+        return await _dbSet.FindAsync(id);
+    }
     public T? GetById(int id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, "Id") == id);
-
+    {
+        return _dbSet.Find(id);
+    }
     public async Task<T?> GetByIdAsync(int id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
-
+    {
+        return await _dbSet.FindAsync(id);
+    }
     public T? GetById(long id)
-        => _dbSet.AsNoTracking().FirstOrDefault(e => EF.Property<long>(e, "Id") == id);
-
+    {
+        return _dbSet.Find(id);
+    }
     public async Task<T?> GetByIdAsync(long id)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => EF.Property<long>(e, "Id") == id);
+    {
+        return await _dbSet.FindAsync(id);
+    }
 
     public T? FirstOrDefault()
-        => _dbSet.AsNoTracking().FirstOrDefault();
+    {
+        return _dbSet.FirstOrDefault();
+    }
 
     public async Task<T?> FirstOrDefaultAsync()
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync();
-
+        => await _dbSet.FirstOrDefaultAsync();
     public T? FirstOrDefault(Expression<Func<T, bool>> predicate)
-        => _dbSet.AsNoTracking().FirstOrDefault(predicate);
-
+    {
+        return _dbSet.FirstOrDefault(predicate);
+    }
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
-        => await _dbSet.AsNoTracking().FirstOrDefaultAsync(predicate);
-
+    {
+        return await _dbSet.FirstOrDefaultAsync(predicate);
+    }
     public TResult? FirstOrDefault<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => _dbSet.Where(predicate).AsNoTracking().Select(selector).FirstOrDefault();
-
+    {
+        return _dbSet.Where(predicate).Select(selector).FirstOrDefault();
+    }
     public async Task<TResult?> FirstOrDefaultAsync<TResult>(Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
-        => await _dbSet.Where(predicate).AsNoTracking().Select(selector).FirstOrDefaultAsync();
+    {
+        return await _dbSet.Where(predicate).Select(selector).FirstOrDefaultAsync();
+    }
 
     public void Add(T entity)
     {
@@ -66,7 +78,6 @@ public class Repository<T> : IRepository<T> where T : class
         _context.SaveChanges();
         _context.Entry(entity).State = EntityState.Detached;
     }
-
     public async Task AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
@@ -89,12 +100,10 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _dbSet.Where(query).ExecuteUpdate(expression);
     }
-
     public async Task ExecuteUpdateAsync(Expression<Func<T, bool>> query, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> expression)
     {
         await _dbSet.Where(query).ExecuteUpdateAsync(expression);
     }
-
     public int ExecuteDelete(Expression<Func<T, bool>> filter)
     {
         return _dbSet.Where(filter).ExecuteDelete();
@@ -119,4 +128,21 @@ public class Repository<T> : IRepository<T> where T : class
     {
         return _context.SaveChanges();
     }
+
+    public async Task<bool> Delete(IEnumerable<T> entities)
+    {
+        try
+        {
+            _dbSet.RemoveRange(entities);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
+
+
+

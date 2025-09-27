@@ -1,53 +1,12 @@
-﻿
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Parking.App.Utilities;
+﻿namespace Parking.App.Utilities;
 
 public static class PermissionHelper
 {
-    public static bool    CheckUserPermission(string enRoleName, string action)
+    public static bool CheckUserPermission(string permission)
     {
-        bool result = false;
-        if(enRoleName == null)
-        {
+        if (string.IsNullOrWhiteSpace(permission))
             return false;
-        }
-        if(action == "UserManagement")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "ApplicationSettings")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "AddCards")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        if (action == "ForceExitRequest")
-        {
-            result = enRoleName.ToUpper() switch
-            {
-                "PARKINGMANAGER" => true,
-                "PARKINGAGENT" => false,
-                _ => false
-            };
-        }
-        return result;
+
+        return PermissionManager.Instance.HasPermission(permission);
     }
 }

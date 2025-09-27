@@ -1,16 +1,9 @@
-﻿using Parking.App.Models.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Parking.Domain.Entities;
 
 namespace Parking.App.Helpers;
 
-
 public static class TokenStore
 {
-
     private static bool _serverStatus;
     private static string _bearerToken;
     private static string _baseUrl;
@@ -20,6 +13,29 @@ public static class TokenStore
     private static DateTime _expirationDateTime;
     private static string _userName;
     private static string _roleName;
+    private static bool _isAuthenticated;
+
+    public static event EventHandler RoleChanged;
+
+    private static List<string> _permissions = new List<string>();
+    public static IReadOnlyList<string> Permissions => _permissions.AsReadOnly();
+
+    public static void SetPermissions(IEnumerable<string> permissions)
+    {
+        _permissions = permissions?.ToList() ?? new List<string>();
+        PermissionManager.Instance.SetUserPermissions(_permissions);
+    }
+    public static void DeletePermissions()
+    {
+        _permissions = new List<string>();
+        PermissionManager.Instance.SetUserPermissions(_permissions);
+    }
+
+    public static void LoadUserPermissions(string roleName, List<RolePermission> permissions)
+    {
+        SetPermissions(permissions.Select(x => x.Permission.Name));
+    }
+
     public static bool ServerStatus
     {
         get => _serverStatus;
@@ -33,7 +49,14 @@ public static class TokenStore
     public static string RoleName
     {
         get => _roleName;
-        set => _roleName = value;
+        set
+        {
+            if (_roleName != value)
+            {
+                _roleName = value;
+                RoleChanged?.Invoke(null, EventArgs.Empty);
+            }
+        }
     }
     public static DateTime ExpirationDateTime
     {
@@ -65,7 +88,26 @@ public static class TokenStore
         get => _fullName;
         set => _fullName = value;
     }
+    public static bool IsAuthenticated
+    {
+        get => !string.IsNullOrWhiteSpace(_fullName);
+        set { }
+    }
 
+
+    public static void Clear()
+    {
+        _serverStatus = false;
+        _bearerToken = null;
+        _baseUrl = null;
+        _parkingLotId = 0;
+        _userId = Guid.Empty;
+        _fullName = null;
+        _expirationDateTime = DateTime.MinValue;
+        _userName = null;
+        _roleName = null;
+        _permissions.Clear();
+    }
 }
 
 

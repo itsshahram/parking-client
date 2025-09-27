@@ -2,20 +2,9 @@
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
-using Parking.App.Models.Dto.Parking.ParkingTicket;
-using Parking.App.Models.Dto.Vehicle.LicensePlate;
 using Parking.App.Models.Dto.Vehicle.VehicleSegment;
 using Parking.App.Models.GeneralServiceResponse;
-using Parking.App.Models.Tickets;
-using Parking.App.Models;
 using Parking.Domain.Entities.Vehicles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using Parking.App.Helpers;
 
 namespace Parking.App.Services.Interfaces;
 
@@ -27,10 +16,11 @@ public interface IParkingService
     List<VehicleSegmentModel> GetVehicleSegments();
     List<ParkingSectionModel> GetSections();
     List<ParkingSpaceModel> GetSpaces();
-    int GetFreeSpacesCount();
-    int GetSpacesCount();
+    int? GetFreeSpacesCount();
+    int? GetSpacesCount();
+    int? GetParkingLotCapacity();
     (Guid? SpaceId, Guid? SectionId) GetOneFreeSpaceId();
-    Task<ImageSource> GetTicketImage(Guid ticketId);
+    Task<(ImageSource? StartImage, ImageSource? ExitImage)> GetTicketImages(Guid ticketId);
     List<TicketsListViewModel> GetLatestTickets(TicketType type, int take);
     Task<List<TicketsListViewModel>> GetLatestTicketsAsync(TicketType type, int take);
     TicketsListViewModel? GetTicketDetails(Guid ticketId);
@@ -41,8 +31,9 @@ public interface IParkingService
     Guid? GetActiveLicensePlateTicketId(string licenseEnPlate);
     bool LicensePlateTicketIsExist(string licenseEnPlate);
     TServiceResponse<Guid> CreateTicket(CreateParkingTicketModel request, string? StartImage);
-    List<TicketsListViewModel> GetTicketList(GetTicketListRequestModel request);
-    Task<List<TicketsListViewModel>> GetTicketListAsync(GetTicketListRequestModel request);
+    (List<TicketsListViewModel> Data, int TotalCount) GetTicketList(GetTicketListRequestModel request);
+    Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListAsync(GetTicketListRequestModel request);
+    Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListReportAsync(GetTicketListRequestModel request);
     bool ExitRequest(Guid ticketId);
     void PaymentAmountCalculation(Guid ticketId);
     Task PaymentAmountCalculationAsync(Guid ticketId);
@@ -52,12 +43,15 @@ public interface IParkingService
     string GetVehicleSegmentNameById(int Id);
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
-    List<LicensePlateListItemViewModel> GetLicensePlateGroupList();
+    (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize);
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
     Guid? GetGroupIdByEnLicensePlate(string enLicensePlate);
     bool SetTicketPaidInfo(TicketPaidInfoModel request);
     LicensePlateGroup? GetLicensePlateGroupById(Guid id);
+
+    List<string?> GetEntryRegistrars();
+    List<string?> GetExitRegistrars();
 
     #region Cards
     decimal GetCardCreditAsync(long cardSerialNo);
@@ -75,8 +69,11 @@ public interface IParkingService
     bool AddCard(CardModel request);
     bool AddCardCreditHistory(CardCreditHistoryModel request);
     int GetCardsCount();
+    int GetDiscountedCardsCount();
     bool IsCardInUse(long cardSerialNo);
     Guid? GetNotExitedTicketIdByCardSerialNo(long cardSerialNo);
+    (bool Result, string ResultMSG) CreateAddCardHistory(AddCardItemModel request);
+    (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
 
     #endregion
     #region ExtraImages
@@ -89,7 +86,20 @@ public interface IParkingService
 
     List<ParkingTicketExtraImageSourceModel> GetTicketExtraImageSources(Guid TicketId, bool? ShowInBox);
     Task<List<ParkingTicketExtraImageSourceModel>> GetTicketExtraImageSourcesAsync(Guid TicketId, bool? ShowInBox);
+    Guid? GetTicketIdByBarcode(long barcode);
 
+    #endregion
+
+
+    #region TicketDescription
+    List<TicketDescriptionItemModel> GetAllTicketDescriptionItems();
+    TicketDescriptionItemModel? GetTicketDescriptionItemById(int id);
+    bool AddTicketDescriptionItem(TicketDescriptionItemModel request);
+    bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request);
+    bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
+    bool DeleteTicketDescriptionItem(int id);
+    Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
+    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
 
     #endregion
 }

@@ -1,16 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_LastSelectedProfileId>D:\repos\Parking-WindowsApp-V2.2\Parking.App\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
+    <_LastSelectedProfileId>C:\Users\Mehdi\Desktop\Projects\avaparsi\Parking-WindowsApp-V2\Parking.App\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="Views\Components\ExitedStatusBorder.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Components\PaginationControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Components\ParkingInfo.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Components\SeizedPlateItemComponent.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Components\SummaryReport.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Components\TicketDetails.xaml.cs">
@@ -28,6 +34,12 @@
     <Compile Update="Views\Pages\AddCardPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Pages\CardsPageChilds\AddCardHistoryPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\FullTicketHistoryPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Pages\InformationPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -35,6 +47,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Pages\MainPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Pages\RolePage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Pages\SeizedPlatePage.xaml.cs">
@@ -55,6 +70,9 @@
     <Compile Update="Views\Pages\SettingsPageChilds\CameraSettingsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Pages\SettingsPageChilds\HotKeyManagment.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Pages\SettingsPageChilds\POSSettingsPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -67,13 +85,31 @@
     <Compile Update="Views\Pages\UsersListPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\AddRoleWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\AddSeizedPelakWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\AssignRoleWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\ChangePasswordWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Windows\ConfigDatabaseWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\DatabaseErrorWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\LoginWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\ManagePermissionsWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\TempLoginWindows.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Windows\TicketDetailsWindow.xaml.cs">

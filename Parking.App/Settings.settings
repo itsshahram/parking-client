@@ -143,7 +143,7 @@
     <Setting Name="Application_Logs_Elastic_Pass" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PlateCheckInExitGate" Type="System.Boolean" Scope="User">
+    <Setting Name="Application_PlateCheckInExitGate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Application_EntryCardRequirement" Type="System.Boolean" Scope="User">
@@ -154,6 +154,42 @@
     </Setting>
     <Setting Name="Application_DeviceId" Type="System.String" Scope="User">
       <Value Profile="(Default)">ExitGate</Value>
+    </Setting>
+    <Setting Name="Application_EnableSyncImage" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Application_MainPage_ReloadShortcut" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Application_DetectLatinPlate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Appearance_ShowBarcodeSearchBox" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_Sync_EnableSyncLicensePlateGroup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_Sync_AllDeviceTickets" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_DefaultTicketDescription" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Application_QueueActive" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Application_Print_dpi" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">96</Value>
+    </Setting>
+    <Setting Name="Application_Print_widthMm" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">58</Value>
+    </Setting>
+    <Setting Name="Application_ParkingLotReciptDescription" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="IsFirstRun" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

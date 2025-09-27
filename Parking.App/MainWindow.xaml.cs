@@ -9,7 +9,7 @@ namespace Parking.App;
 public partial class MainWindow : FluentWindow
 {
     public MainWindowViewModel ViewModel { get; }
-   
+
 
     public MainWindow()
     {
@@ -19,22 +19,13 @@ public partial class MainWindow : FluentWindow
         SystemThemeWatcher.Watch(this);
         Loaded += (_, _) => RootNavigation.Navigate(typeof(MainPage));
         this.Loaded += MainWindow_Loaded;
-
-
         scheduler = App.GetService<IScheduler>();
         StartBackgroundTask();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        //await Task.Run(() =>
-        //{
-        //    this.Dispatcher.Invoke(() =>
-        //    {
-        //        //Loaded += (_, _) => RootNavigation.Navigate(typeof(MainPage));
-        //        RootNavigation.Navigate(typeof(MainPage));
-        //    });
-        //});
+
     }
     private readonly IScheduler scheduler;
     public BackgroundTask BackgroundTask { get; private set; }
@@ -42,7 +33,7 @@ public partial class MainWindow : FluentWindow
     {
         BackgroundTask = new BackgroundTask(this);
 
-        
+
         scheduler.Schedule(() => BackgroundTask.Invoke())
                  .EverySeconds(Settings.Default.Application_Sync_Interval_Second);
     }
@@ -51,5 +42,4 @@ public partial class MainWindow : FluentWindow
         e.Cancel = true;
         this.Hide();
     }
-
 }

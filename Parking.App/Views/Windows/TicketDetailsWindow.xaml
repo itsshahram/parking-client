@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Parking.App"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:components="clr-namespace:Parking.App.Views.Components" 
+        xmlns:components="clr-namespace:Parking.App.Views.Components"
+        xmlns:helpers="clr-namespace:Parking.App.Helpers" 
         mc:Ignorable="d"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
@@ -23,15 +24,15 @@
     <!--Topmost="True"-->
     <DockPanel x:Name="MainPanel" >
 
-        <ui:TitleBar
+        <!--<ui:TitleBar
         x:Name="TitleBar" 
             DockPanel.Dock="Top"
         Title="جزئیات قبض">
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
             </ui:TitleBar.Icon>
-        </ui:TitleBar>
-        
+        </ui:TitleBar>-->
+
         <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -50,6 +51,7 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
+                            <ColumnDefinition  Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -60,16 +62,41 @@
                                 <StackPanel Margin="10 0">
                                     <DockPanel  Margin="10">
                                         <ui:ToggleSwitch x:Name="MissingCardToggle"  FlowDirection="LeftToRight" DockPanel.Dock="Right" Checked="MissingCardToggle_Checked" Unchecked="MissingCardToggle_Unchecked" OffContent="غیر فعال" OnContent="فعال"/>
-                                        <Label DockPanel.Dock="Left" Content="آیا کارت مفقود شده است.  (کلید F12 برای فعال شدن)" Margin="0 0 20 0"/>
+                                        <Label x:Name="MissingCardToggleLabel" DockPanel.Dock="Left" Content="" Margin="0 0 20 0"/>
                                     </DockPanel>
                                 </StackPanel>
 
                             </Border>
 
                         </StackPanel>
-                        <ui:Button x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت (Space)" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
-                        <ui:Button x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی (F1)" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
-                        <ui:Button x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1" HorizontalAlignment="Stretch"  Grid.Column="2" Margin="3" IsDefault="True" Appearance="Info" Padding="20 5 20 5" Content="چاپ رسید (F3)" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                        <ui:Button helpers:PermissionBehavior.Permission="PosPayment" x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
+                        <ui:Button  helpers:PermissionBehavior.Permission="CashPayment" x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
+                        <ui:Button helpers:PermissionBehavior.Permission="PrintTicket"  x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
+                                   Click="Print_Btn_Click"
+                                   HorizontalAlignment="Stretch" 
+                                   Grid.Column="2" 
+                                   Margin="3" 
+                                   IsDefault="True" 
+                                   Appearance="Info" 
+                                   Padding="20 5 20 5" Content="چاپ رسید" Icon="{ui:SymbolIcon Symbol=Print24}" FontSize="24"/>
+                        <ui:Button   x:Name="ExitBtn" VerticalAlignment="Stretch" Grid.Row="1" 
+                                   HorizontalAlignment="Stretch"  
+                                   Grid.Column="3" 
+                                   Margin="3" 
+                                   IsDefault="True" 
+                                   Appearance="Caution" 
+                                   Padding="20 5 20 5"  
+                                   Icon="{ui:SymbolIcon Symbol=Home24}" 
+                                   FontSize="24" Click="ExitBtn_Click"/>
+                        <ui:Button helpers:PermissionBehavior.Permission="CustomAmouontPayment"  x:Name="CustomPayment_Btn" VerticalAlignment="Stretch" 
+                            HorizontalAlignment="Stretch"  
+                            Grid.Column="3" 
+                            Margin="0,1,6,1" 
+                            IsDefault="True" 
+                            Appearance="Primary" 
+                            Padding="20 5 20 5"  
+                            Icon="{ui:SymbolIcon Symbol=Money24}" 
+                            FontSize="24" Click="CustomPayment_Btn_Click" RenderTransformOrigin="-0.433,0.475"/>
                     </Grid>
 
                 </StackPanel>
@@ -80,7 +107,8 @@
                         </StackPanel>
                         <WrapPanel HorizontalAlignment="Center">
                             <Border CornerRadius="8" 
-                             Background="White" 
+                                    x:Name="IRPlateBox"
+                             Background="White" Visibility="Collapsed"
                              BorderThickness="2" 
                              BorderBrush="Gray"
                              Margin="10 5"
@@ -128,6 +156,17 @@
                      Text="22" x:Name="plate_IRNumber"   Foreground="Black"  />
                                     </Border>
                                 </Grid>
+
+                            </Border>
+                            <Border CornerRadius="8" 
+               x:Name="OtherPlateBox"
+        Background="White" 
+        BorderThickness="2" 
+        BorderBrush="Gray"
+        Margin="10 5"
+        Width="400" Visibility="Collapsed"
+        Height="90">
+                                <TextBlock Text="36666666" x:Name="OtherPlateTextBox"  FontSize="40" Foreground="Black" VerticalAlignment="Center" FontWeight="ExtraBold" HorizontalAlignment="Center"/>
 
                             </Border>
                             <Border CornerRadius="8" 

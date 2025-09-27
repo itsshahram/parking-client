@@ -224,6 +224,9 @@ namespace Parking.Infrastructure.Migrations
                     b.Property<Guid>("ParkingSpaceID")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("QueueNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("RRN")
                         .HasColumnType("nvarchar(max)");
 
@@ -235,6 +238,9 @@ namespace Parking.Infrastructure.Migrations
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("TicketDescriptionItemId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TicketStatus")
                         .HasColumnType("int");
@@ -267,6 +273,8 @@ namespace Parking.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TicketDescriptionItemId");
 
                     b.ToTable("ParkingTickets");
                 });
@@ -322,6 +330,76 @@ namespace Parking.Infrastructure.Migrations
                     b.ToTable("ParkingTicketImages");
                 });
 
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.TicketDescriptionItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsQueueEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TicketDescriptionItems");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.TicketQueueItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ParkingTicketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QueueNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TicketDescriptionItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParkingTicketId");
+
+                    b.HasIndex("TicketDescriptionItemId");
+
+                    b.ToTable("TicketQueueItems");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.TicketQueueResetPolicy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ResetIntervalDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TicketDescriptionItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketDescriptionItemId");
+
+                    b.ToTable("TicketQueueResetPolicies");
+                });
+
             modelBuilder.Entity("Parking.Domain.Entities.Parkings.Card", b =>
                 {
                     b.Property<int>("Id")
@@ -370,6 +448,9 @@ namespace Parking.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OwnerNationalCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("OwnerPic")
@@ -603,6 +684,49 @@ namespace Parking.Infrastructure.Migrations
                     b.ToTable("ParkingVehicleSegmentVariablePrices");
                 });
 
+            modelBuilder.Entity("Parking.Domain.Entities.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FaName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicationRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationRoleId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions");
+                });
+
             modelBuilder.Entity("Parking.Domain.Entities.User.ApplicationRole", b =>
                 {
                     b.Property<Guid>("Id")
@@ -730,6 +854,32 @@ namespace Parking.Infrastructure.Migrations
                     b.ToTable("ApplicationUserRole");
                 });
 
+            modelBuilder.Entity("Parking.Domain.Entities.User.UserPermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicationRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationRoleId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("UserPermissions");
+                });
+
             modelBuilder.Entity("Parking.Domain.Entities.Vehicles.LicensePlate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -746,6 +896,8 @@ namespace Parking.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("LicensePlates");
                 });
@@ -843,6 +995,9 @@ namespace Parking.Infrastructure.Migrations
                     b.Property<int>("ParkingLotId")
                         .HasColumnType("int");
 
+                    b.Property<int>("PlateType")
+                        .HasColumnType("int");
+
                     b.Property<byte>("TaxPercentage")
                         .HasColumnType("tinyint");
 
@@ -908,6 +1063,45 @@ namespace Parking.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.ParkingTicket", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.ParkingTicket.TicketDescriptionItem", "TicketDescriptionItem")
+                        .WithMany()
+                        .HasForeignKey("TicketDescriptionItemId");
+
+                    b.Navigation("TicketDescriptionItem");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.TicketQueueItem", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.ParkingTicket.ParkingTicket", "ParkingTicket")
+                        .WithMany()
+                        .HasForeignKey("ParkingTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Parking.Domain.Entities.ParkingTicket.TicketDescriptionItem", "TicketDescriptionItem")
+                        .WithMany()
+                        .HasForeignKey("TicketDescriptionItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParkingTicket");
+
+                    b.Navigation("TicketDescriptionItem");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.ParkingTicket.TicketQueueResetPolicy", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.ParkingTicket.TicketDescriptionItem", "TicketDescriptionItem")
+                        .WithMany()
+                        .HasForeignKey("TicketDescriptionItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TicketDescriptionItem");
+                });
+
             modelBuilder.Entity("Parking.Domain.Entities.Parkings.ParkingVehicleSegmentVariablePrice", b =>
                 {
                     b.HasOne("Parking.Domain.Entities.Parkings.ParkingLot", "ParkingLot")
@@ -925,6 +1119,81 @@ namespace Parking.Infrastructure.Migrations
                     b.Navigation("ParkingLot");
 
                     b.Navigation("VehicleSegment");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.User.ApplicationRole", "ApplicationRole")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("ApplicationRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Parking.Domain.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationRole");
+
+                    b.Navigation("Permission");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.User.UserPermission", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.User.ApplicationRole", "ApplicationRole")
+                        .WithMany()
+                        .HasForeignKey("ApplicationRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Parking.Domain.Entities.User.ApplicationUser", "ApplicationUser")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Parking.Domain.Entities.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationRole");
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Permission");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.Vehicles.LicensePlate", b =>
+                {
+                    b.HasOne("Parking.Domain.Entities.Vehicles.LicensePlateGroup", "Group")
+                        .WithMany("LicensePlates")
+                        .HasForeignKey("GroupId");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.User.ApplicationRole", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.User.ApplicationUser", b =>
+                {
+                    b.Navigation("UserPermissions");
+                });
+
+            modelBuilder.Entity("Parking.Domain.Entities.Vehicles.LicensePlateGroup", b =>
+                {
+                    b.Navigation("LicensePlates");
                 });
 #pragma warning restore 612, 618
         }

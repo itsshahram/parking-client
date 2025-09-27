@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
 namespace Parking.App.Models.Tickets;
 
@@ -15,6 +10,7 @@ public class TicketsListViewModel
     public long? CardUid { get; set; }
     public string? VehicleManufacturerName { get; set; }
     public string? Description { get; set; }
+    public string? DriverDescription { get; set; }
     public long BarcodeId { get; set; }
     public int ParkingLotId { get; set; }
     public int? VehicleSegmentId { get; set; }
@@ -56,5 +52,53 @@ public class TicketsListViewModel
     public bool IsMissingCard { get; set; } = false;
     public string? EntranceGate { get; set; }
     public string? ExitGate { get; set; }
+    public int? QueueNumber { get; set; }
 
+}
+public class TicketSummaryReportItem
+{
+    [DisplayName("تاریخ ورود")]
+    public string StartTime { get; set; }
+
+    [DisplayName("تاریخ خروج")]
+    public string? EndTime { get; set; }
+
+    [DisplayName("پلاک خودرو")]
+    public string? LicensePlate { get; set; }
+
+    [DisplayName("نوع خودرو")]
+    public string? VehicleSegmentName { get; set; }
+
+    [DisplayName("پارکینگ")]
+    public string? ParkingName { get; set; }
+
+    [DisplayName("درگاه ورود")]
+    public string? EntranceGate { get; set; }
+
+    [DisplayName("درگاه خروج")]
+    public string? ExitGate { get; set; }
+
+    [DisplayName("مدت زمان (دقیقه)")]
+    public int DurationMinutes { get; set; }
+
+    [DisplayName("مبلغ کل")]
+    public decimal TotalAmount { get; set; }
+
+    [DisplayName("تخفیف")]
+    public decimal Discount { get; set; }
+
+    [DisplayName("مبلغ پرداخت شده")]
+    public decimal PaidAmount { get; set; }
+
+    [DisplayName("نوع پرداخت")]
+    public string? PaidType { get; set; }
+
+    [DisplayName("پرداخت نقدی/کارت")]
+    public string? PaidCreditCard { get; set; }
+
+    [DisplayName("وضعیت پرداخت")]
+    public string? IsPaid { get; set; }
+
+    [DisplayName("خروج شده")]
+    public string? IsExited { get; set; }
 }

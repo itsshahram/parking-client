@@ -12,7 +12,7 @@ namespace Parking.App {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -590,12 +590,12 @@ namespace Parking.App {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool PlateCheckInExitGate {
+        public bool Application_PlateCheckInExitGate {
             get {
-                return ((bool)(this["PlateCheckInExitGate"]));
+                return ((bool)(this["Application_PlateCheckInExitGate"]));
             }
             set {
-                this["PlateCheckInExitGate"] = value;
+                this["Application_PlateCheckInExitGate"] = value;
             }
         }
         
@@ -632,6 +632,150 @@ namespace Parking.App {
             }
             set {
                 this["Application_DeviceId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Application_EnableSyncImage {
+            get {
+                return ((bool)(this["Application_EnableSyncImage"]));
+            }
+            set {
+                this["Application_EnableSyncImage"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Application_MainPage_ReloadShortcut {
+            get {
+                return ((string)(this["Application_MainPage_ReloadShortcut"]));
+            }
+            set {
+                this["Application_MainPage_ReloadShortcut"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_DetectLatinPlate {
+            get {
+                return ((bool)(this["Application_DetectLatinPlate"]));
+            }
+            set {
+                this["Application_DetectLatinPlate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Appearance_ShowBarcodeSearchBox {
+            get {
+                return ((bool)(this["Appearance_ShowBarcodeSearchBox"]));
+            }
+            set {
+                this["Appearance_ShowBarcodeSearchBox"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_Sync_EnableSyncLicensePlateGroup {
+            get {
+                return ((bool)(this["Application_Sync_EnableSyncLicensePlateGroup"]));
+            }
+            set {
+                this["Application_Sync_EnableSyncLicensePlateGroup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_Sync_AllDeviceTickets {
+            get {
+                return ((bool)(this["Application_Sync_AllDeviceTickets"]));
+            }
+            set {
+                this["Application_Sync_AllDeviceTickets"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Application_DefaultTicketDescription {
+            get {
+                return ((string)(this["Application_DefaultTicketDescription"]));
+            }
+            set {
+                this["Application_DefaultTicketDescription"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_QueueActive {
+            get {
+                return ((bool)(this["Application_QueueActive"]));
+            }
+            set {
+                this["Application_QueueActive"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("96")]
+        public double Application_Print_dpi {
+            get {
+                return ((double)(this["Application_Print_dpi"]));
+            }
+            set {
+                this["Application_Print_dpi"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("58")]
+        public double Application_Print_widthMm {
+            get {
+                return ((double)(this["Application_Print_widthMm"]));
+            }
+            set {
+                this["Application_Print_widthMm"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Application_ParkingLotReciptDescription {
+            get {
+                return ((string)(this["Application_ParkingLotReciptDescription"]));
+            }
+            set {
+                this["Application_ParkingLotReciptDescription"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsFirstRun {
+            get {
+                return ((bool)(this["IsFirstRun"]));
+            }
+            set {
+                this["IsFirstRun"] = value;
             }
         }
     }

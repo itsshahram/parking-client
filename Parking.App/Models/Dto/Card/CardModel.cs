@@ -15,6 +15,7 @@ public class CardModel
     public string? OwnerFirstName { get; set; }
 
     public string? OwnerLastName { get; set; }
+    public string? OwnerPhoneNumber { get; set; }
     public string? OwnerNationalCode { get; set; }
     public string? OwnerAddress { get; set; }
     public string? EnLicensePlate { get; set; }
