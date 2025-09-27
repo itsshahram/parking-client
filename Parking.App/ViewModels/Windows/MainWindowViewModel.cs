@@ -45,7 +45,6 @@ public partial class MainWindowViewModel : ObservableObject
             Icon = new SymbolIcon { Symbol = SymbolRegular.VehicleCarParking24 },
             TargetPageType = typeof(SeizedPlatePage)
         });
-
         MenuItems.Add(new NavigationViewItem()
         {
             Content = "گزارش",

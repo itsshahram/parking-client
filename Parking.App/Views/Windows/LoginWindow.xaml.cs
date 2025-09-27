@@ -152,8 +152,6 @@ namespace Parking.App.Views.Windows
                         if (rememberMe is true)
                             SaveCredentials(username, pasword);
 
-
-
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
                         if (parking.Succeeded)
@@ -200,13 +198,13 @@ namespace Parking.App.Views.Windows
                 if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
                 {
                     var username = usernameBox.Text;
-                    var pasword = passwordBox.Password;
-                    var result = await _synchronizationService?.CheckTokenAsync(username, pasword);
+                    var password = passwordBox.Password;
+                    var result = await _synchronizationService?.CheckTokenAsync(username, password);
                     if (result.Succeeded)
                     {
 
                         if (rememberMe is true)
-                            SaveCredentials(username, pasword);
+                            SaveCredentials(username, password);
 
                         var syncResult = await StartSyncJobs();
 
@@ -257,7 +255,8 @@ namespace Parking.App.Views.Windows
                     ms.Content = "هیچ کاربری تعریف نشده است";
                     ms.IsPrimaryButtonEnabled = false;
                     ms.IsSecondaryButtonEnabled = false;
-                    ms.CloseButtonText = "متوجه شدم";
+                    ms.CloseButtonText =
+                        "متوجه شدم";
                     await ms.ShowDialogAsync();
                 }
 

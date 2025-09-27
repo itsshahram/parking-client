@@ -10,8 +10,6 @@ public class TicketQueueService(
 {
     private readonly ILogger<TicketQueueService> _logger = logger;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
     public int? AssignQueueNumberAsync(int ticketDescriptionItemId, Guid parkingTicketId)
     {
         try
@@ -25,20 +23,12 @@ public class TicketQueueService(
                 return null;
             }
 
-            var resetPolicy = _unitOfWork.TicketQueueResetPolicies
-                .Find(p => p.TicketDescriptionItemId == ticketDescriptionItemId).FirstOrDefault();
-
-            var resetInterval = TimeSpan.FromDays(resetPolicy?.ResetIntervalDays ?? 30);
-
-            var lastItem =  _unitOfWork.TicketQueueItems
-                .Find(q => q.TicketDescriptionItemId == ticketDescriptionItemId)
-                .OrderByDescending(q => q.AssignedDate)
+            var lastItem = _unitOfWork.TicketQueueItems
+                .Find(q => q.TicketDescriptionItemId == ticketDescriptionItemId && q.ResetVersion == item.CurrentResetVersion)
+                .OrderByDescending(q => q.QueueNumber)
                 .FirstOrDefault();
 
-            int nextNumber = 1;
-
-            if (lastItem != null && DateTime.Now - lastItem.AssignedDate < resetInterval)
-                nextNumber = lastItem.QueueNumber + 1;
+            int nextNumber = lastItem == null ? 1 : lastItem.QueueNumber + 1;
 
             var newQueueItem = new TicketQueueItem
             {
@@ -46,13 +36,14 @@ public class TicketQueueService(
                 TicketDescriptionItemId = ticketDescriptionItemId,
                 ParkingTicketId = parkingTicketId,
                 QueueNumber = nextNumber,
+                ResetVersion = item.CurrentResetVersion,
                 AssignedDate = DateTime.Now
             };
 
             _unitOfWork.TicketQueueItems.Add(newQueueItem);
             _unitOfWork.TicketQueueItems.Commit();
 
-            _logger.LogInformation("نوبت {QueueNumber} برای آیتم {ItemId} ثبت شد", nextNumber, ticketDescriptionItemId);
+            _logger.LogInformation("نوبت {QueueNumber} برای آیتم {ItemId} ثبت شد (ResetVersion={ResetVersion})", nextNumber, ticketDescriptionItemId, item.CurrentResetVersion);
             return nextNumber;
         }
         catch (Exception ex)
@@ -61,6 +52,7 @@ public class TicketQueueService(
             return null;
         }
     }
+
 
     public async Task SetQueueEnabledAsync(int ticketDescriptionItemId, bool isEnabled)
     {
@@ -71,7 +63,6 @@ public class TicketQueueService(
 
             if (item == null)
             {
-
                 _logger.LogWarning("آیتم برای فعال‌سازی نوبت‌دهی یافت نشد: {ItemId}", ticketDescriptionItemId);
                 return;
             }
@@ -199,6 +190,30 @@ public class TicketQueueService(
         {
             _logger.LogError(ex, "خطا در GetTicketQueueNumber برای قبض {TicketId}", ticketId);
             return null;
+        }
+    }
+    public async Task ResetQueueAsync(int ticketDescriptionItemId)
+    {
+        try
+        {
+            var item = await _unitOfWork.TicketDescriptionItems
+                .FirstOrDefaultAsync(i => i.Id == ticketDescriptionItemId);
+
+            if (item == null)
+            {
+                _logger.LogWarning("آیتم برای ریست صف یافت نشد: {ItemId}", ticketDescriptionItemId);
+                return;
+            }
+
+            item.CurrentResetVersion++;
+            _unitOfWork.TicketDescriptionItems.Update(item);
+            await _unitOfWork.TicketDescriptionItems.CommitAsync();
+
+            _logger.LogInformation("صف برای آیتم {ItemId} بازنشانی شد (ResetVersion={ResetVersion})", ticketDescriptionItemId, item.CurrentResetVersion);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "خطا در ResetQueueAsync برای آیتم {ItemId}", ticketDescriptionItemId);
         }
     }
 }

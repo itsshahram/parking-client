@@ -50,10 +50,27 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
         }
         private void RemoveDescription_Click(object sender, RoutedEventArgs e)
         {
+            ConfirmWindow confirm = new ConfirmWindow("حذف", "ایا از حذف این توضحیات مطمعن هستید ؟", ConfirmType.Delete, "حذف");
+            if (confirm.ShowDialog() == true)
+            {
+                if (sender is System.Windows.Controls.Button btn && btn.DataContext is TicketDescriptionItemModel item)
+                {
+                    _parkingService.DeleteTicketDescriptionItem(item.Id);
+                    LoadDescriptions();
+                }
+            }
+        }
+
+        private void RefreshQueue_Click(object sender, RoutedEventArgs e)
+        {
             if (sender is System.Windows.Controls.Button btn && btn.DataContext is TicketDescriptionItemModel item)
             {
-                _parkingService.DeleteTicketDescriptionItem(item.Id);
-                LoadDescriptions();
+                ConfirmWindow confirm = new ConfirmWindow("بازنشانی", $"ایا از بازنشانی صف {item.Text} مطمعن هستید ؟", ConfirmType.Warning, "بازنشانی");
+                if (confirm.ShowDialog() == true)
+                {
+                    _parkingService.ResetTicketDescriptionInterval(item.Id);
+                    LoadDescriptions();
+                }
             }
         }
 
@@ -142,9 +159,6 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             }
 
         }
-        private Key _pressedKey;
-        private ModifierKeys _pressedModifiers;
-
 
         private void DescriptionTextBox_KeyDown(object sender, KeyEventArgs e)
         {
@@ -185,6 +199,7 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
                 LoadDescriptions();
             }
         }
+
         private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             if (sender is ToggleSwitch toggle && toggle.DataContext is TicketDescriptionItemModel item)

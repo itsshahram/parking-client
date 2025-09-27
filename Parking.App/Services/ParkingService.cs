@@ -902,8 +902,7 @@ public class ParkingService : IParkingService
                     ExitImage = s.ExitImage,
                     StartImage = s.StartImage,
                     BarcodeId = s.BarcodeId,
-                    DriverDescription = s.DriverDescription
-                    ,
+                    DriverDescription = s.DriverDescription,
                     QueueNumber = s.QueueNumber
                 }).FirstOrDefaultAsync();
             if (ticket != null && (ticket?.IsExited ?? false) == false)
@@ -3065,6 +3064,24 @@ public class ParkingService : IParkingService
         }
     }
 
+
+    public async Task<bool> ResetTicketDescriptionInterval(int Id)
+    {
+        try
+        {
+            var item = unitOfWork.TicketDescriptionItems.GetById(Id);
+            if (item != null)
+            {
+                await _ticketQueueService.ResetQueueAsync(Id);
+                return true;
+            }
+            return false;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
     public bool ChangeTicketDescriptionItemQueueStatus(int id, bool status)
     {
         try
@@ -3093,23 +3110,23 @@ public class ParkingService : IParkingService
         }
     }
 
-    public bool DeleteTicketDescriptionItem(int id)
+    public (bool IsSuccess, bool IsExsist) DeleteTicketDescriptionItem(int id)
     {
         try
         {
             var item = unitOfWork.TicketDescriptionItems.GetById(id);
             if (item != null)
             {
-                unitOfWork.TicketDescriptionItems.Delete(item);
-                unitOfWork.TicketDescriptionItems.Commit();
-                return true;
+                item.IsDeleted = true;
+                unitOfWork.TicketDescriptionItems.Update(item);
+                return (true, false);
             }
-            return false;
+            return (false, false);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return false;
+            return (false, false);
         }
     }
 

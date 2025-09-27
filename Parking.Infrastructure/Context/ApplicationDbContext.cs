@@ -49,5 +49,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ParkingVehicleSegmentVariablePrice>().Property(x => x.Id).ValueGeneratedNever();
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("AspNetUserRoles");
         modelBuilder.Entity<ApplicationUserRole>().HasNoKey();
+        modelBuilder.Entity<TicketDescriptionItem>()
+            .HasQueryFilter(t => !t.IsDeleted);
+
     }
 }

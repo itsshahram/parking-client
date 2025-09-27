@@ -1,9 +1,4 @@
 ﻿using Parking.Domain.Entities.ParkingTicket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Parking.App.Services.Interfaces;
 
@@ -59,4 +54,5 @@ public interface ITicketQueueService
     /// <returns>تعداد روزهای بازه یا null اگر تنظیم نشده باشد</returns>
     Task<int?> GetResetIntervalDaysAsync(int ticketDescriptionItemId);
     int? GetTicketQueueNumber(Guid ticketId);
+    Task ResetQueueAsync(int ticketDescriptionItemId);
 }

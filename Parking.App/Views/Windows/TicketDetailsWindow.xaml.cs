@@ -58,7 +58,6 @@ namespace Parking.App.Views.Windows
                     }
                     SetTicketData(ticketId);
 
-
                     if (extraimages != null)
                     {
                         foreach (var image in extraimages)
@@ -513,7 +512,6 @@ namespace Parking.App.Views.Windows
         [RequiresPermission("PosPayment","پرداخت با پوز")]
         private void PaymentBtn_Click(object sender, RoutedEventArgs e)
         {
-
             Payment();
         }
         private string GateName { get; set; }

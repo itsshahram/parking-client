@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Parking.Domain.Entities.ParkingTicket;
 
@@ -14,5 +9,6 @@ public class TicketDescriptionItem
     public string? Text { get; set; }
     public DateTime CreateDate { get; set; }
     public bool IsQueueEnabled { get; set; } = false;
-
+    public bool IsDeleted { get; set; }
+    public int CurrentResetVersion { get; set; }
 }

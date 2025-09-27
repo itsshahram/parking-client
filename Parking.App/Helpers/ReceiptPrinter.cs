@@ -353,13 +353,19 @@ public class ReceiptPrinter
         }
 
         //AddRow("زمان:", receipt.Description);
-        AddRow("صف:", receipt.DriverDescription, false);
+        if (receipt.QueueNumber != null)
+        {
+            AddRow("صف:", receipt.DriverDescription, false);
+        }
+        else
+        {
+            AddRow("توضیحات:", receipt.DriverDescription, false);
+        }
+
         AddRow("نوع:", receipt.VehicleSegmentName);
         AddRow(" ورود:", receipt.StartTime);
         if (receipt.EndTime != null && receipt.EndTime.Length > 2)
-        {
             AddRow(" خروج:", receipt.EndTime);
-        }
 
 
         AddRow("پلاک:", receipt.LicensePlate);

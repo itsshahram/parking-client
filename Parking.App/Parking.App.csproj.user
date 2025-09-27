@@ -100,6 +100,9 @@
     <Compile Update="Views\Windows\ConfigDatabaseWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\Windows\ConfirmWindows.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Windows\DatabaseErrorWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

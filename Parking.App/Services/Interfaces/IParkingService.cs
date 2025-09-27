@@ -96,8 +96,9 @@ public interface IParkingService
     TicketDescriptionItemModel? GetTicketDescriptionItemById(int id);
     bool AddTicketDescriptionItem(TicketDescriptionItemModel request);
     bool UpdateTicketDescriptionItem(TicketDescriptionItemModel request);
+    Task<bool> ResetTicketDescriptionInterval(int Id);
     bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
-    bool DeleteTicketDescriptionItem(int id);
+    (bool IsSuccess, bool IsExsist) DeleteTicketDescriptionItem(int id);
     Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
     Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
 

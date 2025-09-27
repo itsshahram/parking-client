@@ -99,8 +99,17 @@
                             <Border Background="#304CAF50" CornerRadius="10" Margin="2" Padding="5" MinWidth="300" >
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                                     <DockPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
-                                       
-                                         <ui:Button Icon="{ui:SymbolIcon Symbol=Delete24}" CornerRadius="10"
+
+                                        <ui:Button Icon="{ui:SymbolIcon Symbol=New24}" CornerRadius="10"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0" 
+                                                    Margin="5 0 "
+                                                    Appearance="Caution"
+                                                    Click="RefreshQueue_Click" 
+                                                    DockPanel.Dock="Left" />
+                                        
+                                        <ui:Button Icon="{ui:SymbolIcon Symbol=Delete24}" CornerRadius="10"
                                                     Width="32"
                                                     Height="32"
                                                     Padding="0" 
