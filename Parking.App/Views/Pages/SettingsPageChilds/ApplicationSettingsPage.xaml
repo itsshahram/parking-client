@@ -100,7 +100,7 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                                     <DockPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
 
-                                        <ui:Button Icon="{ui:SymbolIcon Symbol=New24}" CornerRadius="10"
+                                        <ui:Button Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}" CornerRadius="10"
                                                     Width="32"
                                                     Height="32"
                                                     Padding="0" 

@@ -404,9 +404,11 @@ public partial class FullTicketHistoryPage : Page
     {
         if (ticketsDataGrid.SelectedItem is TicketsListViewModel selectedItem)
         {
+            var window = Window.GetWindow(this);
             var ticket = ticketsDataGrid.SelectedItem as TicketsListViewModel;
             var Details = new TicketDetailsWindow(ticket.Id, null, null, null);
-            Details?.Show();
+            Details.Owner = window;
+            Details?.ShowDialog();
         }
     }
 

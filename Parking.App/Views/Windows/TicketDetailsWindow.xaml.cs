@@ -24,6 +24,7 @@ namespace Parking.App.Views.Windows
         private readonly IParkingService? _parkingService;
         private bool IsMissingCard { get; set; } = false;
         private bool PaymentPermission { get; set; } = true;
+        private bool _isIntentionalClose = false;
         private string ExitImage { get; set; }
         private readonly ILogger<TicketDetailsWindow> _logger;
         private List<(ImageSource ImageSource, string Name, bool ForSave)> ExtraImagesList = new List<(ImageSource ImageSource, string Name, bool ForSave)>();
@@ -90,7 +91,6 @@ namespace Parking.App.Views.Windows
             }
             UpdateButtonsTitle();
         }
-
         private void UpdateButtonsTitle()
         {
             PaymentBtn.Content = $"پرداخت ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace))})";
@@ -98,7 +98,6 @@ namespace Parking.App.Views.Windows
             PrintBtn.Content = $"چاپ رسید ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt))})";
             MissingCardToggleLabel.Content = $"آیا کارت مفقود شده است؟ (کلید {_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.LostCard))} برای فعال شدن)";
         }
-
         private void InitializeCloseTimer()
         {
             if (Settings.Default.Appearance_InvoiceShowTime > 0)
@@ -509,7 +508,7 @@ namespace Parking.App.Views.Windows
 
         }
 
-        [RequiresPermission("PosPayment","پرداخت با پوز")]
+        [RequiresPermission("PosPayment", "پرداخت با پوز")]
         private void PaymentBtn_Click(object sender, RoutedEventArgs e)
         {
             Payment();

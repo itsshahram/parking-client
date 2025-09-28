@@ -1228,8 +1228,10 @@ namespace Parking.App.Views.Pages
         {
             this.Dispatcher.Invoke(() =>
             {
+                var window = Window.GetWindow(this);
                 var Details = new TicketDetailsWindow(cardTicketId, ViewModel.CurrentFrame, ExtraImagesList, _cardSerialNo);
-                Details?.Show();
+                Details.Owner = window;
+                Details?.ShowDialog();
             });
         }
 

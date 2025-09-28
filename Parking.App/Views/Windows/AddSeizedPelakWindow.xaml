@@ -65,23 +65,22 @@
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
-                <ui:TextBox Grid.Column="0" x:Name="leftNumbersNumberTextBox" FontSize="20" FontWeight="Bold"
-                    PlaceholderText="_ _" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Foreground="{DynamicResource TextFillColorPrimaryBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}"/>
-
-                <ComboBox Grid.Column="1" x:Name="plateCharsCombo" IsEditable="True" FontSize="20"
-                  SelectedIndex="0" Margin="1 0" Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                  Background="{DynamicResource ControlFillColorDefaultBrush}"/>
-
-                <ui:TextBox Grid.Column="2" x:Name="rightNumbersNumberTextBox" FontSize="20" FontWeight="Bold"
-                    PlaceholderText="_ _ _" Margin="1 0" HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center" Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}"/>
-
-                <ui:TextBox Grid.Column="3" x:Name="irNumberTextBox" FontSize="20" FontWeight="Bold"
-                    MaxLength="2" Margin="1 0" HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center" Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}"/>
+                <ui:TextBox Grid.Row="0" x:Name="leftNumbersNumberTextBox"
+                            FontSize="20" PlaceholderText="_ _"
+                            MaxLength="2" MinWidth="70" FontWeight="Bold"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <ComboBox Grid.Row="0" x:Name="plateCharsCombo" IsEditable="True" FontSize="20"
+                          SelectedIndex="0" Grid.Column="1"/>
+                <ui:TextBox Grid.Row="0" x:Name="rightNumbersNumberTextBox"
+                            FontSize="20" PlaceholderText="_ _ _"
+                            MaxLength="3" MinWidth="100" FontWeight="Bold"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Grid.Column="2"/>
+                <ui:TextBox Grid.Row="0" x:Name="irNumberTextBox"
+                            MinWidth="70" FontSize="20" PlaceholderText="_ _"
+                            MaxLength="2" FontWeight="Bold"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Grid.Column="3"/>
             </Grid>
         </StackPanel>
 

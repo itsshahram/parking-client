@@ -38,7 +38,7 @@
                               Grid.Column="1">
                             </ComboBox>
                             <ui:TextBox Grid.Row="0"  x:Name="rightNumbersNumberTextBox"  FontSize="20" PlaceholderText="_ _ _" Grid.Column="2" MaxLength="3"  MinWidth="100" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                            <ui:TextBox Grid.Row="0"  x:Name="irNumberTextBox" MinWidth="70"   FontSize="20"   Grid.Column="3"  MaxLength="2"  FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            <ui:TextBox Grid.Row="0"  x:Name="irNumberTextBox" MinWidth="70"   FontSize="20"   PlaceholderText="_ _" Grid.Column="3"  MaxLength="2"  FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                         </Grid>
                         <ui:Button x:Name="btnSearch" Click="btnSearch_Click" Content="جستجو" Appearance="Primary" VerticalAlignment="Stretch" Margin="10 0" Padding="40 0"/>
                         <ui:Button x:Name="ClearBtn" Click="ClearBtn_Click"  HorizontalAlignment="Center" IsDefault="True" Appearance="Secondary" Padding="5 5 5 5" Margin="10 0 10 0"  Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}" FontSize="24"/>

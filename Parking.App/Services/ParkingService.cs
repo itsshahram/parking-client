@@ -3236,8 +3236,7 @@ public class ParkingService : IParkingService
             SeizedReason = reason,
             EnLicensePlate = plate,
             FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ")
-      + parsePlate.LeftTwoDigits
-    : parsePlate.OriginalPlate
+      + parsePlate.LeftTwoDigits : parsePlate.OriginalPlate
         };
 
         await unitOfWork.SeizedLicensePlates.AddAsync(seizedPlate);

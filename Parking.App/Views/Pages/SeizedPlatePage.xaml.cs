@@ -37,9 +37,10 @@ namespace Parking.App.Views.Pages
         [RequiresPermission("AddSeized","افزودن پلاک توقیفی")]
         private void Add_Seized_Click(object sender, RoutedEventArgs e)
         {
-            AddSeizedPelakWindow addSeizedPelakWindow = new AddSeizedPelakWindow(() =>
+            AddSeizedPelakWindow addSeizedPelakWindow = new AddSeizedPelakWindow(async () =>
             {
                 var updatedList = _parkingService.GetSeizedLicensePlatesList();
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     SeizedPlateList.Clear();

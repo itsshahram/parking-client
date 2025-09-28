@@ -136,7 +136,6 @@ namespace Parking.App.Views.Windows
                     bool syncStatus = false;
                     if (Settings.Default.Application_Sync_Enable)
                     {
-
                         var loginToServerResult = await _synchronizationService?.CheckTokenAsync(username, pasword);
                         if (loginToServerResult.Succeeded)
                         {
@@ -146,8 +145,7 @@ namespace Parking.App.Views.Windows
                     else
                         syncStatus = true;
 
-
-                    if (result == Domain.General.LoginStatus.Success && syncStatus)
+                    if (result == Domain.General.LoginStatus.Success)
                     {
                         if (rememberMe is true)
                             SaveCredentials(username, pasword);

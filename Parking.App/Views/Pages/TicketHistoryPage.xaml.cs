@@ -372,6 +372,7 @@ namespace Parking.App.Views.Pages
                 request.VehicleSegmentId = segment.Id == 0 ? null : segment.Id;
 
             return request;
+
         }
 
         private async void TicketsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -379,8 +380,10 @@ namespace Parking.App.Views.Pages
             if (ticketsDataGrid.SelectedItem is TicketsListViewModel selectedItem)
             {
                 var ticket = ticketsDataGrid.SelectedItem as TicketsListViewModel;
+                var window = Window.GetWindow(this);
                 var Details = new TicketDetailsWindow(ticket.Id, null, null, null);
-                Details?.Show();
+                Details.Owner = window;
+                Details?.ShowDialog();
             }
         }
 

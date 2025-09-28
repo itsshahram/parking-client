@@ -30,8 +30,10 @@ public partial class TicketListView : UserControl
 
             if (TicketList.SelectedItem is TicketsListViewModel ticket && parentValue != null)
             {
+                var window = Window.GetWindow(this);
                 var details = new TicketDetailsWindow(ticket.Id, parentValue.CurrentFrame, null, null);
-                details?.Show();
+                details.Owner = window;
+                details?.ShowDialog();
                 TicketList.SelectedItem = null;
             }
         }

@@ -140,7 +140,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         Message = "نام کاربری یا رمز عبور اشتباه است"
                     };
                 }
-                    
+
             }
             else
             {
@@ -1105,9 +1105,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
             var getListResponse = client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-seized-plate-List").Result;
             var getListJsonResult = JsonConvert.DeserializeObject<ApiResponse<List<SeizedLicensePlateModel>>>(getListResponse);
+
             if (getListJsonResult?.StatusCode == 200)
             {
-                var localPlateGroups = unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(p => true).Result;
                 foreach (var item in getListJsonResult.Data)
                 {
                     var LicensePlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(p => p.EnLicensePlate == item.EnLicensePlate);
@@ -1115,7 +1115,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                     {
                         SeizedLicensePlate newLicensePlate = new SeizedLicensePlate()
                         {
-
                             CreateDate = item.CreateDate,
                             CreatorUserId = item.CreatorUserId,
                             EnLicensePlate = item.EnLicensePlate,
@@ -1124,11 +1123,22 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         };
 
                         unitOfWork.SeizedLicensePlates.Add(newLicensePlate);
-                        //unitOfWork.Commit();
+                    }
+                    else
+                    {
+                        LicensePlate.CreateDate = item.CreateDate;
+                        LicensePlate.CreatorUserId = item.CreatorUserId;
+                        LicensePlate.FaLicensePlate = item.FaLicensePlate;
+                        LicensePlate.SeizedReason = item.SeizedReason;
+
+                        unitOfWork.SeizedLicensePlates.Update(LicensePlate);
                     }
                 }
+
+                unitOfWork.SeizedLicensePlates.Commit();
                 return new TServiceResponse<bool>(true, "عملیات موفق", true);
             }
+
             return new TServiceResponse<bool>(false, "خطا در دریافت اطلاعات", false);
         }
         catch (Exception ex)
@@ -1136,8 +1146,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             _logger.LogError(ex, ex.Message);
             return new TServiceResponse<bool>(false, "خطا در دریافت اطلاعات", false);
         }
-
     }
+
 
     public async Task<TServiceResponse<bool>> ReceiveSeizedLicensePlateFromServerAsync()
     {
@@ -1145,19 +1155,21 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStore.BearerToken);
+
             var getListResponse = await client.GetStringAsync($"{TokenStore.BaseUrl}/ParkingLot/get-seized-plate-List");
             var getListJsonResult = JsonConvert.DeserializeObject<ApiResponse<List<SeizedLicensePlateModel>>>(getListResponse);
-            if (getListJsonResult?.StatusCode == 200)
+
+            if (getListJsonResult?.StatusCode == 200 && getListJsonResult.Data != null)
             {
-                var localPlateGroups = await unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(p => true);
                 foreach (var item in getListJsonResult.Data)
                 {
-                    var LicensePlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(p => p.EnLicensePlate == item.EnLicensePlate);
-                    if (LicensePlate == null)
-                    {
-                        SeizedLicensePlate newLicensePlate = new SeizedLicensePlate()
-                        {
+                    var existingPlate = await unitOfWork.SeizedLicensePlates
+                        .FirstOrDefaultAsync(p => p.EnLicensePlate == item.EnLicensePlate);
 
+                    if (existingPlate == null)
+                    {
+                        var newLicensePlate = new SeizedLicensePlate()
+                        {
                             CreateDate = item.CreateDate,
                             CreatorUserId = item.CreatorUserId,
                             EnLicensePlate = item.EnLicensePlate,
@@ -1165,10 +1177,20 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             SeizedReason = item.SeizedReason,
                         };
 
-                        unitOfWork.SeizedLicensePlates.Add(newLicensePlate);
-                        //await unitOfWork.CommitAsync(default);
+                        await unitOfWork.SeizedLicensePlates.AddAsync(newLicensePlate);
+                    }
+                    else
+                    {
+                        existingPlate.CreateDate = item.CreateDate;
+                        existingPlate.CreatorUserId = item.CreatorUserId;
+                        existingPlate.FaLicensePlate = item.FaLicensePlate;
+                        existingPlate.SeizedReason = item.SeizedReason;
+
+                        unitOfWork.SeizedLicensePlates.Update(existingPlate);
                     }
                 }
+
+                await unitOfWork.SeizedLicensePlates.CommitAsync();
                 return new TServiceResponse<bool>(true, "عملیات موفق", true);
             }
             return new TServiceResponse<bool>(false, "خطا در دریافت اطلاعات", false);
@@ -1179,6 +1201,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             return new TServiceResponse<bool>(false, "خطا در دریافت اطلاعات", false);
         }
     }
+
 
     public TServiceResponse<bool> ReceiveVehicleSegmentsListFromServer()
     {
