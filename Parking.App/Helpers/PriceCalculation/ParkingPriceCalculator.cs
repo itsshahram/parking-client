@@ -45,12 +45,14 @@ public class ParkingCostCalculator
         this.variablePriceList = variablePriceList;
     }
 
+
     public ParkingPriceOutputModel CalculateCost(DateTime entryTime, DateTime exitTime)
     {
         TimeSpan totalTime = exitTime - entryTime;
         int totalMinutes = (int)totalTime.TotalMinutes;
+
         decimal totalCost = entryFee; // هزینه اولیه
-        int totalDays = (int)totalTime.Days;
+        int totalDays = totalTime.Days;
 
         if (totalMinutes <= freeMinutes)
         {
@@ -63,8 +65,9 @@ public class ParkingCostCalculator
                 TotalHours = totalTime.Hours,
                 TotalMinutes = totalTime.Minutes
             };
+            
         }
-        if (entryFee > 0 )
+        if (entryFee > 0)
         {
             totalMinutes = totalMinutes - 60;
             if (totalMinutes < 0)
@@ -94,9 +97,9 @@ public class ParkingCostCalculator
                 totalCost += totalDays * dailyRate;
                 totalMinutes -= totalDays * MinutesPerDay; // کم کردن دقیقه‌های روزها
             }
-
         }
-        // محاسبه هزینه برای زمان بیشتر از آستانه
+
+        //  محاسبه هزینه برای زمان بیشتر از آستانه ساعتی
         int remainingMinutes = totalMinutes;
         if (thresholdHoursPerDay > 0)
         {
@@ -135,9 +138,7 @@ public class ParkingCostCalculator
                         }
                     }
                 }
-
             }
-
         }
 
         // بررسی باقی‌مانده و اعمال تعرفه ساعتی

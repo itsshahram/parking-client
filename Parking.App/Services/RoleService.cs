@@ -27,7 +27,7 @@ public class RoleService : IRoleService
     public async Task<IEnumerable<Permission>> GetPermissionsAsync()
         => await _unitOfWork.Permissions.GetAll().ToListAsync();
 
-    public async Task<IEnumerable<ApplicationRole>?> GetRoles()
+    public async Task<List<ApplicationRole>> GetRoles()
         => await _unitOfWork.Roles.ToListAsync();
 
     public async Task<ApplicationRole?> GetRoleByName(string Name)
@@ -41,8 +41,6 @@ public class RoleService : IRoleService
         var result = await _roleManager.CreateAsync(role);
         return (result.Succeeded, false);
     }
-
-
 
     public async Task<bool> AddToRolePermission(Guid RoleId, IEnumerable<Guid> Ids)
     {
@@ -77,7 +75,6 @@ public class RoleService : IRoleService
 
     public async Task<bool> AddToUserPermissions(Guid RoleId, Guid UserId, IEnumerable<Guid> Ids)
     {
-
         await _unitOfWork.UserPermissions.ExecuteDeleteAsync(rp => rp.ApplicationRoleId == RoleId);
         foreach (var permissionId in Ids)
         {
@@ -88,7 +85,6 @@ public class RoleService : IRoleService
                 PermissionId = permissionId,
             });
         }
-
         return true;
     }
 

@@ -1108,6 +1108,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
             if (getListJsonResult?.StatusCode == 200)
             {
+                var localPlateGroups = unitOfWork.SeizedLicensePlates.ExecuteDelete(p => true && !p.IsLocal);
+
                 foreach (var item in getListJsonResult.Data)
                 {
                     var LicensePlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(p => p.EnLicensePlate == item.EnLicensePlate);
@@ -1120,6 +1122,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             EnLicensePlate = item.EnLicensePlate,
                             FaLicensePlate = item.FaLicensePlate,
                             SeizedReason = item.SeizedReason,
+                            IsLocal = false
                         };
 
                         unitOfWork.SeizedLicensePlates.Add(newLicensePlate);
@@ -1130,6 +1133,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         LicensePlate.CreatorUserId = item.CreatorUserId;
                         LicensePlate.FaLicensePlate = item.FaLicensePlate;
                         LicensePlate.SeizedReason = item.SeizedReason;
+                        LicensePlate.IsLocal = false;
 
                         unitOfWork.SeizedLicensePlates.Update(LicensePlate);
                     }
@@ -1161,6 +1165,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
             if (getListJsonResult?.StatusCode == 200 && getListJsonResult.Data != null)
             {
+                var localPlateGroups = await unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(p => true && !p.IsLocal);
                 foreach (var item in getListJsonResult.Data)
                 {
                     var existingPlate = await unitOfWork.SeizedLicensePlates
@@ -1175,6 +1180,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             EnLicensePlate = item.EnLicensePlate,
                             FaLicensePlate = item.FaLicensePlate,
                             SeizedReason = item.SeizedReason,
+                            IsLocal = false
                         };
 
                         await unitOfWork.SeizedLicensePlates.AddAsync(newLicensePlate);
@@ -1201,7 +1207,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             return new TServiceResponse<bool>(false, "خطا در دریافت اطلاعات", false);
         }
     }
-
 
     public TServiceResponse<bool> ReceiveVehicleSegmentsListFromServer()
     {
@@ -1768,7 +1773,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             _logger.LogError(ex, ex.Message);
         }
     }
-
     public async Task<bool> ServerConnectiviyCheckAsync()
     {
         try
@@ -1793,7 +1797,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             return false;
         }
     }
-
     public async Task SyncTicketExtraImagesAsync()
     {
         try

@@ -90,8 +90,8 @@
                     <TextBlock Text="نقش:" Width="100" VerticalAlignment="Center"/>
                     <ComboBox Width="300"
                         ItemsSource="{Binding Roles}"
-                        DisplayMemberPath="DisplayName"
-                        SelectedValuePath="Value"
+                        DisplayMemberPath="FaName"
+                        SelectedValuePath="Name"
                         SelectedValue="{Binding Role, Mode=TwoWay, 
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 ValidatesOnDataErrors=True, NotifyOnValidationError=True}"/>

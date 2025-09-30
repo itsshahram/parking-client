@@ -20,7 +20,6 @@ namespace Parking.App.Services;
 public class ParkingService : IParkingService
 {
     private readonly ILogger<ParkingService> _logger;
-    //private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IUnitOfWork unitOfWork;
     private IHttpClientFactory _httpClientFactory;
     private ITicketQueueService _ticketQueueService;
@@ -905,6 +904,7 @@ public class ParkingService : IParkingService
                     DriverDescription = s.DriverDescription,
                     QueueNumber = s.QueueNumber
                 }).FirstOrDefaultAsync();
+
             if (ticket != null && (ticket?.IsExited ?? false) == false)
             {
                 Stopwatch stopwatch = new Stopwatch();
@@ -2045,6 +2045,7 @@ public class ParkingService : IParkingService
                    EnLicensePlate = s.EnLicensePlate,
                    FaLicensePlate = s.FaLicensePlate,
                    SeizedReason = s.SeizedReason,
+                   IsLocal = s.IsLocal,
                    CreateDateShamsi = s.CreateDate.ToLongShamsiString(),
                })
                .ToList();
@@ -3217,6 +3218,21 @@ public class ParkingService : IParkingService
         }
     }
 
+    public async Task<bool> DeleteSeizedVehicleAsync(Guid Id)
+    {
+        try
+        {
+            var existingPlate = unitOfWork.SeizedLicensePlates.FirstOrDefault(x => x.Id == Id);
+            if (existingPlate == null)
+                return false;
+            await unitOfWork.SeizedLicensePlates.ExecuteDeleteAsync(x => x.Id == existingPlate.Id);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
     public async Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason)
     {
         if (string.IsNullOrWhiteSpace(plate))
@@ -3234,6 +3250,7 @@ public class ParkingService : IParkingService
             CreatorUserId = TokenStore.UserId,
             CreateDate = DateTime.Now,
             SeizedReason = reason,
+            IsLocal = true,
             EnLicensePlate = plate,
             FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ")
       + parsePlate.LeftTwoDigits : parsePlate.OriginalPlate
@@ -3243,3 +3260,4 @@ public class ParkingService : IParkingService
         return (false, true);
     }
 }
+

@@ -100,7 +100,8 @@ public interface IParkingService
     bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
     (bool IsSuccess, bool IsExsist) DeleteTicketDescriptionItem(int id);
     Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
-    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
+    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason); 
+    Task<bool> DeleteSeizedVehicleAsync(Guid Id);
 
     #endregion
 }

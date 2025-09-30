@@ -35,8 +35,14 @@
                 <DataGridTextColumn Header="نام خانوادگی" Binding="{Binding Lastname, Mode=OneWay}" />
                 <DataGridTextColumn Header="نام کاربری" Binding="{Binding UserName, Mode=OneWay}" />
                 <DataGridTextColumn Header="نقش" Binding="{Binding RoleFaName, Mode=OneWay}" />
-                <DataGridCheckBoxColumn Header="فعال" 
-                                        Binding="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridTemplateColumn  Header="فعال">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      helpers:PermissionBehavior.Permission="ChangeUserStatus"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="عملیات">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

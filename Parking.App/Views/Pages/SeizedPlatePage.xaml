@@ -33,10 +33,10 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <components:SeizedPlateItemComponent 
-                    DataModel="{Binding}" 
-                    Width="300" 
-                    Margin="10"/>
+                        <components:SeizedPlateItemComponent
+            Width="300"
+            Margin="10"
+            DeleteRequested="OnDeleteRequested"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

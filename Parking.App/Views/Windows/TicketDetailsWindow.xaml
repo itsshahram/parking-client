@@ -302,6 +302,70 @@
 
                             </Grid>
                         </Border>
+                        <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5" Padding="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Left TextBlock: "صف:" or "توضیحات:" -->
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="5">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <MultiBinding StringFormat="صف: {0}">
+                                                        <Binding Path="Item.DriverDescription"/>
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <!-- Change label to "توضیحات:" when QueueNumber is 0 or null -->
+                                                <DataTrigger Binding="{Binding Item.QueueNumber}" Value="0">
+                                                    <Setter Property="Text">
+                                                        <Setter.Value>
+                                                            <MultiBinding StringFormat="توضیحات: {0}">
+                                                                <Binding Path="Item.DriverDescription"/>
+                                                            </MultiBinding>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Item.QueueNumber}" Value="{x:Null}">
+                                                    <Setter Property="Text">
+                                                        <Setter.Value>
+                                                            <MultiBinding StringFormat="توضیحات: {0}">
+                                                                <Binding Path="Item.DriverDescription"/>
+                                                            </MultiBinding>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- Right TextBlock: QueueNumber, hidden when 0 or null -->
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="5">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Item.QueueNumber}" Value="0">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Item.QueueNumber}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+            <Run Text="شماره: "/>
+            <Run Text="{Binding Item.QueueNumber}" FontWeight="Bold"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+
                         <Border CornerRadius="10" Background="#20B9B9B9" BorderThickness="1" Margin="10 5">
                             <Grid Margin="10">
                                 <Grid.ColumnDefinitions>

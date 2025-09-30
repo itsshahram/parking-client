@@ -15,7 +15,6 @@ namespace Parking.App.Views.Pages
         private UsersListPageViewModel ViewModel { get; set; } = new();
         private readonly Logger<UsersListPage> logger;
         private readonly IUserService _userService;
-        private readonly RoleManager<ApplicationRole> _roleManager;
         public UsersListPage()
         {
             InitializeComponent();
@@ -24,6 +23,8 @@ namespace Parking.App.Views.Pages
 
             _ = LoadUsersAsync();
         }
+
+        [RequiresPermission("ChangeUserStatus", "تغییر وضعیت کاربر")]
         private async void User_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(UserListItemModel.IsActive))
@@ -52,7 +53,6 @@ namespace Parking.App.Views.Pages
             try
             {
                 var users = await _userService.GetAllUsersAsync();
-
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     ViewModel.Items.Clear(); 
@@ -106,7 +106,6 @@ namespace Parking.App.Views.Pages
                         ms.CloseButtonText = "متوجه شدم";
                         await ms.ShowDialogAsync();
                     });
-
                 }
             }
             catch
@@ -140,7 +139,6 @@ namespace Parking.App.Views.Pages
                     ShowMessage("خطا", $"کاربر {newUser.Username} از قبل ثبت شده است");
                     return;
                 }
-
 
                 await LoadUsersAsync();
 

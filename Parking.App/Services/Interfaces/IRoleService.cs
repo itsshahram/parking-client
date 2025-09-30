@@ -7,7 +7,7 @@ public interface IRoleService
 {
     Task<ApplicationRole?> GetRoleByName(string Name);
     Task<IEnumerable<Permission>> GetPermissionsAsync();
-    Task<IEnumerable<ApplicationRole>?> GetRoles();
+    Task<List<ApplicationRole>> GetRoles();
     Task<IEnumerable<RolePermission>> GetRolePermissions(Guid RoleId);
     Task<IEnumerable<UserPermission>> GetUserPermissions(Guid RoleId, Guid UserId);
     Task<bool> AssignRoleToUser(Guid UserId, Guid RoleId);

@@ -2,38 +2,60 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Parking.App.Views.Components"
+             xmlns:conv="clr-namespace:Parking.App.Converters"
              mc:Ignorable="d" 
              FontFamily="{StaticResource IranYekanFont}"
              d:DesignWidth="450"
-Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <UserControl.Resources>
+        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+    </UserControl.Resources>
+
     <Grid>
-        <Border  Background="#33828FA8"   CornerRadius="7">
+        <Border Background="#33828FA8" CornerRadius="7">
             <StackPanel Margin="15">
-                <Border BorderBrush="#999999" BorderThickness="1" CornerRadius="7" Margin="5 10 5 10" HorizontalAlignment="Center" Padding="20 5 20 5">
-                    <TextBlock Text="{Binding FaLicensePlate}" FontSize="20" FontStyle="Normal" FontWeight="Bold" HorizontalAlignment="Center"/>
+
+                <!-- License Plate -->
+                <Border BorderBrush="#999999" BorderThickness="1" CornerRadius="7" Margin="5 10 5 10" 
+                        HorizontalAlignment="Center" Padding="20 5 20 5">
+                    <TextBlock Text="{Binding FaLicensePlate}" 
+                               FontSize="20" FontStyle="Normal" FontWeight="Bold" 
+                               HorizontalAlignment="Center"/>
                 </Border>
+
                 <Grid FlowDirection="RightToLeft">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
+
                     <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
-                        <TextBlock  >
+                        <TextBlock>
                             <Run Text="تاریخ:" />
                             <Run Text="{Binding CreateDateShamsi}" />
                         </TextBlock>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="10">
-                        <TextBlock   Text="دلیل:" TextWrapping="Wrap">
+                        <TextBlock Text="دلیل:" TextWrapping="Wrap">
                             <Run Text="{Binding SeizedReason}"/>
                         </TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="10">
+                        <Button Content="حذف"
+                                Background="Crimson"
+                                Foreground="White"
+                                Visibility="{Binding IsLocal, Converter={StaticResource InverseBoolToVisibility}}"
+                                Click="Delete_Click" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

@@ -1,25 +1,34 @@
-﻿
+﻿namespace Parking.App.Views.Components;
 
-namespace Parking.App.Views.Components
+/// <summary>
+/// Interaction logic for SeizedPlateItemComponent.xaml
+/// </summary>
+public partial class SeizedPlateItemComponent : UserControl
 {
-    /// <summary>
-    /// Interaction logic for SeizedPlateItemComponent.xaml
-    /// </summary>
-    public partial class SeizedPlateItemComponent : UserControl
+    public SeizedPlateItemComponent()
     {
-        public SeizedPlateItemComponent()
+        InitializeComponent();
+    }
+
+    public static readonly RoutedEvent DeleteRequestedEvent =
+        EventManager.RegisterRoutedEvent(
+            nameof(DeleteRequested),
+            RoutingStrategy.Bubble,
+            typeof(RoutedEventHandler),
+            typeof(SeizedPlateItemComponent));
+
+    public event RoutedEventHandler DeleteRequested
+    {
+        add => AddHandler(DeleteRequestedEvent, value);
+        remove => RemoveHandler(DeleteRequestedEvent, value);
+    }
+
+    private void Delete_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SeizedLicensePlateModel model)
         {
-            InitializeComponent();
+            RaiseEvent(new RoutedEventArgs(DeleteRequestedEvent, model));
         }
-        public SeizedLicensePlateModel DataModel
-        {
-            get { return (SeizedLicensePlateModel)GetValue(DataModelProperty); }
-            set { SetValue(DataModelProperty, value); }
-        }
-
-        public static readonly DependencyProperty DataModelProperty =
-            DependencyProperty.Register("DataModel", typeof(SeizedLicensePlateModel), typeof(SeizedPlateItemComponent), new PropertyMetadata(null));
-
-
     }
 }
+

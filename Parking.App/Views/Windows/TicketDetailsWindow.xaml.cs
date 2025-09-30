@@ -24,7 +24,6 @@ namespace Parking.App.Views.Windows
         private readonly IParkingService? _parkingService;
         private bool IsMissingCard { get; set; } = false;
         private bool PaymentPermission { get; set; } = true;
-        private bool _isIntentionalClose = false;
         private string ExitImage { get; set; }
         private readonly ILogger<TicketDetailsWindow> _logger;
         private List<(ImageSource ImageSource, string Name, bool ForSave)> ExtraImagesList = new List<(ImageSource ImageSource, string Name, bool ForSave)>();
@@ -407,11 +406,7 @@ namespace Parking.App.Views.Windows
             }
         }
 
-        private void CashPayment_Click(object sender, RoutedEventArgs e)
-        {
-            CashPayment();
-        }
-
+        private void CashPayment_Click(object sender, RoutedEventArgs e) => CashPayment();
         private void MissingCardToggle_Checked(object sender, RoutedEventArgs e)
         {
             if (!IsMissingCard)
@@ -525,13 +520,11 @@ namespace Parking.App.Views.Windows
                     if (PaymentPermission)
                     {
                         if (Settings.Default.Application_GatePCName.Length > 3)
-                        {
                             GateName = Settings.Default.Application_GatePCName;
-                        }
                         else
-                        {
-                            GateName = System.Environment.MachineName;
-                        }
+                            GateName = Environment.MachineName;
+
+
                         if (ViewModel.Item.TotalAmount > 1000)
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()

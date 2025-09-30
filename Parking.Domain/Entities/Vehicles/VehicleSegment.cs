@@ -41,5 +41,4 @@ public class VehicleSegment
     /// مبلغ روزانه بعد از رد کردن آستانه روز
     /// </summary>
     public decimal DailyPriceAfterCrossingThreshold { get; set; }
-    //public virtual ICollection<ParkingVehicleSegmentPrice>? VehicleSegmentPrices { get; set; }
 }

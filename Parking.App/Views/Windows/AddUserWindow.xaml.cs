@@ -2,21 +2,20 @@
 {
     public partial class AddUserWindow : FluentWindow
     {
+        private readonly IRoleService _roleService;
         public AddUserWindowViewModel ViewModel { get; private set; }
 
         public AddUserWindow()
         {
             InitializeComponent();
-
+            _roleService = App.GetService<IRoleService>();
             ViewModel = new AddUserWindowViewModel();
-
-            ViewModel.Roles = new List<RoleItem>
-            {
-                new RoleItem { DisplayName = "مدیر پارکینگ", Value = "PARKINGMANAGER" },
-                new RoleItem { DisplayName = "مسئول پارکینگ", Value = "PARKINGAGENT" }
-            };
-
             DataContext = ViewModel;
+            _ = LoadRoleAsync();
+        }
+        private async Task LoadRoleAsync()
+        {
+            ViewModel.Roles = await _roleService.GetRoles();
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
