@@ -1,0 +1,124 @@
+﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.LicensePlate.AddLicensePlateWindows"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:conv="clr-namespace:Parking.App.Converters"
+                 xmlns:general="clr-namespace:Parking.Domain.General;assembly=Parking.Domain"
+                 xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 mc:Ignorable="d"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 FontFamily="{StaticResource IranYekanFont}"  
+                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 Title="افزودن گروه جدید"
+                 FlowDirection="RightToLeft"
+                 WindowStartupLocation="CenterOwner" Height="500" Width="450">
+
+    <ui:FluentWindow.Resources>
+        <!-- Enum values for GroupDate -->
+        <ObjectDataProvider x:Key="GroupDateValues"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="general:LicensePlateGroupDate"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!-- Converters -->
+        <conv:EnumDisplayNameConverter x:Key="EnumDisplayNameConverter"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </ui:FluentWindow.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="افزودن گروه جدید" 
+                   FontWeight="Bold" FontSize="16" 
+                   HorizontalAlignment="Left" Margin="100,0,0,20"/>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Top">
+
+            <!-- Name -->
+            <StackPanel Margin="0 0 0 10" Orientation="Horizontal">
+                <TextBlock Text="نام:" Width="100" VerticalAlignment="Center"/>
+                <ui:TextBox Width="250" 
+                            Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+
+            <!-- Description -->
+            <StackPanel Margin="0 0 0 10" Orientation="Horizontal">
+                <TextBlock Text="توضیحات:" Width="100" VerticalAlignment="Center"/>
+                <ui:TextBox Width="250" 
+                            Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+
+            <!-- Discount -->
+            <StackPanel Margin="0 0 0 10" Orientation="Horizontal">
+                <TextBlock Text="درصد تخفیف:" Width="100" VerticalAlignment="Center"/>
+                <ui:TextBox Width="250" 
+                            PreviewTextInput="PercentBox_PreviewTextInput"
+                            Text="{Binding DiscountPercent, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+
+            <!-- GroupDate Enum -->
+            <StackPanel Margin="0 0 0 10" Orientation="Horizontal">
+                <TextBlock Text="بازه زمانی:" Width="100" VerticalAlignment="Center"/>
+                <ComboBox Width="250"
+                          ItemsSource="{Binding Source={StaticResource GroupDateValues}}"
+                          SelectedItem="{Binding GroupDate, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumDisplayNameConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Start Date Panel -->
+            <TextBlock Text="تاریخ شروع:" Margin="0,10,0,0"/>
+            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" Margin="0 5 0 10">
+                <ui:TextBox Width="50" Text="{Binding StartYear}" MaxLength="4" Margin="2 0"/>
+                <TextBlock Text="/" VerticalAlignment="Center"/>
+                <ui:TextBox Width="30" Text="{Binding StartMonth}" MaxLength="2" Margin="2 0"/>
+                <TextBlock Text="/" VerticalAlignment="Center"/>
+                <ui:TextBox Width="30" Text="{Binding StartDay}" MaxLength="2" Margin="2 0"/>
+                <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
+                <ui:TextBox Width="30" Text="{Binding StartHour}" MaxLength="2" Margin="2 0"/>
+                <TextBlock Text=":" VerticalAlignment="Center"/>
+                <ui:TextBox Width="30" Text="{Binding StartMinute}" MaxLength="2" Margin="2 0"/>
+            </StackPanel>
+
+            <!-- Optional End Date Panel -->
+            <StackPanel x:Name="OptionalDatesPanel"
+                        Visibility="{Binding IsOptionalSelected, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Margin="0 10 0 0">
+                <TextBlock Text="تاریخ پایان اختیاری:" FontWeight="Bold" Margin="0,0,0,5"/>
+                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" Margin="0 5 0 10">
+                    <ui:TextBox Width="50" Text="{Binding EndYear}" MaxLength="4" Margin="2 0"/>
+                    <TextBlock Text="/" VerticalAlignment="Center"/>
+                    <ui:TextBox Width="30" Text="{Binding EndMonth}" MaxLength="2" Margin="2 0"/>
+                    <TextBlock Text="/" VerticalAlignment="Center"/>
+                    <ui:TextBox Width="30" Text="{Binding EndDay}" MaxLength="2" Margin="2 0"/>
+                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
+                    <ui:TextBox Width="30" Text="{Binding EndHour}" MaxLength="2" Margin="2 0"/>
+                    <TextBlock Text=":" VerticalAlignment="Center"/>
+                    <ui:TextBox Width="30" Text="{Binding EndMinute}" MaxLength="2" Margin="2 0"/>
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <ui:Button Content="ذخیره" Width="100" Margin="5 0" Click="SaveButton_Click"/>
+            <ui:Button Content="انصراف" Width="100" Margin="5 0" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

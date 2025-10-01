@@ -17,7 +17,7 @@
         <StackPanel DockPanel.Dock="Top">
             <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal">
                 <TextBlock Text="گروه پلاک ها" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="20" Margin="10 10 10 0"/>
-                <ui:Button Content="افزودن گروه پلاک" Click="AddLicensePlate_Click" Margin="10 0"/>
+                <ui:Button Content="افزودن پلاک به گروه پلاک" Click="AddLicensePlate_Click" Margin="10 0"/>
             </StackPanel>
             <StackPanel  DockPanel.Dock="Top"  Margin="10">
                 <Label Content="پلاک را وارد کنید" Margin="10 5 0 0"   HorizontalAlignment="Center" />

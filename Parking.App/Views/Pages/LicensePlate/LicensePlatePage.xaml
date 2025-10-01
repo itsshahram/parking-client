@@ -21,28 +21,28 @@
                        Margin="10 0"/>
         </StackPanel>
 
-        <ui:DataGrid ItemsSource="{Binding LicensePlateGroups, Mode=OneWay}">
+        <ui:DataGrid ItemsSource="{Binding LicensePlateGroups, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="False">
             <ui:DataGrid.Columns>
-                <DataGridTextColumn Header="نام گروه" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="توضیحات" Binding="{Binding Description}">
+                <DataGridTextColumn Header="نام گروه" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="توضیحات" Binding="{Binding Description}" Width="2*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextWrapping" Value="Wrap"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
+                <DataGridTextColumn Header="تخفیف (%)" Binding="{Binding DiscountPercent}" Width="80"/>
+                <DataGridTextColumn Header="تاریخ شروع" Binding="{Binding StartDateString}" Width="130"/>
+                <DataGridTextColumn Header="تاریخ پایان" Binding="{Binding EndDateString}" Width="130"/>
 
-                <DataGridTemplateColumn Header="عملیات">
+                <!-- Actions column -->
+                <DataGridTemplateColumn Header="عملیات" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <!--<StackPanel Orientation="Horizontal">
-                                <ui:Button Content="ویرایش"
-                                   Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                   CommandParameter="{Binding}" Margin="5 0"/>
-                                <ui:Button Content="حذف"
-                                   Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                   CommandParameter="{Binding}" Margin="5 0"/>
-                            </StackPanel>-->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <ui:Button Content="ویرایش" Margin="2" Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                <ui:Button Content="حذف" Margin="2" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

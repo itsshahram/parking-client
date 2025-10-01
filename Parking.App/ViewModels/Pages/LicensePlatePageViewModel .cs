@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
 
 namespace Parking.App.ViewModels.Pages;
-
-
 public class LicensePlatePageViewModel : INotifyPropertyChanged
 {
     private readonly IParkingService _parkingService;
@@ -50,7 +48,7 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
                 Description = item.Description,
                 DiscountPercent = item.DiscountPercent,
                 StartDateString = item.StartDate.ToShamsi(),
-                EndDateString = item.EndDate.ToShamsi()
+                EndDateString = item.EndDate.ToShamsi(),
             });
         }
     }

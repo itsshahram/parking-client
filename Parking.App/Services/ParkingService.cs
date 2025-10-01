@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Parking.App.Models.Dto.Card;
+﻿using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -3290,5 +3289,26 @@ public class ParkingService : IParkingService
         return (false, true);
     }
 
+    public async Task<bool> AddLicensePlateGroup(LicensePlateGroup licensePlate)
+    {
+        try
+        {
+            await unitOfWork.LicensePlateGroups.AddAsync(new LicensePlateGroup()
+            {
+                Name = licensePlate.Name,
+                ParkingLotId = TokenStore.ParkingLotId,
+                Description = licensePlate.Description,
+                DiscountPercent = licensePlate.DiscountPercent,
+                StartDate = licensePlate.StartDate,
+                EndDate = licensePlate.EndDate,
+                IsActive = true,
+            });
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }
 

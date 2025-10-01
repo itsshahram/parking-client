@@ -44,13 +44,13 @@ public interface IParkingService
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
     Task<List<LicensePlateGroupModel>> GetLicensePlateList();
+    Task<bool> AddLicensePlateGroup(LicensePlateGroup licensePlate);
     (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize);
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
     Guid? GetGroupIdByEnLicensePlate(string enLicensePlate);
     bool SetTicketPaidInfo(TicketPaidInfoModel request);
     LicensePlateGroup? GetLicensePlateGroupById(Guid id);
-
     List<string?> GetEntryRegistrars();
     List<string?> GetExitRegistrars();
 
