@@ -1,6 +1,7 @@
 ﻿using Coravel;
 using Microsoft.AspNetCore.Identity;
 using Parking.App.Seeds;
+using Parking.App.Views.Pages.LicensePlate;
 using Parking.Domain.Contracts.Base;
 using Parking.Domain.Entities;
 using Parking.Domain.Entities.User;
@@ -70,6 +71,7 @@ public partial class App : Application
                 services.AddTransient<CustomAmountPaymentModalWindow>();
                 services.AddScoped<SettingsPageViewModel>();
                 services.AddScoped<LicensePlateGroupPage>();
+                services.AddScoped<LicensePlateTabsPage>();
                 services.AddScoped<LicensePlateGroupViewModel>();
                 services.AddScoped<AddCardPage>();
                 services.AddScoped<AddCardPageViewModel>();

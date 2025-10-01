@@ -63,7 +63,6 @@ namespace Parking.App.Views.Pages
                     {
                         await _parkingService.DeleteSeizedVehicleAsync(model.Id);
                         var updatedList = _parkingService.GetSeizedLicensePlatesList();
-
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             SeizedPlateList.Clear();
@@ -82,7 +81,7 @@ namespace Parking.App.Views.Pages
                         await ms.ShowDialogAsync();
                         return;
                     }
-                }   
+                }
             }
         }
     }

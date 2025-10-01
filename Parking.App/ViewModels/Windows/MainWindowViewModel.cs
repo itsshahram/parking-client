@@ -1,5 +1,6 @@
 ﻿using Parking.App.Attributes;
 using Parking.App.Views.Pages.CardsPageChilds;
+using Parking.App.Views.Pages.LicensePlate;
 
 namespace Parking.App.ViewModels.Windows;
 
@@ -61,7 +62,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Content = "گروه ها",
             Icon = new SymbolIcon { Symbol = SymbolRegular.AlignSpaceEvenlyVertical20 },
-            TargetPageType = typeof(LicensePlateGroupPage)
+            TargetPageType = typeof(LicensePlateTabsPage)
         });
         MenuItems.Add(new NavigationViewItem()
         {

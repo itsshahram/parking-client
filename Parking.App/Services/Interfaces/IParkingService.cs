@@ -43,6 +43,7 @@ public interface IParkingService
     string GetVehicleSegmentNameById(int Id);
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
+    Task<List<LicensePlateGroupModel>> GetLicensePlateList();
     (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize);
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
@@ -100,7 +101,7 @@ public interface IParkingService
     bool ChangeTicketDescriptionItemQueueStatus(int id, bool status);
     (bool IsSuccess, bool IsExsist) DeleteTicketDescriptionItem(int id);
     Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
-    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason); 
+    Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
     Task<bool> DeleteSeizedVehicleAsync(Guid Id);
 
     #endregion

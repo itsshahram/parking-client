@@ -1,4 +1,5 @@
-﻿using Parking.App.Models.Dto.Card;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -1941,6 +1942,35 @@ public class ParkingService : IParkingService
         }
     }
 
+
+    public async Task<List<LicensePlateGroupModel>> GetLicensePlateList()
+    {
+        var licensePlateGroupList = await unitOfWork
+               .LicensePlateGroups
+               .GetAll()
+               .Select(l => new LicensePlateGroupModel
+               {
+                   Id = l.Id,
+                   DiscountPercent = l.DiscountPercent,
+                   CreatorUserId = l.CreatorUserId,
+                   Description = l.Description,
+                   EndDate = l.EndDate,
+                   IsActive = l.IsActive,
+                   Name = l.Name,
+                   StartDate = l.StartDate,
+                   LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
+                   {
+                       Id = ll.Id,
+                       EnLicensePlate = ll.EnLicensePlate,
+                       FaLicensePlate = ll.FaLicensePlate,
+                       GroupId = (Guid)ll.GroupId
+                   }).ToList()
+               }).ToListAsync();
+
+
+        return licensePlateGroupList;
+    }
+
     public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize)
     {
         try
@@ -3259,5 +3289,6 @@ public class ParkingService : IParkingService
         await unitOfWork.SeizedLicensePlates.AddAsync(seizedPlate);
         return (false, true);
     }
+
 }
 
