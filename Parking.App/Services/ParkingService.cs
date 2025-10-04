@@ -3302,6 +3302,7 @@ public class ParkingService : IParkingService
                 StartDate = licensePlate.StartDate,
                 EndDate = licensePlate.EndDate,
                 IsActive = true,
+                IsLocal = true
             });
             return true;
         }
@@ -3325,6 +3326,7 @@ public class ParkingService : IParkingService
                 FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + parsePlate.LeftTwoDigits : parsePlate.OriginalPlate,
                 EnLicensePlate = licensePlate.EnLicensePlate,
                 GroupId = licensePlate.GroupId,
+                IsLocal = true
             });
             return (true, false);
         }

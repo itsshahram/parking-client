@@ -14,5 +14,6 @@ public class LicensePlateGroup
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public Guid CreatorUserId { get; set; }
+    public bool IsLocal { get; set; }
     public virtual List<LicensePlate>? LicensePlates { get; set; }
 }

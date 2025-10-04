@@ -853,7 +853,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             {
                 var localPlateGroups = unitOfWork.LicensePlateGroups.ToList();
 
-                var toRemove = localPlateGroups.Where(a => !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
+                var toRemove = localPlateGroups.Where(a => !a.IsLocal && !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
                 foreach (var item in toRemove)
                 {
                     var a = unitOfWork.LicensePlates.ExecuteDeleteAsync(l => l.GroupId == item.Id).Result;
@@ -875,6 +875,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             DiscountPercent = groupItem.DiscountPercent,
                             EndDate = groupItem.EndDate,
                             IsActive = groupItem.IsActive,
+                            IsLocal = false,
                             Name = groupItem.Name,
                             ParkingLotId = groupItem.ParkingLotId,
                             StartDate = groupItem.StartDate
@@ -891,6 +892,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 LicensePlate newLicensePlate = new LicensePlate()
                                 {
                                     Id = subitem.Id,
+                                    IsLocal = false,
                                     GroupId = subitem.GroupId,
                                     EnLicensePlate = subitem.EnLicensePlate,
                                     FaLicensePlate = subitem.FaLicensePlate
@@ -937,7 +939,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 {
                                     GroupId = subitem.GroupId,
                                     EnLicensePlate = subitem.EnLicensePlate,
-                                    FaLicensePlate = subitem.FaLicensePlate
+                                    FaLicensePlate = subitem.FaLicensePlate,
+                                    IsLocal = false
                                 };
                                 unitOfWork.LicensePlates.Add(newLicensePlate);
                                 //unitOfWork.Commit();
@@ -978,7 +981,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
             {
                 var localPlateGroups = unitOfWork.LicensePlateGroups.ToList();
 
-                var toRemove = localPlateGroups.Where(a => !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
+                var toRemove = localPlateGroups.Where(a => !a.IsLocal && !getListJsonResult.Data.Any(b => b.Id == a.Id)).ToList();
                 foreach (var item in toRemove)
                 {
                     await unitOfWork.LicensePlates.ExecuteDeleteAsync(l => l.GroupId == item.Id);
@@ -1002,7 +1005,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             IsActive = groupItem.IsActive,
                             Name = groupItem.Name,
                             ParkingLotId = groupItem.ParkingLotId,
-                            StartDate = groupItem.StartDate
+                            StartDate = groupItem.StartDate,
+                            IsLocal = false
                         };
                         unitOfWork.LicensePlateGroups.Add(newLicensePlateGroup);
                         //await unitOfWork.CommitAsync(default);
@@ -1017,6 +1021,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 {
                                     Id = subitem.Id,
                                     GroupId = subitem.GroupId,
+                                    IsLocal = false,
                                     EnLicensePlate = subitem.EnLicensePlate,
                                     FaLicensePlate = subitem.FaLicensePlate
                                 };
@@ -1064,7 +1069,8 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                 {
                                     GroupId = subitem.GroupId,
                                     EnLicensePlate = subitem.EnLicensePlate,
-                                    FaLicensePlate = subitem.FaLicensePlate
+                                    FaLicensePlate = subitem.FaLicensePlate,
+                                    IsLocal = false
                                 };
                                 unitOfWork.LicensePlates.Add(newLicensePlate);
                                 //await unitOfWork.CommitAsync(default);
