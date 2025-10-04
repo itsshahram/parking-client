@@ -45,7 +45,10 @@ public interface IParkingService
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
     Task<List<LicensePlateGroupModel>> GetLicensePlateList();
     Task<bool> AddLicensePlateGroup(LicensePlateGroup licensePlate);
-    (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize);
+    Task<(bool IsSuccess, bool IsExsist)> AddLicensePlate(LicensePlate licensePlate);
+    Task<(bool IsSuccess, bool IsExsist)> DeleteLicensePlateGroup(Guid Id);
+    Task<bool> DeleteLicensePlate(Guid Id);
+    (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize, Guid? SelectedGroupId);
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
     Guid? GetGroupIdByEnLicensePlate(string enLicensePlate);
@@ -77,6 +80,7 @@ public interface IParkingService
     (List<AddCardItemModel> Result, int ResultCount, string ResultMSG) SearchInCardHistory(string? FullName, long? CardUid, string? EnLicensePlate, int? PercentDiscount, DateTime? StartCreateDate, DateTime? EndCreateDate, string? Description, int Page, int PageSize);
 
     #endregion
+
     #region ExtraImages
     bool AddTicketExtraImage(Guid TicketId, string Image, string Name, bool ShowInPage);
     Task<bool> AddTicketExtraImageAsync(Guid TicketId, string Image, string Name, bool ShowInPage);
@@ -90,7 +94,6 @@ public interface IParkingService
     Guid? GetTicketIdByBarcode(long barcode);
 
     #endregion
-
 
     #region TicketDescription
     List<TicketDescriptionItemModel> GetAllTicketDescriptionItems();

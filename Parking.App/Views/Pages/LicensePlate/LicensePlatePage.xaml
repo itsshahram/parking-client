@@ -35,13 +35,11 @@
                 <DataGridTextColumn Header="تاریخ شروع" Binding="{Binding StartDateString}" Width="130"/>
                 <DataGridTextColumn Header="تاریخ پایان" Binding="{Binding EndDateString}" Width="130"/>
 
-                <!-- Actions column -->
                 <DataGridTemplateColumn Header="عملیات" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <ui:Button Content="ویرایش" Margin="2" Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
-                                <ui:Button Content="حذف" Margin="2" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                <ui:Button Content="حذف" Margin="2" Click="DeleteLicensePlateGroup_Click"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

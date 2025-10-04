@@ -11,15 +11,12 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
         = new ObservableCollection<LicensePlateListItemResult>();
 
     public ICommand EditCommand { get; }
-    public ICommand DeleteCommand { get; }
 
     public LicensePlatePageViewModel(IParkingService parkingService)
     {
         _parkingService = parkingService;
 
         EditCommand = new RelayCommand<LicensePlateListItemResult>(Edit);
-        DeleteCommand = new RelayCommand<LicensePlateListItemResult>(Delete);
-
         _ = LoadData();
     }
 
@@ -27,13 +24,6 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
     {
         if (item == null) return;
         await Task.CompletedTask;
-    }
-
-    private async void Delete(LicensePlateListItemResult? item)
-    {
-        if (item == null) return;
-        //await _parkingService.DeleteLicensePlateGroup(item.Name);
-        LicensePlateGroups.Remove(item);
     }
 
     public async Task LoadData()
@@ -44,6 +34,7 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
         {
             LicensePlateGroups.Add(new LicensePlateListItemResult
             {
+                Id = item.Id,
                 Name = item.Name,
                 Description = item.Description,
                 DiscountPercent = item.DiscountPercent,

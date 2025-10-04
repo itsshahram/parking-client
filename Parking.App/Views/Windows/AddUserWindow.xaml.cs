@@ -17,14 +17,6 @@
         {
             ViewModel.Roles = await _roleService.GetRoles();
         }
-
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is AddUserWindowViewModel vm)
-            {
-                vm.Password = ((System.Windows.Controls.PasswordBox)sender).Password;
-            }
-        }
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             var vm = DataContext as AddUserWindowViewModel;
@@ -42,6 +34,38 @@
 
             DialogResult = true;
             Close();
+        }
+
+        private void TogglePasswordVisibility_Click(object sender, RoutedEventArgs e)
+        {
+            if (PasswordTextBox.Visibility == Visibility.Collapsed)
+            {
+                PasswordTextBox.Text = PasswordBox.Password;
+                PasswordTextBox.Visibility = Visibility.Visible;
+                PasswordBox.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                PasswordBox.Password = PasswordTextBox.Text;
+                PasswordTextBox.Visibility = Visibility.Collapsed;
+                PasswordBox.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is AddUserWindowViewModel vm)
+            {
+                vm.Password = ((System.Windows.Controls.PasswordBox)sender).Password;
+            }
+            if (PasswordTextBox.Visibility == Visibility.Visible)
+                PasswordTextBox.Text = PasswordBox.Password;
+        }
+
+        private void PasswordTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (PasswordBox.Visibility == Visibility.Visible)
+                PasswordBox.Password = PasswordTextBox.Text;
         }
 
         private async void ShowMessage(string title, string message)

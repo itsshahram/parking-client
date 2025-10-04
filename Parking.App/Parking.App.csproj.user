@@ -112,7 +112,10 @@
     <Compile Update="Views\Windows\DatabaseErrorWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\Windows\LicensePlate\AddLicensePlateWindows.xaml.cs">
+    <Compile Update="Views\Windows\LicensePlate\AddLicensePlateWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Windows\LicensePlate\AddLicenseGroupPlateWindows.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Windows\LoginWindow.xaml.cs">

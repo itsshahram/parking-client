@@ -6,13 +6,13 @@ namespace Parking.App.Views.Windows.LicensePlate;
 /// <summary>
 /// Interaction logic for AddLicensePlateWindows.xaml
 /// </summary>
-public partial class AddLicensePlateWindows : FluentWindow
+public partial class AddLicenseGroupPlateWindows : FluentWindow
 {
     private PersianCalendar _pc = new PersianCalendar();
 
     public AddLicensePlateViewModel Vm => DataContext as AddLicensePlateViewModel;
 
-    public AddLicensePlateWindows()
+    public AddLicenseGroupPlateWindows()
     {
         InitializeComponent();
         DataContext = new AddLicensePlateViewModel();
@@ -28,18 +28,15 @@ public partial class AddLicensePlateWindows : FluentWindow
                 if (!Vm.IsOptionalSelected)
                 {
                     var start = GetStartDateFromViewModel();
-                    switch (Vm.GroupDate)
+                    DateTime end = Vm.GroupDate switch
                     {
-                        case LicensePlateGroupDate.OneMonth:
-                            SetEndDate(start.AddMonths(1));
-                            break;
-                        case LicensePlateGroupDate.ThreeMonth:
-                            SetEndDate(start.AddMonths(3));
-                            break;
-                        case LicensePlateGroupDate.SixMonth:
-                            SetEndDate(start.AddMonths(6));
-                            break;
-                    }
+                        LicensePlateGroupDate.OneMonth => start.AddMonths(1),
+                        LicensePlateGroupDate.ThreeMonth => start.AddMonths(3),
+                        LicensePlateGroupDate.SixMonth => start.AddMonths(6),
+                        _ => start.AddMonths(1)
+                    };
+
+                    SetEndDate(end);
                 }
             }
         };
@@ -54,6 +51,12 @@ public partial class AddLicensePlateWindows : FluentWindow
     {
         try
         {
+            if (!Vm.Validate(out string errorMessage))
+            {
+                ShowMessage("خطا", errorMessage);
+                return;
+            }
+
             DateTime start = GetStartDateFromViewModel();
             DateTime end;
 
@@ -112,8 +115,10 @@ public partial class AddLicensePlateWindows : FluentWindow
         Vm.EndDay = _pc.GetDayOfMonth(end).ToString("00");
         Vm.EndHour = end.Hour.ToString("00");
         Vm.EndMinute = end.Minute.ToString("00");
-    }
 
+        Vm.EndDate = end;
+        Vm.EndDateString = end.ToShamsi(); 
+    }
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
         Close();

@@ -55,7 +55,7 @@ namespace Parking.App.Views.Pages
                 var users = await _userService.GetAllUsersAsync();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ViewModel.Items.Clear(); 
+                    ViewModel.Items.Clear();
                     foreach (var user in users)
                     {
                         user.PropertyChanged += User_PropertyChanged;
@@ -69,7 +69,7 @@ namespace Parking.App.Views.Pages
             }
         }
 
-        [RequiresPermission("UserChangePassword","تغییر رمز عبور")]
+        [RequiresPermission("UserChangePassword", "تغییر رمز عبور")]
         private async void ChangePassword_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -114,18 +114,20 @@ namespace Parking.App.Views.Pages
             }
         }
 
-        [RequiresPermission("UserAdd","ایجاد کاربر")]
+        [RequiresPermission("UserAdd", "ایجاد کاربر")]
         private async void AddUser_Click(object sender, RoutedEventArgs e)
         {
-            var addUserWindow = new AddUserWindow();
-            addUserWindow.Owner = Application.Current.MainWindow;
+            var addUserWindow = new AddUserWindow
+            {
+                Owner = Application.Current.MainWindow
+            };
 
-            if (addUserWindow.ShowDialog() == true)
+            bool? result = addUserWindow.ShowDialog();
+            if (result == true)
             {
                 var newUser = addUserWindow.ViewModel;
 
-
-                var result = await _userService.CreateUser(new ApplicationUser()
+                var resultUser = await _userService.CreateUser(new ApplicationUser()
                 {
                     Firstname = newUser.FirstName,
                     Lastname = newUser.LastName,
@@ -134,7 +136,7 @@ namespace Parking.App.Views.Pages
                     RegisterDate = DateTime.Now,
                 }, newUser.Role, newUser.Password);
 
-                if (result.IsExist)
+                if (resultUser.IsExist)
                 {
                     ShowMessage("خطا", $"کاربر {newUser.Username} از قبل ثبت شده است");
                     return;
@@ -143,7 +145,6 @@ namespace Parking.App.Views.Pages
                 await LoadUsersAsync();
 
                 ShowMessage("موفقیت", $"کاربر {newUser.Username} با موفقیت ایجاد شد.");
-                addUserWindow.DialogResult = true;
             }
         }
     }

@@ -1970,7 +1970,7 @@ public class ParkingService : IParkingService
         return licensePlateGroupList;
     }
 
-    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize)
+    public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize, Guid? SelectedGroupId)
     {
         try
         {
@@ -1998,20 +1998,23 @@ public class ParkingService : IParkingService
 
             if (EnLicensePlate != null)
             {
-
                 licensePlateGroupList = licensePlateGroupList.Where(g => g.LicensePlates.Any(lp => lp.EnLicensePlate == EnLicensePlate));
+            }
+
+            if (SelectedGroupId != null)
+            {
+                licensePlateGroupList = licensePlateGroupList.Where(g => g.LicensePlates.Any(lp => lp.GroupId == SelectedGroupId));
             }
 
             var x = licensePlateGroupList.ToList();
             List<LicensePlateListItemViewModel> list = new List<LicensePlateListItemViewModel>();
             foreach (var item in licensePlateGroupList)
             {
-
-
                 foreach (var sub in item?.LicensePlates)
                 {
                     list.Add(new LicensePlateListItemViewModel
                     {
+                        Id = sub.Id,
                         Name = item.Name,
                         Description = item.Description,
                         DiscountPercent = item.DiscountPercent,
@@ -2147,10 +2150,7 @@ public class ParkingService : IParkingService
     }
 
     public LicensePlateGroup? GetLicensePlateGroupById(Guid id)
-    {
-
-        return unitOfWork.LicensePlateGroups.GetById(id);
-    }
+        => unitOfWork.LicensePlateGroups.GetById(id);
 
     public decimal GetCardCreditAsync(long cardSerialNo)
     {
@@ -3309,6 +3309,52 @@ public class ParkingService : IParkingService
         {
             return false;
         }
+    }
+    public async Task<(bool IsSuccess, bool IsExsist)> AddLicensePlate(LicensePlate licensePlate)
+    {
+        try
+        {
+            var plate = unitOfWork.LicensePlates.FirstOrDefault(x => x.EnLicensePlate == licensePlate.EnLicensePlate);
+            if (plate != null)
+                return (false, true);
+
+            var parsePlate = licensePlate.EnLicensePlate.ParsePlate();
+
+            await unitOfWork.LicensePlates.AddAsync(new LicensePlate()
+            {
+                FaLicensePlate = parsePlate.IsIranianPlate ? "ایران" + parsePlate.IranCode.Replace("IR", "") + "_" + parsePlate.RightThreeDigits + parsePlate.Letter.ToLower()?.ConvertEnCharToFaCharIndex().Replace("ه", "هـ") + parsePlate.LeftTwoDigits : parsePlate.OriginalPlate,
+                EnLicensePlate = licensePlate.EnLicensePlate,
+                GroupId = licensePlate.GroupId,
+            });
+            return (true, false);
+        }
+        catch (Exception)
+        {
+            return (false, false);
+        }
+    }
+    public async Task<(bool IsSuccess, bool IsExsist)> DeleteLicensePlateGroup(Guid Id)
+    {
+        var licensePlateGroup = GetLicensePlateGroupById(Id);
+        if (licensePlateGroup is null)
+            return (false, false);
+
+        var licensePlateAssigned = unitOfWork.LicensePlates.FirstOrDefault(x => x.GroupId == licensePlateGroup.Id);
+        if (licensePlateAssigned != null)
+            return (false, true);
+
+        await unitOfWork.LicensePlateGroups.ExecuteDeleteAsync(x => x.Id == licensePlateGroup.Id);
+        return (true, false);
+    }
+
+    public async Task<bool> DeleteLicensePlate(Guid Id)
+    {
+        var licensePlate = unitOfWork.LicensePlates.FirstOrDefault(x => x.Id == Id);
+        if (licensePlate is null)
+            return false;
+
+        await unitOfWork.LicensePlates.ExecuteDeleteAsync(x => x.Id == licensePlate.Id);
+        return true;
     }
 }
 

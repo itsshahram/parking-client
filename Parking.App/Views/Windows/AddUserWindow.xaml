@@ -26,15 +26,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <TextBlock Text="افزودن کاربر جدید" 
                    FontWeight="Bold" FontSize="16" 
                    HorizontalAlignment="Left" Margin="121,0,0,20"/>
 
-        <!-- Form -->
+
         <StackPanel Grid.Row="1" VerticalAlignment="Top" Grid.ColumnSpan="2">
 
-            <!-- First Name -->
+
             <StackPanel Margin="0 0 0 10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="نام:" Width="100" VerticalAlignment="Center"/>
@@ -47,7 +46,7 @@
                                   RelativeSource={RelativeSource Mode=PreviousData}}"/>
             </StackPanel>
 
-            <!-- Last Name -->
+
             <StackPanel Margin="0 0 0 10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="نام خانوادگی:" Width="100" VerticalAlignment="Center"/>
@@ -60,7 +59,7 @@
                                   RelativeSource={RelativeSource Mode=PreviousData}}"/>
             </StackPanel>
 
-            <!-- Username -->
+
             <StackPanel Margin="0 0 0 10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="نام کاربری:" Width="100" VerticalAlignment="Center"/>
@@ -72,19 +71,44 @@
                            Text="{Binding (Validation.Errors)[0].ErrorContent, 
                                   RelativeSource={RelativeSource Mode=PreviousData}}"/>
             </StackPanel>
-
-            <!-- Password -->
             <StackPanel Margin="0 0 0 10">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="رمز عبور:" Width="100" VerticalAlignment="Center"/>
-                    <PasswordBox x:Name="PasswordBox" Width="300"
-                                 PasswordChanged="PasswordBox_PasswordChanged"/>
+
+
+                    <Grid Width="300" Height="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+
+                        <PasswordBox x:Name="PasswordBox"
+                         Grid.Column="0"
+                         VerticalAlignment="Stretch"
+                         Padding="5,0,5,0"
+                         PasswordChanged="PasswordBox_PasswordChanged"/>
+
+                        <TextBox x:Name="PasswordTextBox"
+                     Grid.Column="0"
+                     VerticalAlignment="Stretch"
+                     Padding="5,0,5,0"
+                     Visibility="Collapsed"
+                     TextChanged="PasswordTextBox_TextChanged"/>
+
+                   <ui:Button Icon="{ui:SymbolIcon Symbol=Eye24}"
+                    Grid.Column="1"
+                    Width="25" Height="25"
+                    VerticalAlignment="Center"
+                    Margin="0,0,2,0"
+                    Click="TogglePasswordVisibility_Click"/>
+                    </Grid>
                 </StackPanel>
+
+
                 <TextBlock Foreground="Red" FontSize="12"
-                           Text="{Binding PasswordError, Mode=OneWay}"/>
+               Text="{Binding PasswordError, Mode=OneWay}" Margin="100,2,0,0"/>
             </StackPanel>
 
-            <!-- Role -->
             <StackPanel Margin="0 0 0 10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="نقش:" Width="100" VerticalAlignment="Center"/>
@@ -102,7 +126,6 @@
             </StackPanel>
         </StackPanel>
 
-        <!-- Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="70,20,0,0" Grid.ColumnSpan="2">
             <ui:Button Content="ذخیره" Width="100" Margin="5 0" Click="SaveButton_Click"/>
             <ui:Button Content="انصراف" Width="100" Margin="5 0" Click="CancelButton_Click"/>
