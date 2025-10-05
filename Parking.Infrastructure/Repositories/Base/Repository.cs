@@ -90,6 +90,12 @@ public class Repository<T> : IRepository<T> where T : class
         _context.SaveChanges();
     }
 
+    public async Task UpdateAsync(T entity)
+    {
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync();
+    }
+
     public void Delete(T entity)
     {
         _dbSet.Remove(entity);

@@ -10,12 +10,12 @@ public partial class AddLicenseGroupPlateWindows : FluentWindow
 {
     private PersianCalendar _pc = new PersianCalendar();
 
-    public AddLicensePlateViewModel Vm => DataContext as AddLicensePlateViewModel;
+    public AddLicensePlateGroupViewModel Vm => DataContext as AddLicensePlateGroupViewModel;
 
     public AddLicenseGroupPlateWindows()
     {
         InitializeComponent();
-        DataContext = new AddLicensePlateViewModel();
+        DataContext = new AddLicensePlateGroupViewModel();
 
         Vm.PropertyChanged += (s, e) =>
         {

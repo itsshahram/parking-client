@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 namespace Parking.App.ViewModels.Windows
 {
-    public class AddLicensePlateViewModel : INotifyPropertyChanged
+    public class AddLicensePlateGroupViewModel : INotifyPropertyChanged
     {
         private readonly PersianCalendar _pc = new PersianCalendar();
 
-        public AddLicensePlateViewModel()
+        public AddLicensePlateGroupViewModel()
         {
             var now = DateTime.Now;
 

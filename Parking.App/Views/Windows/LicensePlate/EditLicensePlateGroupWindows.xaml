@@ -1,4 +1,4 @@
-﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.LicensePlate.AddLicenseGroupPlateWindows"
+﻿<ui:FluentWindow x:Class="Parking.App.Views.Windows.LicensePlate.EditLicenseGroupPlateWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +13,7 @@
                  WindowCornerPreference="Round"
                  FontFamily="{StaticResource IranYekanFont}"  
                  Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                 Title="افزودن گروه جدید"
+                 Title="ویرایش گروه پلاک"
                  FlowDirection="RightToLeft"
                  WindowStartupLocation="CenterOwner" Height="500" Width="450">
 
@@ -40,7 +40,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="افزودن گروه جدید" 
+        <TextBlock Text="ویرایش گروه پلاک" 
                    FontWeight="Bold" FontSize="16" 
                    HorizontalAlignment="Left" Margin="100,0,0,20"/>
 
@@ -52,7 +52,6 @@
                 <ui:TextBox Width="250" 
                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
-
 
             <StackPanel Margin="0 0 0 10" Orientation="Horizontal">
                 <TextBlock Text="توضیحات:" Width="100" VerticalAlignment="Center"/>
@@ -80,50 +79,52 @@
                 </ComboBox>
             </StackPanel>
 
+            <!-- Start Date -->
             <TextBlock Text="تاریخ شروع:" Margin="0,10,0,0"/>
             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" Margin="0 5 0 10">
-                <ui:TextBox Width="70" Text="{Binding StartYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="4" Margin="2 0" FontSize="20"/>
+                <ui:TextBox Width="70" Text="{Binding StartYear}" MaxLength="4" Margin="2 0" FontSize="20"/>
                 <TextBlock Text="/" VerticalAlignment="Center"/>
-                <ui:TextBox Width="70" Text="{Binding StartMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                <ui:TextBox Width="70" Text="{Binding StartMonth}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 <TextBlock Text="/" VerticalAlignment="Center"/>
-                <ui:TextBox Width="70" Text="{Binding StartDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                <ui:TextBox Width="70" Text="{Binding StartDay}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                <ui:TextBox Width="70" Text="{Binding StartHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                <ui:TextBox Width="70" Text="{Binding StartHour}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 <TextBlock Text=":" VerticalAlignment="Center"/>
-                <ui:TextBox Width="70" Text="{Binding StartMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                <ui:TextBox Width="70" Text="{Binding StartMinute}" MaxLength="2" Margin="2 0" FontSize="20"/>
             </StackPanel>
 
+            <!-- End Date -->
             <TextBlock Text="پایان گروه:" 
-           Margin="0,5,0,0" 
-           FontWeight="Bold"
-           Visibility="{Binding IsOptionalSelected, Converter={StaticResource NegateBoolToVisibilityConverter}}"/>
+                       Margin="0,5,0,0" 
+                       FontWeight="Bold"
+                       Visibility="{Binding IsOptionalSelected, Converter={StaticResource NegateBoolToVisibilityConverter}}"/>
             <TextBlock Text="{Binding EndDateString}" 
-           FontWeight="Bold" 
-           Foreground="DarkGreen" 
-           Margin="0,0,0,10"
-           Visibility="{Binding IsOptionalSelected, Converter={StaticResource NegateBoolToVisibilityConverter}}"/>
+                       FontWeight="Bold" 
+                       Foreground="DarkGreen" 
+                       Margin="0,0,0,10"
+                       Visibility="{Binding IsOptionalSelected, Converter={StaticResource NegateBoolToVisibilityConverter}}"/>
+
             <StackPanel x:Name="OptionalDatesPanel"
-            Visibility="{Binding IsOptionalSelected, Converter={StaticResource BoolToVisibilityConverter}}"
-            Margin="0 10 0 0">
+                        Visibility="{Binding IsOptionalSelected, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Margin="0 10 0 0">
                 <TextBlock Text="تاریخ پایان اختیاری:" FontWeight="Bold" Margin="0,0,0,5"/>
                 <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" Margin="0 5 0 10">
-                    <ui:TextBox Width="70" Text="{Binding EndYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="4" Margin="2 0" FontSize="20"/>
+                    <ui:TextBox Width="70" Text="{Binding EndYear}" MaxLength="4" Margin="2 0" FontSize="20"/>
                     <TextBlock Text="/" VerticalAlignment="Center"/>
-                    <ui:TextBox Width="70" Text="{Binding EndMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                    <ui:TextBox Width="70" Text="{Binding EndMonth}" MaxLength="2" Margin="2 0" FontSize="20"/>
                     <TextBlock Text="/" VerticalAlignment="Center"/>
-                    <ui:TextBox Width="70" Text="{Binding EndDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                    <ui:TextBox Width="70" Text="{Binding EndDay}" MaxLength="2" Margin="2 0" FontSize="20"/>
                     <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                    <ui:TextBox Width="70" Text="{Binding EndHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                    <ui:TextBox Width="70" Text="{Binding EndHour}" MaxLength="2" Margin="2 0" FontSize="20"/>
                     <TextBlock Text=":" VerticalAlignment="Center"/>
-                    <ui:TextBox Width="70" Text="{Binding EndMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="2" Margin="2 0" FontSize="20"/>
+                    <ui:TextBox Width="70" Text="{Binding EndMinute}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 </StackPanel>
-
             </StackPanel>
 
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-            <ui:Button Content="ذخیره" Width="100" Margin="5 0" Click="SaveButton_Click"/>
+            <ui:Button Content="ویرایش" Width="100" Margin="5 0" Click="SaveButton_Click"/>
             <ui:Button Content="انصراف" Width="100" Margin="5 0" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>

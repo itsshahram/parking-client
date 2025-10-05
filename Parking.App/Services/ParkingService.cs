@@ -1,4 +1,5 @@
-﻿using Parking.App.Models.Dto.Card;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -3357,6 +3358,28 @@ public class ParkingService : IParkingService
 
         await unitOfWork.LicensePlates.ExecuteDeleteAsync(x => x.Id == licensePlate.Id);
         return true;
+    }
+
+    public async Task<bool> UpdateLicensePlateGroup(LicensePlateGroup licensePlateGroup)
+    {
+        try
+        {
+            await unitOfWork.LicensePlateGroups.ExecuteUpdateAsync(
+                group => group.Id == licensePlateGroup.Id,
+                g => g.SetProperty(x => x.Name, licensePlateGroup.Name)
+              .SetProperty(x => x.Description, licensePlateGroup.Description)
+              .SetProperty(x => x.DiscountPercent, licensePlateGroup.DiscountPercent)
+              .SetProperty(x => x.StartDate, licensePlateGroup.StartDate)
+              .SetProperty(x => x.EndDate, licensePlateGroup.EndDate));
+
+
+            unitOfWork.LicensePlateGroups.Commit();
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }
 

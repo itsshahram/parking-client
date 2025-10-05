@@ -25,6 +25,7 @@ public interface IRepository<T> where T : class
     void Add(T entity);
     Task AddAsync(T entity);
     void Update(T entity);
+    Task UpdateAsync(T entity);
     void Delete(T entity);
     Task<bool> Delete(IEnumerable<T> entities);
     void ExecuteUpdate(Expression<Func<T, bool>> query, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> expression);

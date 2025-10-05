@@ -106,6 +106,7 @@ public interface IParkingService
     Task<TicketSummaryReportModel> GetSummaryReport(GetTicketListRequestModel request);
     Task<(bool Exists, bool IsSuccess)> AddSeizedVehicleAsync(string plate, string reason);
     Task<bool> DeleteSeizedVehicleAsync(Guid Id);
+    Task<bool> UpdateLicensePlateGroup(LicensePlateGroup licensePlateGroup);
 
     #endregion
 }

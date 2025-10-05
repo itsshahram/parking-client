@@ -42,11 +42,11 @@
         <components:ParkingInfo DockPanel.Dock="Top" Margin="0,0,0,10"/>
         <TabControl FlowDirection="RightToLeft" Background="Transparent" BorderThickness="0">
             <TabItem Header="گروه ها">
-                <Frame x:Name="LicensePlateFrame" NavigationUIVisibility="Hidden"/>
+                <Frame x:Name="LicensePlateGroupFrame" NavigationUIVisibility="Hidden"/>
             </TabItem>
 
             <TabItem Header="گروه پلاک‌ها">
-                <Frame x:Name="LicensePlateGroupFrame" NavigationUIVisibility="Hidden"/>
+                <Frame x:Name="LicensePlateFrame" NavigationUIVisibility="Hidden"/>
             </TabItem>
 
         </TabControl>

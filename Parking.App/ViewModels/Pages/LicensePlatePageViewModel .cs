@@ -15,16 +15,9 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
     public LicensePlatePageViewModel(IParkingService parkingService)
     {
         _parkingService = parkingService;
-
-        EditCommand = new RelayCommand<LicensePlateListItemResult>(Edit);
         _ = LoadData();
     }
 
-    private async void Edit(LicensePlateListItemResult? item)
-    {
-        if (item == null) return;
-        await Task.CompletedTask;
-    }
 
     public async Task LoadData()
     {
