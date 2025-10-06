@@ -45,7 +45,7 @@
         Grid.Row="0"
         Grid.RowSpan="2" />
 
-            <ui:TitleBar
+        <ui:TitleBar
         x:Name="TitleBar"
         Title="{Binding ViewModel.ApplicationTitle}"
         Grid.Row="0"

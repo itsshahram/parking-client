@@ -221,19 +221,6 @@ namespace Parking.App.Views.Pages
             }
             #endregion
 
-            #region لود کردن لیست تعرفه
-            int defaultVehicleSegmentId = Settings.Default.Application_DefaultVehicleSegmentPrice;
-            var vehicleSegmentsList = _parkingService
-                .GetVehicleSegments()
-                .OrderByDescending(x => x.Id == defaultVehicleSegmentId)
-                .ThenBy(x => x.Id == defaultVehicleSegmentId)
-                .Select(v => new ComboBoxItem { Tag = v.Id, Content = v.NameFa })
-                .ToList();
-
-            foreach (var item in vehicleSegmentsList)
-                VehicleSegmentComboBox.Items.Add(item);
-            #endregion
-
             #region لود کردن لیست حروف پلاک
             var plateChars = LicensePlateHelper.GetChars();
             plateCharsCombo.ItemsSource = plateChars.Select(p => p.PlateFa).ToList();
@@ -572,48 +559,51 @@ namespace Parking.App.Views.Pages
 
         private void SortSegmentsByDetectedPlate(List<VehicleSegmentModel> vehicleSegments, PlateType plateType)
         {
-            var segment = vehicleSegments.FirstOrDefault(x => x.PlateType == plateType);
+            int defaultVehicleSegmentId = Settings.Default.Application_DefaultVehicleSegmentPrice;
 
             this.Dispatcher.Invoke(() =>
             {
-
-                var vehicleSegmentsList = vehicleSegments.Where(x => x.PlateType == plateType || x.PlateType == Domain.General.PlateType.All)
+                var vehicleSegmentsList = vehicleSegments
+                    .Where(x => x.PlateType == plateType || x.PlateType == PlateType.All)
                     .Select(v => new ComboBoxItem
                     {
                         Tag = v.Id,
                         Content = v.NameFa
-                    }).ToList();
+                    })
+                    .ToList();
 
+                bool containsDefaultSegment = vehicleSegmentsList.Any(x => (int)x.Tag == defaultVehicleSegmentId);
 
+                VehicleSegmentComboBox.Items.Clear();
 
-                if (vehicleSegmentsList != null)
+                if (defaultVehicleSegmentId == 0 || !containsDefaultSegment)
                 {
-                    VehicleSegmentComboBox.Items.Clear();
-                    int defaultVehicleSegmentId = Settings.Default.Application_DefaultVehicleSegmentPrice;
-
-                    if (defaultVehicleSegmentId == 0)
-                        vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = null, Content = "انتخاب کنید" });
-
-                    foreach (var item in vehicleSegmentsList.OrderBy(x => x.Tag))
-                        VehicleSegmentComboBox.Items.Add(item);
-
-                    var vehicleSegment = vehicleSegmentsList.FirstOrDefault();
-                    VehicleSegmentComboBox.SelectedIndex = vehicleSegmentsList.IndexOf(vehicleSegment);
-
-                    VehicleSegmentId = int.TryParse(vehicleSegment?.Tag?.ToString(), out var id)
-                        ? id
-                        : 0;
-
-                    VehicleSegmentName = VehicleSegmentComboBox.Text;
-
-                    ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
-                    {
-                        Content = VehicleSegmentComboBox.SelectedIndex,
-                        Tag = VehicleSegmentComboBox.SelectedIndex
-                    };
+                    vehicleSegmentsList.Insert(0, new ComboBoxItem { Tag = null, Content = "انتخاب کنید" });
                 }
+
+                foreach (var item in vehicleSegmentsList)
+                    VehicleSegmentComboBox.Items.Add(item);
+
+                ComboBoxItem selectedItem;
+                if (containsDefaultSegment)
+                    selectedItem = vehicleSegmentsList.First(x => (int)x.Tag == defaultVehicleSegmentId);
+                else
+                    selectedItem = vehicleSegmentsList.First(); 
+
+                VehicleSegmentComboBox.SelectedItem = selectedItem;
+
+   
+                VehicleSegmentId = int.TryParse(selectedItem?.Tag?.ToString(), out var id) ? id : 0;
+                VehicleSegmentName = VehicleSegmentComboBox.Text;
+
+                ViewModel.SelectedVehicleSegmentItem = new ComboBoxItem
+                {
+                    Content = VehicleSegmentName,
+                    Tag = VehicleSegmentId
+                };
             });
         }
+
 
         private void CheckPlate()
         {
@@ -1257,7 +1247,7 @@ namespace Parking.App.Views.Pages
 
         }
 
-        [RequiresPermission("CreateTicket","ایجاد قبض")]
+        [RequiresPermission("CreateTicket", "ایجاد قبض")]
         private void CreateTicketBtn_Click(object sender, RoutedEventArgs e)
         {
             try
