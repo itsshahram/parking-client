@@ -2983,10 +2983,7 @@ public class ParkingService : IParkingService
             {
                 result = result.Where(r => r.CardUid == CardUid);
             }
-
             return (result.Skip((Page - 1) * PageSize).Take(PageSize).ToList(), result.Count(), "جستجو در تاریخچه");
-
-
         }
         catch (Exception ex)
         {

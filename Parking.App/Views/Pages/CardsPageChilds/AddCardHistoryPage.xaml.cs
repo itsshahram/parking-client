@@ -64,7 +64,7 @@ public partial class AddCardHistoryPage : Page
         StartMountTextBox.Text = nowTime[1];
         StartDayTextBox.Text = nowTime[2];
 
-        var yesterdayTime = SafeSplitShamsi(DateTime.Now.AddDays(-90));
+        var yesterdayTime = SafeSplitShamsi(DateTime.Now.AddDays(90));
 
         EndYearTextBox.Text = yesterdayTime[0];
         EndMountTextBox.Text = yesterdayTime[1];

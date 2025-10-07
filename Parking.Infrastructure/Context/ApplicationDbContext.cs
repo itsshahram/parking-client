@@ -39,6 +39,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserPermission> UserPermissions { get; set; }
+    public DbSet<AddCardItem> AddCardItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
