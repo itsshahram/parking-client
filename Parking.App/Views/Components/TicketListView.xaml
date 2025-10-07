@@ -26,8 +26,6 @@
                             <Run Text="{Binding StartTimeString}"/>
                             <Run Text=" | "/>
                             <Run Text="{Binding StartTimeOnlyString}" FontSize="18"/>
-                            <!--<LineBreak/>
-                            <Run Text="{Binding BarcodeId}"/>-->
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -41,11 +39,16 @@
         </DataTemplate>
     </UserControl.Resources>
     <ui:ListView x:Name="TicketList"
-      VirtualizingStackPanel.IsVirtualizing="True"
-      VirtualizingStackPanel.VirtualizationMode="Recycling"
-      ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
-      SelectionMode="Single"
-      SelectionChanged="TicketList_Selected"
-      ItemTemplate="{StaticResource carPlateItemTemplate}"/>
+    ScrollViewer.CanContentScroll="False"
+    ScrollViewer.VerticalScrollBarVisibility="Auto"
+    VirtualizingStackPanel.IsVirtualizing="True"
+    VirtualizingStackPanel.VirtualizationMode="Recycling"
+    ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
+    SelectionMode="Single"
+    SelectionChanged="TicketList_Selected"
+    ItemTemplate="{StaticResource carPlateItemTemplate}" />
+
+
+
 
 </UserControl>

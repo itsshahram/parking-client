@@ -221,47 +221,75 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <ScrollViewer Grid.Column="1" Margin="5" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed"  x:Name="LatestEntriesColumn">
-                <StackPanel  Margin="0 5 10 5">
-                    <TextBlock Text="آخرین ورود ها"/>
-                    <StackPanel x:Name="TicketDetailsBox" Margin="6">
+            <ScrollViewer Grid.Column="1" Margin="5" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed" x:Name="LatestEntriesColumn">
+                <Grid Margin="0 5 10 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    </StackPanel>
-                    <components:TicketListView x:Name="LatestEntryList" Margin="0 0 0 50" ItemsSource="{Binding LatestEntryListItems}"/>
+                    <TextBlock Text="آخرین ورود ها" Grid.Row="0"/>
+                    <StackPanel x:Name="TicketDetailsBox" Margin="6" Grid.Row="1"/>
 
-                </StackPanel>
+                    <components:TicketListView x:Name="LatestEntryList"
+                                   Grid.Row="2"
+                                   Margin="0 0 0 50"
+                                   ItemsSource="{Binding LatestEntryListItems}"/>
+                </Grid>
             </ScrollViewer>
 
-            <ScrollViewer Grid.Column="2" Margin="5" x:Name="LatestExitedColumn" CanContentScroll="True" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
-                <StackPanel Grid.Column="2" Margin="0 5 5 5">
-                    <StackPanel Margin="10" x:Name="BarcodeSearchBox">
-                        <TextBlock Text="جستجو با بارکد"></TextBlock>
+
+            <ScrollViewer Grid.Column="2"
+              Margin="5"
+              x:Name="LatestExitedColumn"
+              CanContentScroll="True"
+              VerticalScrollBarVisibility="Auto"
+              Visibility="Collapsed">
+
+                <Grid Margin="0 5 5 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="10"
+                    x:Name="BarcodeSearchBox"
+                    Grid.Row="0">
+                        <TextBlock Text="جستجو با بارکد"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <ui:TextBox Grid.Column="0" 
-                    HorizontalAlignment="Stretch" 
-                    x:Name="BarcodeTextBox" 
-                    MinWidth="200"
-                    PreviewTextInput="BarcodeTextBox_PreviewTextInput"
-                    DataObject.Pasting="BarcodeTextBox_Pasting"
-                    PreviewKeyDown="MainWindow_PreviewKeyDown"/>
+                            <ui:TextBox Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            x:Name="BarcodeTextBox"
+                            MinWidth="200"
+                            PreviewTextInput="BarcodeTextBox_PreviewTextInput"
+                            DataObject.Pasting="BarcodeTextBox_Pasting"
+                            PreviewKeyDown="MainWindow_PreviewKeyDown"/>
 
-                            <ui:Button Grid.Column="1" 
-                   x:Name="BTNSearchBarcode" 
-                   Click="BTNSearchBarcode_Click" 
-                   Icon="{ui:SymbolIcon Symbol=Search28}" 
-                   Appearance="Success"/>
+                            <ui:Button Grid.Column="1"
+                           x:Name="BTNSearchBarcode"
+                           Click="BTNSearchBarcode_Click"
+                           Icon="{ui:SymbolIcon Symbol=Search28}"
+                           Appearance="Success"/>
                         </Grid>
                     </StackPanel>
 
-                    <TextBlock Text="آخرین خروج ها"/>
-                    <components:TicketListView  ItemsSource="{Binding LatestExitedListItems}" />
-                </StackPanel>
+                    <TextBlock Grid.Row="1"
+                   Text="آخرین خروج ها"
+                   Margin="10 0 0 5"/>
+
+                    <components:TicketListView Grid.Row="2"
+                                   Margin="0 0 0 50"
+                                   ItemsSource="{Binding LatestExitedListItems}"/>
+                </Grid>
             </ScrollViewer>
+
         </Grid>
     </DockPanel>
 </Page>
