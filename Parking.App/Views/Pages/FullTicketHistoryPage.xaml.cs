@@ -353,6 +353,8 @@ public partial class FullTicketHistoryPage : Page
         request.EntryRegistrar = EntryRegistrarCombo.Text == "همه" ? null : EntryRegistrarCombo.Text;
         request.ExitRegistrar = ExitRegistrarCombo.Text == "همه" ? null : ExitRegistrarCombo.Text;
         request.HasDiscrepancy = DiscrepancyCheckBox.IsChecked == true ? true : null;
+        request.RRN = RRNTextBox.Text;
+        request.TrackNo = TrackNoTextBox.Text;
 
         return request;
     }
@@ -466,6 +468,9 @@ public partial class FullTicketHistoryPage : Page
         PriceTo.Text = "";
         PriceFrom.Text = "";
         DiscrepancyCheckBox.IsChecked = false;
+
+        RRNTextBox.Text = "";
+        TrackNoTextBox.Text = "";
     }
 
     private void VehicleStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
