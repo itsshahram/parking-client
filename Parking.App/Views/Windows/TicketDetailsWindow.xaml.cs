@@ -352,6 +352,7 @@ namespace Parking.App.Views.Windows
                                 });
                                 SetTicketData(ViewModel.Item.Id);
                                 SetPaymentStatus(true);
+                                CloseAfterSuccessPayment();
                             }
                             else
                             {
@@ -382,6 +383,7 @@ namespace Parking.App.Views.Windows
                                 SetTicketData(ViewModel.Item.Id);
                                 SetPaymentStatus(true);
                                 SaveExtraImages();
+                                CloseAfterSuccessPayment();
                             }
                             else
                             {
@@ -799,6 +801,17 @@ namespace Parking.App.Views.Windows
                 CustomPayment_Btn.Visibility = Visibility.Collapsed;
             else
                 CustomPayment_Btn.Visibility = Visibility.Visible;
+        }
+
+
+        private async void CloseAfterSuccessPayment()
+        {
+            bool active = Settings.Default.Application_CloseTicketAfterSuccessPayment;
+            if (active)
+            {
+                await Task.Delay(2000); 
+                this.Close();
+            }
         }
     }
 }
