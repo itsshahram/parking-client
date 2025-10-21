@@ -1642,37 +1642,13 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 .Select(p => new { p.Id }).ToList();
             foreach (var item in tickets)
             {
-                var responce = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-image/{item.Id}").Result;
-                var result = JsonConvert.DeserializeObject<ApiResponse<string>>(responce);
+                var response = client.GetStringAsync($"{TokenStore.BaseUrl}/Ticket/get-ticket-image/{item.Id}").Result;
+                var result = JsonConvert.DeserializeObject<ApiResponse<string>>(response);
                 if (result?.Data != null)
                 {
                     unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
                                 update => update
-                                .SetProperty(ticket => ticket.StartImage, ticket => result.Data)
-                                );
-                    //if (!unitOfWork.ParkingTicketImages.Find(t => t.TicketId == item.Id).Any())
-                    //{
-                    //    unitOfWork.ParkingTicketImages.Add(new ParkingTicketImage
-                    //    {
-                    //        TicketId = item.Id,
-                    //        CreateDateTime = DateTime.Now,
-                    //        EntryImageAddress = result.Data
-                    //    });
-                    //    //unitOfWork.Commit();
-
-
-
-                    //    //unitOfWork.Commit();
-                    //}
-                    //else
-                    //{
-                    //    unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                    //                            update => update
-                    //                            .SetProperty(ticket => ticket.StartImage, ticket => "0")
-                    //                            );
-                    //    //unitOfWork.Commit();
-                    //}
-
+                                .SetProperty(ticket => ticket.StartImage, ticket => result.Data));
                 }
             }
 
@@ -1704,24 +1680,14 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                                                     update => update
                                                     .SetProperty(ticket => ticket.ExitImage, ticket => result.Data)
                                                     );
-                        //unitOfWork.ParkingTicketImages.ExecuteUpdate(g => g.TicketId == item.Id,
-                        //            update => update
-                        //            .SetProperty(image => image.ExitImageAddress, image => result.Data)
-                        //            );
-                        //unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == item.Id,
-                        //    update => update
-                        //    .SetProperty(ticket => ticket.ExitImage, ticket => "0")
-                        //    );
                     }
                 }
 
             }
-
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-
         }
     }
     public async Task SyncTicketImageAsync()

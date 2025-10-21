@@ -20,16 +20,32 @@
 
             <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" Margin="10 5">
                 <TextBlock Text="فیلتر بر اساس گروه:" VerticalAlignment="Center" Margin="5"/>
-                <ComboBox x:Name="GroupFilterComboBox"
-                          Width="200"
-                          SelectionChanged="GroupFilter_SelectionChanged"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"
-                          Margin="5 0"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox x:Name="GroupFilterComboBox"
+              Width="200"
+              IsEditable="True"
+              DisplayMemberPath="Name"
+              SelectedValuePath="Id"
+              StaysOpenOnEdit="True"
+              IsTextSearchEnabled="False"
+              SelectionChanged="GroupFilter_SelectionChanged"
+              Margin="5 0"/>
+
+
+                    <ui:Button 
+               Click="SearchGroupButton_Click"
+               Icon="{ui:SymbolIcon Symbol=Search20}"
+               Appearance="Primary"
+               VerticalAlignment="Stretch"
+               Margin="10 0"
+               Padding="40 0"/>
+                </StackPanel>
+
                 <ui:Button Content="پاک کردن فیلتر"
-                           Click="ClearGroupFilter_Click"
-                           Appearance="Secondary"
-                           Margin="5 0"/>
+               Click="ClearGroupFilter_Click"
+               Appearance="Secondary"
+               Margin="5 0"/>
             </StackPanel>
 
             <StackPanel Margin="10">

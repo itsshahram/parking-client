@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Parking.App.Models.Dto.Card;
+﻿using Parking.App.Models.Dto.Card;
 using Parking.App.Models.Dto.Parking.ParkingLot;
 using Parking.App.Models.Dto.Parking.ParkingSection;
 using Parking.App.Models.Dto.Parking.ParkingSpace;
@@ -1942,34 +1941,46 @@ public class ParkingService : IParkingService
         }
     }
 
-
-    public async Task<List<LicensePlateGroupModel>> GetLicensePlateList()
+    public async Task<List<LicensePlateGroupModel>> GetLicensePlateList(string? q = "")
     {
-        var licensePlateGroupList = await unitOfWork
-               .LicensePlateGroups
-               .GetAll()
-               .Select(l => new LicensePlateGroupModel
-               {
-                   Id = l.Id,
-                   DiscountPercent = l.DiscountPercent,
-                   CreatorUserId = l.CreatorUserId,
-                   Description = l.Description,
-                   EndDate = l.EndDate,
-                   IsActive = l.IsActive,
-                   Name = l.Name,
-                   StartDate = l.StartDate,
-                   LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
-                   {
-                       Id = ll.Id,
-                       EnLicensePlate = ll.EnLicensePlate,
-                       FaLicensePlate = ll.FaLicensePlate,
-                       GroupId = (Guid)ll.GroupId
-                   }).ToList()
-               }).ToListAsync();
+        var query = unitOfWork
+            .LicensePlateGroups
+            .GetAll()
+            .AsQueryable();
 
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(x =>
+                x.Name.Contains(q) ||
+                (x.Description != null && x.Description.Contains(q)));
+        }
+
+        var licensePlateGroupList = await query
+            .OrderBy(x => x.Name)
+            .Select(l => new LicensePlateGroupModel
+            {
+                Id = l.Id,
+                Name = l.Name,
+                DiscountPercent = l.DiscountPercent,
+                CreatorUserId = l.CreatorUserId,
+                Description = l.Description,
+                EndDate = l.EndDate,
+                IsActive = l.IsActive,
+                StartDate = l.StartDate,
+                LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
+                {
+                    Id = ll.Id,
+                    EnLicensePlate = ll.EnLicensePlate,
+                    FaLicensePlate = ll.FaLicensePlate,
+                    GroupId = (Guid)ll.GroupId
+                }).ToList()
+            })
+            .ToListAsync();
 
         return licensePlateGroupList;
     }
+
+
 
     public (List<LicensePlateListItemViewModel> Data, int TotalCount) GetLicensePlateGroupList(string? EnLicensePlate, int Page, int PageSize, Guid? SelectedGroupId)
     {
@@ -3378,5 +3389,70 @@ public class ParkingService : IParkingService
             return false;
         }
     }
+
+
+    public async Task<int> GetActiveLicensePlateGroupCountAsync()
+        => await unitOfWork.LicensePlateGroups.GetAll().CountAsync(x => x.IsActive);
+
+    public async Task<int> GetInactiveLicensePlateGroupCountAsync()
+        => await unitOfWork.LicensePlateGroups.GetAll().CountAsync(x => !x.IsActive);
+
+    public async Task<int> GetTotalLicensePlateGroupCountAsync()
+        => await unitOfWork.LicensePlateGroups.GetAll().CountAsync();
+
+    public async Task<(List<LicensePlateGroupModel> Data, int TotalCount)> GetLicensePlatePaginatedList(
+        int page,
+        int pageSize,
+        string? filterName,
+        int? filterDiscount,
+        DateTime? filterStartDate,
+        DateTime? filterEndDate)
+    {
+        var baseQuery = unitOfWork
+            .LicensePlateGroups
+            .GetAll();
+
+
+        if (!string.IsNullOrWhiteSpace(filterName))
+            baseQuery = baseQuery.Where(l => l.Name.Contains(filterName));
+
+        if (filterDiscount.HasValue)
+            baseQuery = baseQuery.Where(l => l.DiscountPercent == filterDiscount.Value);
+
+        if (filterStartDate.HasValue)
+            baseQuery = baseQuery.Where(l => l.StartDate >= filterStartDate.Value);
+
+        if (filterEndDate.HasValue)
+            baseQuery = baseQuery.Where(l => l.EndDate <= filterEndDate.Value);
+
+        var totalCount = await baseQuery.CountAsync();
+
+        var pagedData = await baseQuery
+            .OrderBy(l => l.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(l => new LicensePlateGroupModel
+            {
+                Id = l.Id,
+                DiscountPercent = l.DiscountPercent,
+                CreatorUserId = l.CreatorUserId,
+                Description = l.Description,
+                EndDate = l.EndDate,
+                IsActive = l.IsActive,
+                Name = l.Name,
+                StartDate = l.StartDate,
+                LicensePlates = l.LicensePlates.Select(ll => new LicensePlateModel
+                {
+                    Id = ll.Id,
+                    EnLicensePlate = ll.EnLicensePlate,
+                    FaLicensePlate = ll.FaLicensePlate,
+                    GroupId = (Guid)ll.GroupId
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return (pagedData, totalCount);
+    }
+
 }
 
