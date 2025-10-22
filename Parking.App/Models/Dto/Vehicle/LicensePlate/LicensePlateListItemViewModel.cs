@@ -20,6 +20,10 @@ public class LicensePlateListItemResult
     public string? Name { get; set; }
     public string? Description { get; set; }
     public short DiscountPercent { get; set; }
-    public string? StartDateString { get; set; }
-    public string? EndDateString { get; set; }
+    public DateTime StartDate { get; set; }  
+    public DateTime EndDate { get; set; }  
+
+    public string StartDateString => StartDate.ToShamsi();
+    public string EndDateString => EndDate.ToShamsi();
+
 }

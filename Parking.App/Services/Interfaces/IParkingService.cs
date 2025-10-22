@@ -43,7 +43,7 @@ public interface IParkingService
     string GetVehicleSegmentNameById(int Id);
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
-    Task<List<LicensePlateGroupModel>> GetLicensePlateList(string? q = "");
+    Task<List<LicensePlateGroupModel>> GetLicensePlateList(int Page = 0, int Take = 0, string? q = "");
     Task<(List<LicensePlateGroupModel> Data, int TotalCount)> GetLicensePlatePaginatedList(int Page, int PageSize, string? filterName, int? filterDiscount, DateTime? filterStartDate, DateTime? filterEndDate);
     Task<bool> AddLicensePlateGroup(LicensePlateGroup licensePlate);
     Task<(bool IsSuccess, bool IsExsist)> AddLicensePlate(LicensePlate licensePlate);

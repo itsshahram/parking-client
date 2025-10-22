@@ -23,14 +23,14 @@
 
                 <StackPanel Orientation="Horizontal">
                     <ComboBox x:Name="GroupFilterComboBox"
-              Width="200"
-              IsEditable="True"
-              DisplayMemberPath="Name"
-              SelectedValuePath="Id"
-              StaysOpenOnEdit="True"
-              IsTextSearchEnabled="False"
-              SelectionChanged="GroupFilter_SelectionChanged"
-              Margin="5 0"/>
+                      Width="250"
+                      IsEditable="True"
+                      DisplayMemberPath="Name"
+                      SelectedValuePath="Id"
+                      StaysOpenOnEdit="True"
+                      IsTextSearchEnabled="False"
+                      SelectionChanged="GroupFilter_SelectionChanged"
+                      Margin="5 0" />
 
 
                     <ui:Button 

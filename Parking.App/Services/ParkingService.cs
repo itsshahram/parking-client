@@ -1941,7 +1941,7 @@ public class ParkingService : IParkingService
         }
     }
 
-    public async Task<List<LicensePlateGroupModel>> GetLicensePlateList(string? q = "")
+    public async Task<List<LicensePlateGroupModel>> GetLicensePlateList(int Page = 1, int Take = 10, string? q = "")
     {
         var query = unitOfWork
             .LicensePlateGroups
@@ -1951,12 +1951,15 @@ public class ParkingService : IParkingService
         if (!string.IsNullOrWhiteSpace(q))
         {
             query = query.Where(x =>
-                x.Name.Contains(q) ||
-                (x.Description != null && x.Description.Contains(q)));
+                x.Name.Contains(q));
         }
 
-        var licensePlateGroupList = await query
-            .OrderBy(x => x.Name)
+        query = query.OrderBy(x => x.Name);
+
+        if (Page > 0 && Take > 0)
+            query = query.Skip((Page - 1) * Take).Take(Take);
+
+        var result = await query
             .Select(l => new LicensePlateGroupModel
             {
                 Id = l.Id,
@@ -1977,7 +1980,7 @@ public class ParkingService : IParkingService
             })
             .ToListAsync();
 
-        return licensePlateGroupList;
+        return result;
     }
 
 
@@ -3379,7 +3382,6 @@ public class ParkingService : IParkingService
               .SetProperty(x => x.DiscountPercent, licensePlateGroup.DiscountPercent)
               .SetProperty(x => x.StartDate, licensePlateGroup.StartDate)
               .SetProperty(x => x.EndDate, licensePlateGroup.EndDate));
-
 
             unitOfWork.LicensePlateGroups.Commit();
             return true;

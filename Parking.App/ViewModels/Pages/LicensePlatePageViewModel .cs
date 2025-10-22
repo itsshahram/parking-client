@@ -175,6 +175,7 @@ namespace Parking.App.ViewModels.Pages
             {
                 FilterStartDate = null;
             }
+            OnPropertyChanged(nameof(FilterStartDate));
         }
 
         private void UpdateEndDate()
@@ -199,6 +200,7 @@ namespace Parking.App.ViewModels.Pages
             {
                 FilterEndDate = null;
             }
+            OnPropertyChanged(nameof(FilterEndDate));
         }
 
         #endregion
@@ -230,8 +232,6 @@ namespace Parking.App.ViewModels.Pages
                     Name = item.Name,
                     Description = item.Description,
                     DiscountPercent = item.DiscountPercent,
-                    StartDateString = item.StartDate.ToShamsi(),
-                    EndDateString = item.EndDate.ToShamsi(),
                 });
             }
         }
