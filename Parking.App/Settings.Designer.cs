@@ -778,5 +778,17 @@ namespace Parking.App {
                 this["IsFirstRun"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Application_CloseTicketAfterSuccessPayment {
+            get {
+                return ((bool)(this["Application_CloseTicketAfterSuccessPayment"]));
+            }
+            set {
+                this["Application_CloseTicketAfterSuccessPayment"] = value;
+            }
+        }
     }
 }

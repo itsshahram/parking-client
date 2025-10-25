@@ -71,12 +71,9 @@ public partial class AddCardHistoryPage : Page
         EndDayTextBox.Text = yesterdayTime[2];
     }
 
-
     private void PaginationControl_Loaded(object sender, RoutedEventArgs e)
     {
-
     }
-
 
     private async void Pagination_PageChanged(object sender, int newPage)
     {
