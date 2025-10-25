@@ -28,6 +28,8 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
     private string? _entryRegistrar;
     private string? _exitRegistrar;
     private bool? _hasDiscrepancy;
+    private string? _rrn;
+    private string? _trackNo;
 
     private TicketStatus? _ticketStatus;
     private VehicleStatus? _vehicleStatus;
@@ -65,6 +67,33 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
             }
         }
     }
+
+    public string? TrackNo
+    {
+        get => _trackNo;
+        set
+        {
+            if (_trackNo != value)
+            {
+                _trackNo = value;
+                OnPropertyChanged(nameof(TrackNo));
+            }
+        }
+    }
+
+    public string? RRN
+    {
+        get => _rrn;
+        set
+        {
+            if (_rrn != value)
+            {
+                _rrn = value;
+                OnPropertyChanged(nameof(RRN));
+            }
+        }
+    }
+
 
     public Guid? SectionId
     {
@@ -444,6 +473,7 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
         }
     }
     public int TotalPages => (int)Math.Ceiling((double)_totalCount / _itemsPerPage);
+
 
     protected void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

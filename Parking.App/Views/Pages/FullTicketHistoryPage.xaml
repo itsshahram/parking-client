@@ -23,7 +23,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- TabItem Style with bottom bar -->
         <Style TargetType="TabItem">
             <Setter Property="Template">
                 <Setter.Value>
@@ -226,6 +225,16 @@
                                             </StackPanel>
 
                                         </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10 5">
+                                        <TextBlock Text="شماره تراکنش" />
+                                        <ui:TextBox x:Name="TrackNoTextBox" Width="200" PlaceholderText="مثلاً 123456789" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10 5">
+                                        <TextBlock Text="شماره مرجع پرداخت" />
+                                        <ui:TextBox x:Name="RRNTextBox" Width="200" PlaceholderText="مثلاً 987654321" />
                                     </StackPanel>
 
                                     <StackPanel Margin="10 5">
