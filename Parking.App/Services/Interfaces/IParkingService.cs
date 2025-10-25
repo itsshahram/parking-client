@@ -43,7 +43,8 @@ public interface IParkingService
     string GetVehicleSegmentNameById(int Id);
     LicensePlateGroupModel? GetLicensePlateGroupByPlate(string licenseEnPlate);
     LicensePlateGroupModel? GetLicensePlateGroup(Guid id);
-    Task<List<LicensePlateGroupModel>> GetLicensePlateList();
+    Task<List<LicensePlateGroupModel>> GetLicensePlateList(int Page = 0, int Take = 0, string? q = "");
+    Task<(List<LicensePlateGroupModel> Data, int TotalCount)> GetLicensePlatePaginatedList(int Page, int PageSize, string? filterName, int? filterDiscount, DateTime? filterStartDate, DateTime? filterEndDate);
     Task<bool> AddLicensePlateGroup(LicensePlateGroup licensePlate);
     Task<(bool IsSuccess, bool IsExsist)> AddLicensePlate(LicensePlate licensePlate);
     Task<(bool IsSuccess, bool IsExsist)> DeleteLicensePlateGroup(Guid Id);
@@ -92,6 +93,10 @@ public interface IParkingService
     List<ParkingTicketExtraImageSourceModel> GetTicketExtraImageSources(Guid TicketId, bool? ShowInBox);
     Task<List<ParkingTicketExtraImageSourceModel>> GetTicketExtraImageSourcesAsync(Guid TicketId, bool? ShowInBox);
     Guid? GetTicketIdByBarcode(long barcode);
+
+    Task<int> GetActiveLicensePlateGroupCountAsync();
+    Task<int> GetInactiveLicensePlateGroupCountAsync();
+    Task<int> GetTotalLicensePlateGroupCountAsync();
 
     #endregion
 

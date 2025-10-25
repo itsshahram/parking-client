@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Parking.App.Helpers;
 public static class DateConvertor
@@ -14,6 +13,28 @@ public static class DateConvertor
         PersianCalendar persianCalendar = new PersianCalendar();
         return persianCalendar.ToDateTime(persianYear, persianMonth, persianDay, hours, minutes, 0, 0);
     }
+    public static DateTime? SafeShamsiToDateTime(string shamsi)
+    {
+        if (string.IsNullOrWhiteSpace(shamsi)) return null;
+
+        var parts = shamsi.Split('/');
+        if (parts.Length != 3) return null;
+
+        if (!int.TryParse(parts[0], out int year)) return null;
+        if (!int.TryParse(parts[1], out int month)) return null;
+        if (!int.TryParse(parts[2], out int day)) return null;
+
+        try
+        {
+            return DateConvertor.ShamsiToDateTime(year, month, day);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+
     public static string ToShamsi(this DateTime Value)
     {
         PersianCalendar pc = new PersianCalendar();
@@ -22,7 +43,8 @@ public static class DateConvertor
     public static string ToLongShamsiString(this DateTime? Value)
     {
         PersianCalendar pc = new PersianCalendar();
-        if (Value == null) {
+        if (Value == null)
+        {
             return "";
         }
         try
@@ -35,7 +57,7 @@ public static class DateConvertor
             return "";
         }
 
-        
+
     }
     public static string ToLongShamsiString(this DateTime Value)
     {
@@ -49,7 +71,7 @@ public static class DateConvertor
         {
             return "-";
         }
-          
+
 
     }
     public static string ToRelativeDate(this DateTime theDate)

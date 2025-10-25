@@ -3,16 +3,15 @@ using Button = System.Windows.Controls.Button;
 
 namespace Parking.App.Views.Pages.LicensePlate;
 
-/// <summary>
-/// Interaction logic for LicensePlateGroupPage.xaml
-/// </summary>
 public partial class LicensePlatePage : Page
 {
     private LicensePlateGroupViewModel ViewModel { get; set; }
     private readonly IParkingService _parkingService;
-    private readonly ILogger<LicensePlateGroupPage> _logger;
+    private readonly ILogger<LicensePlatePage> _logger;
     private string? EnLicensePlate { get; set; } = null;
     private Guid? SelectedGroupId { get; set; } = null;
+    private bool _isSelectingItem = false;
+    private CancellationTokenSource _debounceCts;
 
     public LicensePlatePage()
     {
@@ -21,11 +20,81 @@ public partial class LicensePlatePage : Page
         DataContext = ViewModel;
 
         _parkingService = App.GetService<IParkingService>();
-        _logger = App.GetService<ILogger<LicensePlateGroupPage>>();
+        _logger = App.GetService<ILogger<LicensePlatePage>>();
 
-        LoadGroupFilter();
-        LoadData();
         InitPlateChars();
+        LoadData();
+
+        GroupFilterComboBox.Loaded += GroupFilterComboBox_Loaded;
+
+        _ = LoadInitialGroupFilterAsync();
+    }
+
+    private System.Windows.Controls.TextBox GetComboBoxTextBox(ComboBox comboBox)
+    {
+        return comboBox.Template.FindName("PART_EditableTextBox", comboBox) as System.Windows.Controls.TextBox;
+    }
+
+    private async void GroupFilterComboBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (!GroupFilterComboBox.IsLoaded || !GroupFilterComboBox.IsEditable)
+            return;
+
+        if (_isSelectingItem)
+        {
+            _isSelectingItem = false;
+            return;
+        }
+
+        string filterText = GroupFilterComboBox.Text?.Trim() ?? string.Empty;
+
+        _debounceCts?.Cancel();
+        _debounceCts = new CancellationTokenSource();
+        var token = _debounceCts.Token;
+
+        try
+        {
+            await Task.Delay(500, token); 
+
+            if (string.IsNullOrWhiteSpace(filterText))
+            {
+                await Dispatcher.InvokeAsync(async () => await LoadInitialGroupFilterAsync());
+                return;
+            }
+
+            await Dispatcher.InvokeAsync(async () => await LoadGroupFilter(filterText));
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in debounce filter");
+        }
+    }
+
+
+    private void GroupFilterComboBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        var comboTextBox = GetComboBoxTextBox(GroupFilterComboBox);
+        if (comboTextBox != null)
+        {
+            comboTextBox.TextChanged -= GroupFilterComboBox_TextChanged; 
+            comboTextBox.TextChanged += GroupFilterComboBox_TextChanged;
+
+            comboTextBox.KeyDown -= ComboBoxTextBox_KeyDown;
+            comboTextBox.KeyDown += ComboBoxTextBox_KeyDown;
+        }
+    }
+
+
+    private void ComboBoxTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            SearchGroupButton_Click(sender, e);
+            e.Handled = true;
+        }
     }
 
     private void InitPlateChars()
@@ -41,21 +110,50 @@ public partial class LicensePlatePage : Page
         }
     }
 
-    private async void LoadGroupFilter()
+    /// <summary>
+    /// Load first 20 LicensePlateGroup items when page initializes.
+    /// </summary>
+    private async Task LoadInitialGroupFilterAsync()
     {
         try
         {
-            var data = await _parkingService.GetLicensePlateList();
-
+            var data = await _parkingService.GetLicensePlateList(Page: 1, Take: 20);
             GroupFilterComboBox.ItemsSource = data;
-            GroupFilterComboBox.DisplayMemberPath = "Name";
-            GroupFilterComboBox.SelectedValuePath = "Id";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading group filter");
+            _logger.LogError(ex, "Error loading initial LicensePlate groups");
         }
     }
+
+    /// <summary>
+    /// Search and filter LicensePlate groups using the service method with pagination.
+    /// </summary>
+    private async Task LoadGroupFilter(string filter)
+    {
+        try
+        {
+            var data = await _parkingService.GetLicensePlateList(Page: 1, Take: 20, q: filter);
+            GroupFilterComboBox.ItemsSource = data;
+
+            GroupFilterComboBox.IsDropDownOpen = data.Any();
+            if (data.Any())
+                GroupFilterComboBox.SelectedIndex = -1;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error filtering LicensePlate groups");
+        }
+    }
+
+
+
+    private async void SearchGroupButton_Click(object sender, RoutedEventArgs e)
+{
+string? filterText = GroupFilterComboBox.Text;
+await LoadGroupFilter(filterText);
+}
+
 
     public void LoadData()
     {
@@ -99,6 +197,7 @@ public partial class LicensePlatePage : Page
         var dataGridRow = UIHelper.FindAncestor<DataGridRow>(button);
         var item = dataGridRow?.Item as LicensePlateListItemViewModel;
         if (item == null) return;
+
         var confirm = new ConfirmWindow(
             "حذف پلاک از گروه",
             $"آیا از حذف پلاک {item.Name} از این گروه اطمینان دارید؟",
@@ -123,15 +222,21 @@ public partial class LicensePlatePage : Page
 
     private void GroupFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var selectedGroup = GroupFilterComboBox.SelectedItem as LicensePlateGroupModel;
-        SelectedGroupId = selectedGroup?.Id;
-        LoadData();
+        if (GroupFilterComboBox.SelectedItem != null)
+        {
+            _isSelectingItem = true;
+            var selectedGroup = GroupFilterComboBox.SelectedItem as LicensePlateGroupModel;
+            SelectedGroupId = selectedGroup?.Id;
+            LoadData();
+        }
     }
 
-    private void ClearGroupFilter_Click(object sender, RoutedEventArgs e)
+    private async void ClearGroupFilter_Click(object sender, RoutedEventArgs e)
     {
         SelectedGroupId = null;
         GroupFilterComboBox.SelectedItem = null;
+        GroupFilterComboBox.Text = string.Empty;
+        await LoadInitialGroupFilterAsync();
         LoadData();
     }
 
@@ -165,7 +270,6 @@ public partial class LicensePlatePage : Page
     private async void AddLicensePlate_Click(object sender, RoutedEventArgs e)
     {
         AddLicensePlateWindow addLicensePlateWindow = new AddLicensePlateWindow();
-
         addLicensePlateWindow.Owner = Application.Current.MainWindow;
 
         if (addLicensePlateWindow.ShowDialog() == true)
