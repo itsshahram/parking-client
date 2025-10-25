@@ -1388,6 +1388,13 @@ public class ParkingService : IParkingService
             x.PaidAmount != (x.TotalAmount * (1 - (x.DiscountPercent / 100m))));
         }
 
+        if (!string.IsNullOrEmpty(request.RRN))
+            tickets = tickets.Where(x => x.RRN == request.RRN);
+
+
+        if (!string.IsNullOrEmpty(request.TrackNo))
+            tickets = tickets.Where(x => x.TraceNo == request.TrackNo);
+
 
         if (request.VehicleStatus != null)
         {
