@@ -74,8 +74,6 @@ public partial class LicensePlatePage : Page
     }
 
 
-
-
     private void GroupFilterComboBox_Loaded(object sender, RoutedEventArgs e)
     {
         var comboTextBox = GetComboBoxTextBox(GroupFilterComboBox);
