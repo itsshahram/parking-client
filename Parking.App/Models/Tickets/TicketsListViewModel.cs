@@ -53,6 +53,7 @@ public class TicketsListViewModel
     public string? EntranceGate { get; set; }
     public string? ExitGate { get; set; }
     public int? QueueNumber { get; set; }
+    public bool? IsCustomPaid { get; set; }
 
 }
 public class TicketSummaryReportItem
@@ -101,4 +102,7 @@ public class TicketSummaryReportItem
 
     [DisplayName("خروج شده")]
     public string? IsExited { get; set; }
+
+    [DisplayName("پرداخت دستی")]
+    public string? IsCustomPaid { get; set; }
 }

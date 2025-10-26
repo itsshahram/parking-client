@@ -138,10 +138,10 @@ public partial class SummaryReport : UserControl
             SetFieldsEnabled(false);
             var request = FillParameters();
 
-            var filterDescription = $"ورود از: {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
-                                    $"تا: {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
-                                    $"خروج از: {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} " +
-                                    $"تا: {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}, " +
+            var filterDescription = $"ورود از: {request.EntryFrom?.ToShamsi(includeTime:true) ?? "-"} " +
+                                    $"تا: {request.EntryTo?.ToShamsi(includeTime: true) ?? "-"}, " +
+                                    $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: true) ?? "-"} " +
+                                    $"تا: {request.ExitTo?.ToShamsi(includeTime: true) ?? "-"}, " +
                                     $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
                                     $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
 
