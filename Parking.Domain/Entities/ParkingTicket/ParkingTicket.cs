@@ -52,8 +52,7 @@ public class ParkingTicket
     public string? DriverFullName { get; set; }
     public string? DriverPhoneNumber { get; set; }
     public string? DriverDescription { get; set; }
-
-
+    public bool IsCustomPaid { get; set; }
     public int? QueueNumber { get; set; }
     public int? TicketDescriptionItemId { get; set; }
 

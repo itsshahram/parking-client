@@ -531,7 +531,7 @@ namespace Parking.App.Views.Windows
                         {
                             var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                             {
-                                PaidAmount = ViewModel.Item.PaidAmount,
+                                PaidAmount = ViewModel.Item.TotalAmount,
                                 TotalAmount = ViewModel.Item.TotalAmount,
                                 PaidCreditCard = "",
                                 PaidType = "Naghdi",
@@ -573,6 +573,84 @@ namespace Parking.App.Views.Windows
                         SetTicketData(ViewModel.Item.Id);
                         SetPaymentStatus(true);
                     }
+                }
+                else
+                {
+                    ShowMessage("خطا", "قبلا پرداخت شده");
+                    return;
+                }
+
+            }
+            catch
+            {
+                ShowMessage("خطا", "خطا در پرداخت با دستگاه کارتخوان");
+                return;
+            }
+        }
+
+        public async void CustomPayment()
+        {
+            try
+            {
+                if (ViewModel.Item.IsPaid == false)
+                {
+                    if (PaymentPermission)
+                    {
+                        if (Settings.Default.Application_GatePCName.Length > 3)
+                            GateName = Settings.Default.Application_GatePCName;
+                        else
+                            GateName = Environment.MachineName;
+
+
+                        if (ViewModel.Item.TotalAmount > 1000)
+                        {
+                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
+                            {
+                                PaidAmount = ViewModel.Item.PaidAmount,
+                                TotalAmount = ViewModel.Item.TotalAmount,
+                                PaidCreditCard = "",
+                                PaidType = "Naghdi",
+                                RefId = "0000",
+                                TicketId = ViewModel.Item.Id,
+                                MerchantNumber = "00",
+                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
+                                RRN = "000",
+                                TraceNo = "00000",
+                                ExitGate = GateName,
+                                IsMissingCard = IsMissingCard,
+                                CardUid = ViewModel.Item.CardUid,
+                                ExitRegistrarUserId = TokenStore.UserId,
+                                ExitImage = ExitImage,
+                                IsCustomPaid = true
+                            });
+
+                        }
+                        else
+                        {
+                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
+                            {
+                                TotalAmount = ViewModel.Item.TotalAmount,
+                                PaidAmount = ViewModel.Item.PaidAmount,
+                                PaidCreditCard = "",
+                                PaidType = "Naghdi",
+                                RefId = "0000",
+                                TicketId = ViewModel.Item.Id,
+                                MerchantNumber = "00",
+                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
+                                RRN = "000",
+                                TraceNo = "00000",
+                                ExitGate = GateName,
+                                IsMissingCard = IsMissingCard,
+                                CardUid = ViewModel.Item.CardUid,
+                                ExitImage = ExitImage,
+                                IsCustomPaid = true
+                            });
+                        
+                        }
+                        SaveExtraImages();
+                        SetTicketData(ViewModel.Item.Id);
+                        SetPaymentStatus(true);
+                    }
 
                 }
                 else
@@ -588,6 +666,7 @@ namespace Parking.App.Views.Windows
                 return;
             }
         }
+
 
         private void AddImageListToExtraImageBox(List<(ImageSource imageSource, string title, bool ForSave)> list)
         {
@@ -686,7 +765,7 @@ namespace Parking.App.Views.Windows
             if (result == true)
             {
                 ViewModel.Item.PaidAmount = customAmountPaymentModalWindow.ViewModel.Amount;
-                CashPayment();
+                CustomPayment();
             }
         }
         private async void PrintTicket()
@@ -809,7 +888,7 @@ namespace Parking.App.Views.Windows
             bool active = Settings.Default.Application_CloseTicketAfterSuccessPayment;
             if (active)
             {
-                await Task.Delay(2000); 
+                await Task.Delay(2000);
                 this.Close();
             }
         }

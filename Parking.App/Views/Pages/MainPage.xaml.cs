@@ -871,25 +871,9 @@ namespace Parking.App.Views.Pages
                             return false;
                         }
 
-                        //چک کردن پلاک
-                        var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
-                        if (plateTicketId != null)
-                        {
-                            // ورودی=0   خروجی=1
-                            if (Settings.Default.Application_GateType.ToString().Contains("1"))
-                            {
 
-                                ShowTicketDetails(plateTicketId ?? new Guid());
-                                ResetForm();
-                                return false;
-                            }
-                            else
-                            {
-                                ShowMessage("خطا", "ورود این پلاک قبلا ثبت شده است، لطفا از گیت های خروجی نسبت به خارج کردن پلاک اقدام نمایید");
-                                return false;
-                            }
-                        }
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -905,7 +889,24 @@ namespace Parking.App.Views.Pages
                         ShowMessage("خطا", "پلاک بدرستی وارد نشده است");
                         return false;
                     }
+                    //چک کردن پلاک
+                    var plateTicketId = _parkingService.GetActiveLicensePlateTicketId(LatestValidEnPlate);
+                    if (plateTicketId != null)
+                    {
+                        // ورودی=0   خروجی=1
+                        if (Settings.Default.Application_GateType.ToString().Contains("1"))
+                        {
 
+                            ShowTicketDetails(plateTicketId ?? new Guid());
+                            ResetForm();
+                            return false;
+                        }
+                        else
+                        {
+                            ShowMessage("خطا", "ورود این پلاک قبلا ثبت شده است، لطفا از گیت های خروجی نسبت به خارج کردن پلاک اقدام نمایید");
+                            return false;
+                        }
+                    }
 
                     // ورودی=0   خروجی=1
                     if (!Settings.Default.Application_GateType.ToString().Contains("0"))

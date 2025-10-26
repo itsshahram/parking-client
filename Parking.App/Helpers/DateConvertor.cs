@@ -35,10 +35,18 @@ public static class DateConvertor
     }
 
 
-    public static string ToShamsi(this DateTime Value)
+    public static string ToShamsi(this DateTime value, bool includeTime = true)
     {
-        PersianCalendar pc = new PersianCalendar();
-        return pc.GetYear(Value) + "/" + pc.GetMonth(Value).ToString("00") + "/" + pc.GetDayOfMonth(Value).ToString("00");
+        var pc = new PersianCalendar();
+        string datePart = $"{pc.GetYear(value)}/{pc.GetMonth(value):00}/{pc.GetDayOfMonth(value):00}";
+
+        if (includeTime)
+        {
+            string timePart = $"{pc.GetHour(value):00}:{pc.GetMinute(value):00}";
+            return $"{datePart} {timePart}";
+        }
+
+        return datePart;
     }
     public static string ToLongShamsiString(this DateTime? Value)
     {
