@@ -29,12 +29,8 @@ public class DatabaseMonitorService
         bool reachable;
         try
         {
-            using var context = new ApplicationDbContext(_options);
-            var connectTask = context.Database.CanConnectAsync();
-            var timeoutTask = Task.Delay(3000);
-            var finishedTask = await Task.WhenAny(connectTask, timeoutTask);
-
-            reachable = finishedTask == connectTask && await connectTask;
+            var connected = await DatabaseConnectionTester.TestConnectionAsync(Settings.Default.Application_DbHostAddress, Settings.Default.Application_DbUsername, Settings.Default.Application_DbPassword);
+            reachable = connected.Item1;
         }
         catch
         {

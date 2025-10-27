@@ -1,9 +1,7 @@
 ﻿using Coravel;
-using Microsoft.AspNetCore.Identity;
 using Parking.App.Seeds;
 using Parking.App.Views.Pages.LicensePlate;
 using Parking.Domain.Contracts.Base;
-using Parking.Domain.Entities;
 using Parking.Domain.Entities.User;
 using Serilog;
 using Serilog.Events;
@@ -151,7 +149,7 @@ public partial class App : Application
 
         try
         {
-            bool canConnect = await CanConnectToDatabaseAsync(optionsBuilder.Options, TimeSpan.FromSeconds(3));
+            bool canConnect = await CanConnectToDatabaseAsync();
             if (!canConnect)
             {
                 ShowDatabaseErrorWindow();
@@ -217,16 +215,15 @@ public partial class App : Application
     }
 
 
-    private static async Task<bool> CanConnectToDatabaseAsync(DbContextOptions<ApplicationDbContext> options, TimeSpan timeout)
+    private static async Task<bool> CanConnectToDatabaseAsync()
     {
         try
         {
-            using var context = new ApplicationDbContext(options);
-            var connectTask = context.Database.CanConnectAsync();
-            var timeoutTask = Task.Delay(timeout);
-
-            var finishedTask = await Task.WhenAny(connectTask, timeoutTask);
-            return finishedTask == connectTask && await connectTask;
+            var connected = await DatabaseConnectionTester.TestConnectionAsync(
+                Settings.Default.Application_DbHostAddress,
+                Settings.Default.Application_DbUsername,
+                Settings.Default.Application_DbPassword);
+            return connected.Item1;
         }
         catch
         {
@@ -287,7 +284,6 @@ public partial class App : Application
             Application.Current.MainWindow = mainWindow;
             mainWindow.Close();
         }
-
     }
     public void CloseMainWindow()
     {
@@ -296,7 +292,6 @@ public partial class App : Application
             Application.Current.MainWindow = mainWindow;
             mainWindow.Close();
         }
-
     }
 
     public void ShowMainWindow()

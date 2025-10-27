@@ -23,6 +23,6 @@ public static class AppInfoHelper
         var filePath = assembly.Location;
         var fileInfo = FileVersionInfo.GetVersionInfo(filePath);
 
-        return File.GetLastWriteTime(filePath).ToString("yyyy-MM-dd");
+        return File.GetLastWriteTime(filePath).ToShamsi();
     }
 }

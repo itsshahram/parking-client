@@ -13,12 +13,17 @@
         Foreground="{DynamicResource TextFillColorPrimaryBrush}"
         FlowDirection="RightToLeft"
         Title="اتصال پایگاه داده"
-        Height="250"
+        Height="270"
         Width="500"
         ResizeMode="NoResize">
 
     <Grid Margin="20">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0">
             <TextBlock x:Name="TitleText"
                        Text="در حال بررسی اتصال به پایگاه داده..."
                        FontSize="16"
@@ -43,6 +48,19 @@
                        IsEnabled="False"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,8"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <TextBlock x:Name="AppVersionText"
+                       FontSize="12"
+                       Text="نسخه: 1.0.0"
+                       Opacity="0.7"
+                       TextAlignment="Center"/>
+            <TextBlock x:Name="PublishDateText"
+                       FontSize="12"
+                       Text="تاریخ انتشار: 1403/08/05"
+                       Opacity="0.7"
+                       TextAlignment="Center"/>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>

@@ -196,8 +196,6 @@ public partial class SummaryReport : UserControl
         }
     }
 
-
-
     private void ClearBtn_Click(object sender, RoutedEventArgs e)
     {
         // تاریخ ورود از
@@ -251,7 +249,6 @@ public partial class SummaryReport : UserControl
                     ms.CloseButtonText = "متوجه شدم";
                     await ms.ShowDialogAsync();
                 });
-
             }
         }
         catch
