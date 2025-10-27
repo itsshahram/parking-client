@@ -2148,6 +2148,7 @@ public class ParkingService : IParkingService
                                                 .SetProperty(ticket => ticket.TotalAmount, ticket => request.TotalAmount ?? ticket.TotalAmount)
                                                 .SetProperty(ticket => ticket.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
                                                 .SetProperty(ticket => ticket.RefId, product => request.RefId)
+                                                .SetProperty(ticket => ticket.IsCustomPaid, product => request.IsCustomPaid)
                                                 .SetProperty(ticket => ticket.PaidType, product => request.PaidType)
                                                 .SetProperty(ticket => ticket.PaidDate, product => request.PaidDate)
                                                 .SetProperty(ticket => ticket.RRN, product => request.RRN)
@@ -3219,7 +3220,7 @@ public class ParkingService : IParkingService
         if (!string.IsNullOrEmpty(request.ExitRegistrar))
             tickets = tickets.Where(x => x.ExitGate == request.ExitRegistrar);
 
-        var ticketList = await tickets.ToListAsync();
+        var ticketList = await tickets.Where(x => x.IsExited == true && x.IsPaid.Value).ToListAsync();
 
         var result = new TicketSummaryReportModel()
         {

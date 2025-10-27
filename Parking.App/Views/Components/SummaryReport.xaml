@@ -140,16 +140,14 @@
 
             <ProgressBar x:Name="progressBar" Margin="10 0"/>
 
-            <!-- Report Summary -->
             <Border CornerRadius="6" Padding="10" Background="#20E9E9E9" Margin="5 5 5 0">
                 <StackPanel>
                     <TextBlock Text="خلاصه گزارش" FontWeight="Bold"  FontSize="16" Margin="0 0 0 10"/>
 
                     <WrapPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
-                        <!-- تعداد کل تیکت‌ها -->
                         <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
                             <StackPanel Margin="10 5">
-                                <TextBlock Text="تعداد کل تیکت‌ها" HorizontalAlignment="Center"/>
+                                <TextBlock Text="تعداد کل قبض ‌ها" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{Binding Report.TotalTickets}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>

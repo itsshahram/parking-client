@@ -21,4 +21,5 @@ public class TicketPaidInfoModel
     public long? CardUid { get; set; }
     public Guid? ExitRegistrarUserId { get; set; }
     public decimal? TotalAmount { get; set; }
+    public bool IsCustomPaid { get; set; }
 }

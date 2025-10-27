@@ -503,7 +503,8 @@ public partial class FullTicketHistoryPage : Page
             PaidType = x.PaidType == "Naghdi" ? "نقدی" : "پوز",
             PaidCreditCard = x.PaidCreditCard,
             IsPaid = x.IsPaid.Value == true ? "پرداخت شده" : "پرداخت نشده",
-            IsExited = x.IsExited.Value == true ? "خارج شده" : "وارد شده"
+            IsExited = x.IsExited.Value == true ? "خارج شده" : "وارد شده",
+            IsCustomPaid = x.IsCustomPaid.Value == true ? "پرداخت دستی" : "عادی"
         }).ToList();
 
 
