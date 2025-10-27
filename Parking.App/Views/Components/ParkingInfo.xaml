@@ -23,10 +23,13 @@
                    Foreground="{DynamicResource SystemFillColorCriticalBrush}"
                    ToolTip="ارتباط با پایگاه داده برقرار نیست"/>
 
-
+                        <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" FlowDirection="LeftToRight">
+                            <TextBlock x:Name="VersionText" Text="1.0.0"  HorizontalAlignment="Right"  VerticalAlignment="Center"/>
+                            <ui:SymbolIcon Symbol="AppTitle24"  Margin="2 0 10 0"/>
+                        </StackPanel>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                        
+
                         <TextBlock x:Name="PakingNameText"     Margin="15 0 0 0" Text="........"  HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <Separator  Margin="5 0"/>
                         <ui:SymbolIcon Symbol="Person16" Margin="3 0"/>
@@ -40,7 +43,9 @@
 
                         <TextBlock x:Name="TimeText" Width="60" Margin="15 0 0 0"  Text="22:30:50"  HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <ui:SymbolIcon Symbol="Clock16"/>
+
                     </StackPanel>
+
                 </DockPanel>
             </StackPanel>
         </Border>

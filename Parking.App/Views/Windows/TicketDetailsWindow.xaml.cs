@@ -81,7 +81,6 @@ namespace Parking.App.Views.Windows
                     ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
                     this.Close();
                 }
-                CustomPaymentCheckPermission();
             }
             catch (Exception ex)
             {
@@ -262,31 +261,39 @@ namespace Parking.App.Views.Windows
 
             if (Settings.Default.Application_GateType.Contains("1"))
             {
-                var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
-                if (IsHotKeyPressed(cashPaymentHotKey))
+                if (PermissionHelper.CheckUserPermission("CashPayment"))
                 {
-                    if (!ViewModel.Item?.IsPaid ?? false)
+                    var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
+                    if (IsHotKeyPressed(cashPaymentHotKey))
                     {
-                        CashPayment();
-                    }
-                    else
-                    {
-                        ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+                        if (!ViewModel.Item?.IsPaid ?? false)
+                        {
+                            CashPayment();
+                        }
+                        else
+                        {
+                            ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+                        }
                     }
                 }
 
-                var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
-                if (IsHotKeyPressed(paymentWithSpaceHotKey))
+                if (PermissionHelper.CheckUserPermission("PosPayment"))
                 {
-                    if (!ViewModel.Item?.IsPaid ?? false)
+                    var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
+                    if (IsHotKeyPressed(paymentWithSpaceHotKey))
                     {
-                        Payment();
-                    }
-                    else
-                    {
-                        ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+                        if (!ViewModel.Item?.IsPaid ?? false)
+                        {
+                            Payment();
+                        }
+                        else
+                        {
+                            ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+                        }
                     }
                 }
+
+
 
                 var missingCardHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.LostCard);
                 if (IsHotKeyPressed(missingCardHotKey))
@@ -300,16 +307,22 @@ namespace Parking.App.Views.Windows
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
                     }
                 }
-            }
 
-            var printReceiptHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
-            if (IsHotKeyPressed(printReceiptHotKey))
-            {
-                PrintTicket();
+                var printReceiptHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
+                if (IsHotKeyPressed(printReceiptHotKey))
+                {
+                    if (PermissionHelper.CheckUserPermission("PrintTicket"))
+                    {
+                        PrintTicket();
+                    }
+                }
             }
         }
         public async void Payment()
         {
+            if (!PermissionHelper.CheckUserPermission("PosPayment"))
+                return;
+
             try
             {
 
@@ -515,6 +528,8 @@ namespace Parking.App.Views.Windows
         [RequiresPermission("CashPayment", "پرداخت نقدی")]
         public async void CashPayment()
         {
+            if (!PermissionHelper.CheckUserPermission("CashPayment"))
+                return;
             try
             {
                 if (ViewModel.Item.IsPaid == false)
@@ -590,6 +605,8 @@ namespace Parking.App.Views.Windows
 
         public async void CustomPayment()
         {
+            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment"))
+                return;
             try
             {
                 if (ViewModel.Item.IsPaid == false)
@@ -645,7 +662,7 @@ namespace Parking.App.Views.Windows
                                 ExitImage = ExitImage,
                                 IsCustomPaid = true
                             });
-                        
+
                         }
                         SaveExtraImages();
                         SetTicketData(ViewModel.Item.Id);
@@ -749,13 +766,16 @@ namespace Parking.App.Views.Windows
         [RequiresPermission("PrintTicket", "چاپ قبض")]
         private async void Print_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+            if (!PermissionHelper.CheckUserPermission("PrintTicket"))
+                return;
             PrintTicket();
         }
 
         [RequiresPermission("CustomAmouontPayment", "خروج با مبلغ دلخواه")]
         private void CustomPayment_Btn_Click(object sender, RoutedEventArgs e)
         {
+            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment"))
+                return;
             CustomAmountPaymentModalWindow customAmountPaymentModalWindow = new CustomAmountPaymentModalWindow(ViewModel.TicketId)
             {
                 Owner = this
@@ -808,29 +828,7 @@ namespace Parking.App.Views.Windows
                 return;
             }
         }
-        //private void DirectPrint(UIElement contentToPrint)
-        //{
 
-        //    PrintQueue printQueue = LocalPrintServer.GetDefaultPrintQueue();
-        //    PrintTicket printTicket = printQueue.DefaultPrintTicket;
-
-        //    FixedDocument fixedDoc = new FixedDocument();
-        //    //fixedDoc.DocumentPaginator.PageSize = new Size(96 * 3.2, 96 * 4); 
-
-
-        //    PageContent pageContent = new PageContent();
-        //    FixedPage fixedPage = new FixedPage();
-
-
-        //    fixedPage.Children.Add(contentToPrint);
-        //    ((IAddChild)pageContent).AddChild(fixedPage);
-        //    fixedDoc.Pages.Add(pageContent);
-
-        //    XpsDocumentWriter writer = PrintQueue.CreateXpsDocumentWriter(printQueue);
-        //    writer.Write(fixedDoc, printTicket);
-
-        //    Console.WriteLine("Printing completed successfully.");
-        //}
         private void DirectPrint(UIElement contentToPrint)
         {
             // تنظیمات پرینتر
@@ -874,14 +872,6 @@ namespace Parking.App.Views.Windows
         }
 
         [RequiresPermission("ForceExitRequest", "درخواست خروج اجباری")]
-        private async void CustomPaymentCheckPermission()
-        {
-            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment") && PaymentPermission)
-                CustomPayment_Btn.Visibility = Visibility.Collapsed;
-            else
-                CustomPayment_Btn.Visibility = Visibility.Visible;
-        }
-
 
         private async void CloseAfterSuccessPayment()
         {

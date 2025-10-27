@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Timer = System.Threading.Timer;
+using static Parking.App.Helpers.AppInfoHelper;
 
 namespace Parking.App.Views.Windows
 {
@@ -27,6 +28,9 @@ namespace Parking.App.Views.Windows
 
             // Start background check every 5s
             _pingTimer = new Timer(async _ => await CheckDatabaseAvailability(), null, 0, 5000);
+            AppVersionText.Text = $"نسخه: {GetVersion()}";
+            PublishDateText.Text = $"تاریخ انتشار: {GetBuildDate()}";
+
         }
 
         private async Task CheckDatabaseAvailability()
