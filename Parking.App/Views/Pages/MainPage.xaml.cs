@@ -588,11 +588,11 @@ namespace Parking.App.Views.Pages
                 if (containsDefaultSegment)
                     selectedItem = vehicleSegmentsList.First(x => (int)x.Tag == defaultVehicleSegmentId);
                 else
-                    selectedItem = vehicleSegmentsList.First(); 
+                    selectedItem = vehicleSegmentsList.First();
 
                 VehicleSegmentComboBox.SelectedItem = selectedItem;
 
-   
+
                 VehicleSegmentId = int.TryParse(selectedItem?.Tag?.ToString(), out var id) ? id : 0;
                 VehicleSegmentName = VehicleSegmentComboBox.Text;
 
@@ -786,7 +786,6 @@ namespace Parking.App.Views.Pages
                     _logger.LogError("Error01", ex);
                     return false;
                 }
-
                 try
                 {
                     if (Settings.Default.Application_EntryCardRequirement)
@@ -798,7 +797,8 @@ namespace Parking.App.Views.Pages
                             return false;
                         }
 
-                        if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate)
+
+                        if (card.EnLicensePlate != null && card.EnLicensePlate != LatestValidEnPlate && IsValidPlate)
                         {
                             ShowMessage("خطا", "پلاک ثبت شده با پلاک کارت مطابقت ندارد");
                             return false;
@@ -880,7 +880,6 @@ namespace Parking.App.Views.Pages
                     _logger.LogError("Error02", ex);
                     return false;
                 }
-
                 try
                 {
                     //چک کردن درست بودن پلاک
@@ -1036,9 +1035,6 @@ namespace Parking.App.Views.Pages
                     _logger.LogError("Error04", ex);
                     return false;
                 }
-
-
-
             }
             catch (Exception e)
             {
@@ -1072,9 +1068,7 @@ namespace Parking.App.Views.Pages
                     TicketDetailsBox.Children.Remove(ticketDetails);
                     timer.Stop();
                 };
-
             });
-
         }
 
         public void ResetFormValues()
@@ -1128,7 +1122,6 @@ namespace Parking.App.Views.Pages
                         ms.CloseButtonText = "متوجه شدم";
                         await ms.ShowDialogAsync();
                     });
-
                 }
             }
             catch

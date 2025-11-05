@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace Parking.App.Helpers;
 public static class DateConvertor
@@ -35,8 +36,11 @@ public static class DateConvertor
     }
 
 
-    public static string ToShamsi(this DateTime value, bool includeTime = true)
+    public static string ToShamsi(this DateTime value, bool includeTime = false)
     {
+        if (value == default || value == DateTime.MinValue)
+            return string.Empty;
+
         var pc = new PersianCalendar();
         string datePart = $"{pc.GetYear(value)}/{pc.GetMonth(value):00}/{pc.GetDayOfMonth(value):00}";
 
@@ -48,6 +52,7 @@ public static class DateConvertor
 
         return datePart;
     }
+
     public static string ToLongShamsiString(this DateTime? Value)
     {
         PersianCalendar pc = new PersianCalendar();

@@ -17,7 +17,39 @@ namespace Parking.App;
 /// </summary>
 public partial class App : Application
 {
+    public App()
+    {
+        DispatcherUnhandledException += App_DispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += UnHandleException;
+        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+    }
+
+    private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        _logger?.Error(e.Exception, "Unhandled Dispatcher exception occurred.");
+        e.Handled = true;
+        MessageBox.Show("An unexpected error occurred. Check the log file for details.", "Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private void UnHandleException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+            _logger?.Error(ex, "Unhandled domain exception occurred.");
+        else
+            _logger?.Error("Unhandled domain exception: {0}", e.ExceptionObject);
+
+        MessageBox.Show("Critical application error occurred. Please restart the app.", "Fatal Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        _logger?.Error(e.Exception, "Unobserved Task exception occurred.");
+        e.SetObserved();
+    }
+
     public IConfiguration? Configuration { get; private set; }
+
+    public Serilog.ILogger _logger;
     public static CancellationTokenSource GlobalCancellationTokenSource { get; private set; } = new CancellationTokenSource();
     public static DatabaseMonitorService DatabaseMonitor { get; private set; }
 
@@ -93,28 +125,23 @@ public partial class App : Application
         return _host.Services.GetService(typeof(T)) as T;
     }
 
-
     public MainWindow? mainWindow { get; private set; }
-    static string GetLocalIPAddress()
+    private static string GetLocalIPAddress()
     {
-        string ip = "Unknown";
         try
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ipAddr in host.AddressList)
+            foreach (var ip in host.AddressList)
             {
-                if (ipAddr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                {
-                    ip = ipAddr.ToString();
-                    break;
-                }
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    return ip.ToString();
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("خطا در دریافت IP: " + ex.Message);
+            Console.WriteLine("Failed to get IP: " + ex.Message);
         }
-        return ip;
+        return "Unknown";
     }
 
     private async void OnStartup(object sender, StartupEventArgs e)
@@ -214,7 +241,6 @@ public partial class App : Application
         }
     }
 
-
     private static async Task<bool> CanConnectToDatabaseAsync()
     {
         try
@@ -233,50 +259,52 @@ public partial class App : Application
 
     private void ConfigureLogging()
     {
-        if (Settings.Default.Application_Logging)
-        {
-            if (Settings.Default.Application_Logging_In_Elastic)
-            {
-                string password = Settings.Default.Application_Logs_Elastic_Pass;
-                Log.Logger = new LoggerConfiguration()
-                    .Enrich.FromLogContext()
-                    .Enrich.WithMachineName()
-                    .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
-                    .Enrich.WithProperty("MachineName", Settings.Default.Application_GatePCName)
-                    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri($"{Settings.Default.Application_Logs_Elastic_Server}"))
-                    {
-                        AutoRegisterTemplate = true,
-                        IndexFormat = "logs-{0:yyyy.MM.dd}",
-                        MinimumLogEventLevel = LogEventLevel.Information,
-                        ModifyConnectionSettings = x =>
-                            x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username, password)
-                    })
-                    .WriteTo.File("logs/log-.txt",
-                        rollingInterval: RollingInterval.Day,
-                        retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
-                        fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
-                        rollOnFileSizeLimit: true,
-                        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
-                        restrictedToMinimumLevel: LogEventLevel.Error)
-                    .CreateLogger();
-            }
-            else
-            {
-                Log.Logger = new LoggerConfiguration()
-                    .Enrich.FromLogContext()
-                    .Enrich.WithMachineName()
-                    .WriteTo.File("logs/log-.txt",
-                        rollingInterval: RollingInterval.Day,
-                        retainedFileCountLimit: Settings.Default.Application_LoggingFileCount,
-                        fileSizeLimitBytes: Settings.Default.Application_LoggingFileSize * 1024 * 1024,
-                        rollOnFileSizeLimit: true,
-                        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
-                        restrictedToMinimumLevel: LogEventLevel.Error)
-                    .CreateLogger();
-            }
-        }
-    }
+        var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        if (!Directory.Exists(logDirectory))
+            Directory.CreateDirectory(logDirectory);
 
+        var logFilePath = Path.Combine(logDirectory, "log.txt");
+        var crashFilePath = Path.Combine(logDirectory, "crash-log.txt"); // Crash logs
+
+        var loggerConfig = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
+            .MinimumLevel.Debug()
+
+            .WriteTo.File(logFilePath,
+                rollingInterval: RollingInterval.Infinite,
+                shared: true,
+                retainedFileCountLimit: null,
+                rollOnFileSizeLimit: false,
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+
+            .WriteTo.File(crashFilePath,
+                rollingInterval: RollingInterval.Infinite,
+                shared: true,
+                retainedFileCountLimit: null,
+                rollOnFileSizeLimit: false,
+                restrictedToMinimumLevel: LogEventLevel.Error,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+
+        if (Settings.Default.Application_Logging_In_Elastic)
+        {
+            loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
+            {
+                AutoRegisterTemplate = true,
+                IndexFormat = "logs-{0:yyyy.MM.dd}",
+                MinimumLogEventLevel = LogEventLevel.Information,
+                ModifyConnectionSettings = x =>
+                    x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username,
+                                          Settings.Default.Application_Logs_Elastic_Pass)
+            });
+        }
+
+        Log.Logger = loggerConfig.CreateLogger();
+        _logger = Log.Logger;
+        _logger.Information("Logger configured successfully.");
+    }
     private void MainWindow_Closed(object sender, ExitEventArgs e)
     {
         if (mainWindow != null)

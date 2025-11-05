@@ -42,7 +42,6 @@ public class HotKeyConfig
     public override string ToString() => Shortcut;
 }
 
-
 public enum HotKeyActionType
 {
     [Display(Name = "ثبت قبض")]
