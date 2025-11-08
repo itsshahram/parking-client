@@ -228,6 +228,11 @@
                                     </StackPanel>
 
                                     <StackPanel Margin="10 5">
+                                        <TextBlock Text="درصد تخفیف" />
+                                        <ui:TextBox x:Name="DiscountTextBox" Width="200" PlaceholderText="مثلا 100" />
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10 5">
                                         <TextBlock Text="شماره تراکنش" />
                                         <ui:TextBox x:Name="TrackNoTextBox" Width="200" PlaceholderText="مثلاً 123456789" />
                                     </StackPanel>

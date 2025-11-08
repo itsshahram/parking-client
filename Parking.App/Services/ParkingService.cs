@@ -1403,6 +1403,9 @@ public class ParkingService : IParkingService
             tickets = tickets.Where(expression);
         }
 
+        if (request.Discount != null)
+            tickets = tickets.Where(x => x.DiscountPercent == request.Discount);
+
         return tickets;
     }
     private static Expression<Func<TicketsListViewModel, TicketsListViewModel>> ToTicketListViewModelResult()
