@@ -22,13 +22,13 @@ public partial class App : Application
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += UnHandleException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-    }
+    }   
 
     private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         _logger?.Error(e.Exception, "Unhandled Dispatcher exception occurred.");
         e.Handled = true;
-        MessageBox.Show("An unexpected error occurred. Check the log file for details.", "Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+        //MessageBox.Show("An unexpected error occurred. Check the log file for details.", "Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private void UnHandleException(object sender, UnhandledExceptionEventArgs e)
@@ -38,7 +38,7 @@ public partial class App : Application
         else
             _logger?.Error("Unhandled domain exception: {0}", e.ExceptionObject);
 
-        MessageBox.Show("Critical application error occurred. Please restart the app.", "Fatal Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+        //MessageBox.Show("Critical application error occurred. Please restart the app.", "Fatal Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)

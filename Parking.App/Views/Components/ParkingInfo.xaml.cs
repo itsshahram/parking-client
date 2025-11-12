@@ -25,18 +25,15 @@ public partial class ParkingInfo : UserControl
 
         InitializeComponent();
 
-        // Initialize UI
         PakingNameText.Text = ParkingLotInfoStore.ParkingInfo?.Name;
         DateText.Text = DateTime.Now.ToLongShamsiString();
         TimeText.Text = DateTime.Now.ToString("HH:mm:ss");
         UserFullName.Text = TokenStore.FullName ?? "-----";
 
-        // Timers
         InitializeTimeTimer();
         InitializeServerStatusCheck();
         InitializeDatabaseStatusCheck();
 
-        // Set initial server icon
         UpdateServerIcon(TokenStore.ServerStatus);
 
         VersionText.Text = GetVersion();
@@ -120,12 +117,12 @@ public partial class ParkingInfo : UserControl
             if (dbConnected)
             {
                 UpdateDBStatusIconAndColor(SymbolRegular.Database16,
-                    "SystemFillColorSuccessBrush", "ارتباط با پایگاه داده برقرار میباشد");
+                    "SystemFillColorSuccessBrush", "ارتباط با سرور برقرار میباشد");
             }
             else
             {
                 UpdateDBStatusIconAndColor(SymbolRegular.Database16,
-                    "SystemFillColorCriticalBrush", "ارتباط با پایگاه داده برقرار نیست");
+                    "SystemFillColorCriticalBrush", "ارتباط با سرور برقرار نیست");
             }
         }
         catch (Exception ex)

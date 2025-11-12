@@ -21,7 +21,7 @@
                         <ui:SymbolIcon x:Name="DbStatusIcon" Margin="10 0 0 0"
                    Symbol="Database16"
                    Foreground="{DynamicResource SystemFillColorCriticalBrush}"
-                   ToolTip="ارتباط با پایگاه داده برقرار نیست"/>
+                   ToolTip="ارتباط با سرور برقرار نیست"/>
 
                         <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center" FlowDirection="LeftToRight">
                             <TextBlock x:Name="VersionText" Text="1.0.0"  HorizontalAlignment="Right"  VerticalAlignment="Center"/>
