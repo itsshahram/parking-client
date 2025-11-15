@@ -37,7 +37,6 @@ public class BackgroundTask : IInvocable
                 {
                     await _synchronizationService.ReceiveLicensePlateGroupFromServerAsync();
                 }
-               
             }
             catch (Exception ex)
             {
@@ -92,7 +91,6 @@ public class BackgroundTask : IInvocable
             _logger.LogError("Error in establishing connection with the server", ex.Message);
             SetAppIcon(TaskStatus.Error);
         }
-
     }
     public async Task Invoke()
     {
@@ -112,7 +110,6 @@ public class BackgroundTask : IInvocable
                     {
                         return;
                     }
-
                 }
                 else
                 {
@@ -142,7 +139,7 @@ public class BackgroundTask : IInvocable
     {
         try
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 switch (ts)
                 {
@@ -166,7 +163,8 @@ public class BackgroundTask : IInvocable
                         throw new ArgumentOutOfRangeException(nameof(ts), ts, "Unknown TaskStatus");
                 }
             });
-        }   catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             _logger.LogError("Error in Set App Icon", ex.Message);
         }

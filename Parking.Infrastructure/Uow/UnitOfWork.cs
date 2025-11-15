@@ -9,91 +9,100 @@ using Parking.Domain.Entities.Vehicles;
 using Parking.Infrastructure.Context;
 
 namespace Parking.Infrastructure.Uow;
+
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context;
-    public IRepository<ApplicationRole> Roles { get; private set; }
-    public IRepository<ApplicationUser> Users { get; private set; }
-    public IRepository<ParkingLot> ParkingLots { get; private set; }
-    public IRepository<ParkingSection> ParkingSections { get; private set; }
-    public IRepository<ParkingSpace> ParkingSpaces { get; private set; }
-    public IRepository<ParkingTicket> ParkingTickets { get; private set; }
-    public IRepository<VehicleSegment> VehicleSegments { get; private set; }
-    public IRepository<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices { get; private set; }
-    public IRepository<LicensePlate> LicensePlates { get; private set; }
-    public IRepository<LicensePlateGroup> LicensePlateGroups { get; private set; }
-    public IRepository<SeizedLicensePlate> SeizedLicensePlates { get; private set; }
-    public IRepository<Card> Cards { get; private set; }
-    public IRepository<CardCreditHistory> CardCreditHistories { get; private set; }
-    public IRepository<ParkingTicketImage> ParkingTicketImages { get; private set; }
-    public IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; private set; }
-    public IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices { get; private set; }
-    public IRepository<AddCardItem> AddCardItems { get; private set; }
-    public IRepository<TicketDescriptionItem> TicketDescriptionItems { get; private set; }
-    public IRepository<TicketQueueItem> TicketQueueItems { get; private set; }
-    public IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; private set; }
-    public IRepository<RolePermission> RolePermissions { get; private set; }
-    public IRepository<Permission> Permissions { get; private set; }
-    public IRepository<UserPermission> UserPermissions { get; private set; }
+    private readonly IDbContextFactory<ApplicationDbContext> _factory;
 
-    public UnitOfWork(ApplicationDbContext context,
-        IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices,
-        IRepository<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices,
-        IRepository<ParkingTicketImage> ParkingTicketImages,
-        IRepository<CardCreditHistory> CardCreditHistories,
-        IRepository<Card> Cards,
-        IRepository<SeizedLicensePlate> SeizedLicensePlates,
-        IRepository<LicensePlateGroup> LicensePlateGroups,
-        IRepository<LicensePlate> LicensePlates,
-        IRepository<VehicleSegment> VehicleSegments,
-        IRepository<ParkingTicket> ParkingTickets,
-        IRepository<ParkingSpace> ParkingSpaces,
-        IRepository<ParkingSection> ParkingSections,
-        IRepository<ParkingLot> ParkingLots,
-        IRepository<ApplicationUser> Users,
-        IRepository<ApplicationRole> Roles,
-        IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages,
+    public IRepository<ApplicationRole> Roles { get; }
+    public IRepository<ApplicationUser> Users { get; }
+    public IRepository<ParkingLot> ParkingLots { get; }
+    public IRepository<ParkingSection> ParkingSections { get; }
+    public IRepository<ParkingSpace> ParkingSpaces { get; }
+    public IRepository<ParkingTicket> ParkingTickets { get; }
+    public IRepository<VehicleSegment> VehicleSegments { get; }
+    public IRepository<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices { get; }
+    public IRepository<LicensePlate> LicensePlates { get; }
+    public IRepository<LicensePlateGroup> LicensePlateGroups { get; }
+    public IRepository<SeizedLicensePlate> SeizedLicensePlates { get; }
+    public IRepository<Card> Cards { get; }
+    public IRepository<CardCreditHistory> CardCreditHistories { get; }
+    public IRepository<ParkingTicketImage> ParkingTicketImages { get; }
+    public IRepository<ParkingTicketExtraImage> ParkingTicketExtraImages { get; }
+    public IRepository<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices { get; }
+    public IRepository<AddCardItem> AddCardItems { get; }
+    public IRepository<TicketDescriptionItem> TicketDescriptionItems { get; }
+    public IRepository<TicketQueueItem> TicketQueueItems { get; }
+    public IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies { get; }
+    public IRepository<RolePermission> RolePermissions { get; }
+    public IRepository<Permission> Permissions { get; }
+    public IRepository<UserPermission> UserPermissions { get; }
+
+    public UnitOfWork(
+        IDbContextFactory<ApplicationDbContext> factory,
+        IRepository<ApplicationRole> roles,
+        IRepository<ApplicationUser> users,
+        IRepository<ParkingLot> parkingLots,
+        IRepository<ParkingSection> parkingSections,
+        IRepository<ParkingSpace> parkingSpaces,
+        IRepository<ParkingTicket> parkingTickets,
+        IRepository<VehicleSegment> vehicleSegments,
+        IRepository<ParkingVehicleSegmentPrice> parkingVehicleSegmentPrices,
+        IRepository<LicensePlate> licensePlates,
+        IRepository<LicensePlateGroup> licensePlateGroups,
+        IRepository<SeizedLicensePlate> seizedLicensePlates,
+        IRepository<Card> cards,
+        IRepository<CardCreditHistory> cardCreditHistories,
+        IRepository<ParkingTicketImage> parkingTicketImages,
+        IRepository<ParkingTicketExtraImage> parkingTicketExtraImages,
+        IRepository<ParkingVehicleSegmentVariablePrice> parkingVehicleSegmentVariablePrices,
         IRepository<AddCardItem> addCardItems,
-        IRepository<TicketDescriptionItem> TicketDescriptionItems,
-        IRepository<TicketQueueItem> TicketQueueItems,
-        IRepository<TicketQueueResetPolicy> TicketQueueResetPolicies,
+        IRepository<TicketDescriptionItem> ticketDescriptionItems,
+        IRepository<TicketQueueItem> ticketQueueItems,
+        IRepository<TicketQueueResetPolicy> ticketQueueResetPolicies,
         IRepository<RolePermission> rolePermissions,
         IRepository<Permission> permissions,
         IRepository<UserPermission> userPermissions)
     {
+        _factory = factory;
 
-        this.Roles = Roles;
-        this.Users = Users;
-        this.ParkingLots = ParkingLots;
-        this.ParkingSections = ParkingSections;
-        this.ParkingSpaces = ParkingSpaces;
-        this.ParkingTickets = ParkingTickets;
-        this.VehicleSegments = VehicleSegments;
-        this.ParkingVehicleSegmentPrices = ParkingVehicleSegmentPrices;
-        this.LicensePlates = LicensePlates;
-        this.LicensePlateGroups = LicensePlateGroups;
-        this.SeizedLicensePlates = SeizedLicensePlates;
-        this.Cards = Cards;
-        this.CardCreditHistories = CardCreditHistories;
-        this.ParkingTicketImages = ParkingTicketImages;
-        this.ParkingVehicleSegmentVariablePrices = ParkingVehicleSegmentVariablePrices;
-        this.ParkingTicketExtraImages = ParkingTicketExtraImages;
-        _context = context;
+        Roles = roles;
+        Users = users;
+        ParkingLots = parkingLots;
+        ParkingSections = parkingSections;
+        ParkingSpaces = parkingSpaces;
+        ParkingTickets = parkingTickets;
+        VehicleSegments = vehicleSegments;
+        ParkingVehicleSegmentPrices = parkingVehicleSegmentPrices;
+        LicensePlates = licensePlates;
+        LicensePlateGroups = licensePlateGroups;
+        SeizedLicensePlates = seizedLicensePlates;
+        Cards = cards;
+        CardCreditHistories = cardCreditHistories;
+        ParkingTicketImages = parkingTicketImages;
+        ParkingTicketExtraImages = parkingTicketExtraImages;
+        ParkingVehicleSegmentVariablePrices = parkingVehicleSegmentVariablePrices;
         AddCardItems = addCardItems;
-        this.TicketDescriptionItems = TicketDescriptionItems;
-        this.TicketQueueItems = TicketQueueItems;
-        this.TicketQueueResetPolicies = TicketQueueResetPolicies;
+        TicketDescriptionItems = ticketDescriptionItems;
+        TicketQueueItems = ticketQueueItems;
+        TicketQueueResetPolicies = ticketQueueResetPolicies;
         RolePermissions = rolePermissions;
         Permissions = permissions;
         UserPermissions = userPermissions;
     }
-    public async Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters) where T : class
+
+
+    public async Task<List<T>> ExecuteRawQueryAsync<T>(string sql, params object[] parameters)
+        where T : class
     {
-        return await _context.Set<T>().FromSqlRaw(sql, parameters).AsNoTracking().ToListAsync();
+        using var db = _factory.CreateDbContext();
+        return await db.Set<T>().FromSqlRaw(sql, parameters).AsNoTracking().ToListAsync();
     }
-    public List<T> ExecuteRawQuery<T>(string sql, params object[] parameters) where T : class
+
+    public List<T> ExecuteRawQuery<T>(string sql, params object[] parameters)
+        where T : class
     {
-        return _context.Set<T>().FromSqlRaw(sql, parameters).AsNoTracking().ToList();
+        using var db = _factory.CreateDbContext();
+        return db.Set<T>().FromSqlRaw(sql, parameters).AsNoTracking().ToList();
     }
 }
-

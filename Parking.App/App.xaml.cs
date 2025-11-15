@@ -22,13 +22,22 @@ public partial class App : Application
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += UnHandleException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-    }   
+    }
 
     private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        _logger?.Error(e.Exception, "Unhandled Dispatcher exception occurred.");
-        e.Handled = true;
-        //MessageBox.Show("An unexpected error occurred. Check the log file for details.", "Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+        _logger?.Error(e.Exception, "Unhandled Dispatcher (UI) exception occurred.");
+
+        // اگر بخوای همه چیز رو قورت بدی، برنامه در حالت خراب ادامه می‌ده و Freeze می‌کنی.
+        // اینجا فقط خطاهای "نرم" رو swallow می‌کنیم، بقیه اجازه‌ی کرش دارند.
+        if (e.Exception is ArgumentException or InvalidOperationException)
+        {
+            e.Handled = true;
+            return;
+        }
+
+        // خطای جدی → اجازه کرش تمیز (به‌جای هنگ کردن)
+        e.Handled = false;
     }
 
     private void UnHandleException(object sender, UnhandledExceptionEventArgs e)
@@ -38,7 +47,8 @@ public partial class App : Application
         else
             _logger?.Error("Unhandled domain exception: {0}", e.ExceptionObject);
 
-        //MessageBox.Show("Critical application error occurred. Please restart the app.", "Fatal Error", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+        // برنامه را در حالت ناقص رها نکن؛ بهتره تمیز ببنده
+        Environment.Exit(1);
     }
 
     private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
@@ -50,99 +60,90 @@ public partial class App : Application
     public IConfiguration? Configuration { get; private set; }
 
     public Serilog.ILogger _logger;
-    public static CancellationTokenSource GlobalCancellationTokenSource { get; private set; } = new CancellationTokenSource();
+    public static CancellationTokenSource GlobalCancellationTokenSource { get; private set; } = new();
     public static DatabaseMonitorService DatabaseMonitor { get; private set; }
 
-    // The.NET Generic Host provides dependency injection, configuration, logging, and other services.
-    // https://docs.microsoft.com/dotnet/core/extensions/generic-host
-    // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
-    // https://docs.microsoft.com/dotnet/core/extensions/configuration
-    // https://docs.microsoft.com/dotnet/core/extensions/logging
     private static readonly IHost _host = Host
         .CreateDefaultBuilder()
         .ConfigureServices((context, services) =>
         {
             if (Settings.Default.Application_DbActiveStatus)
             {
-                var connectionString = $"Server={Settings.Default.Application_DbHostAddress};Database={Settings.Default.Application_DbName};User Id={Settings.Default.Application_DbUsername};Password={Settings.Default.Application_DbPassword};TrustServerCertificate=true;MultipleActiveResultSets=True;";
-                services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString), ServiceLifetime.Transient);
+                var connectionString =
+                    $"Server={Settings.Default.Application_DbHostAddress};" +
+                    $"Database={Settings.Default.Application_DbName};" +
+                    $"User Id={Settings.Default.Application_DbUsername};" +
+                    $"Password={Settings.Default.Application_DbPassword};" +
+                    $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
+
+
+                services.AddDbContextFactory<ApplicationDbContext>(options =>
+                {
+                    options.UseSqlServer(connectionString);
+                });
+
                 services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddDefaultTokenProviders();
 
-                services.AddHttpClient();
 
-                services.AddTransient<IUnitOfWork, UnitOfWork>();
+                services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+                services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-                services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-
-                services.AddTransient<IParkingService, ParkingService>();
-                services.AddTransient<IRoleService, RoleService>();
-                services.AddTransient<ISynchronizationService, SynchronizationService>();
-                services.AddTransient<IUserService, UserService>();
-                services.AddTransient<ITicketQueueService, TicketQueueService>();
-
+                //  Business Services
+                services.AddScoped<IParkingService, ParkingService>();
+                services.AddScoped<IRoleService, RoleService>();
+                services.AddScoped<ISynchronizationService, SynchronizationService>();
+                services.AddScoped<IUserService, UserService>();
+                services.AddScoped<ITicketQueueService, TicketQueueService>();
                 services.AddScoped<IThemeService, ThemeService>();
 
-                services.AddLogging(builder =>
-                {
-                    builder.AddSerilog();
-                });
 
                 services.AddScheduler();
                 services.AddTransient<BackgroundTask>();
+
+
                 services.AddScoped<MainWindow>();
                 services.AddTransient<LoginWindow>();
                 services.AddTransient<DatabaseErrorWindow>();
                 services.AddTransient<AddUserWindow>();
-                services.AddScoped<MainPage>();
-                services.AddScoped<MainWindowViewModel>();
                 services.AddTransient<TicketDetailsWindow>();
                 services.AddTransient<CustomAmountPaymentModalWindow>();
+
+
+                services.AddScoped<MainPage>();
+                services.AddScoped<MainWindowViewModel>();
                 services.AddScoped<SettingsPageViewModel>();
                 services.AddScoped<LicensePlateGroupPage>();
                 services.AddScoped<LicensePlateTabsPage>();
                 services.AddScoped<LicensePlateGroupViewModel>();
                 services.AddScoped<AddCardPage>();
                 services.AddScoped<AddCardPageViewModel>();
-                services.AddScoped<UserManager<ApplicationUser>>();
-                services.AddScoped<RoleManager<IdentityRole<Guid>>>();
-                services.AddScoped<ChangePasswordWindow>();
                 services.AddScoped<UsersListPage>();
                 services.AddScoped<UsersListPageViewModel>();
                 services.AddScoped<AddCardHistoryPageViewModel>();
+
+
+                services.AddScoped<UserManager<ApplicationUser>>();
+                services.AddScoped<RoleManager<IdentityRole<Guid>>>();
+
+
+                services.AddHttpClient();
             }
             else
             {
                 services.AddScoped<ConfigDatabaseWindow>();
             }
+        })
+        .UseSerilog()
+        .Build();
 
-
-        }).UseSerilog().Build();
-    public static T? GetService<T>()
-    where T : class
-    {
-        return _host.Services.GetService(typeof(T)) as T;
-    }
+    public static T? GetService<T>() where T : class
+        => _host.Services.GetService(typeof(T)) as T;
 
     public MainWindow? mainWindow { get; private set; }
-    private static string GetLocalIPAddress()
-    {
-        try
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    return ip.ToString();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Failed to get IP: " + ex.Message);
-        }
-        return "Unknown";
-    }
+
+
 
     private async void OnStartup(object sender, StartupEventArgs e)
     {
@@ -189,10 +190,14 @@ public partial class App : Application
             }
 
             DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
-            DatabaseMonitor.DatabaseLost += () => Dispatcher.Invoke(ShowDatabaseErrorWindow);
+            DatabaseMonitor.DatabaseLost += () =>
+                Dispatcher.BeginInvoke(ShowDatabaseErrorWindow);
             DatabaseMonitor.StartMonitoring();
-            SyncPermissionsWithDatabase(optionsBuilder.Options);
+
+            await SyncPermissionsWithDatabase(optionsBuilder.Options);
+
             _host.Start();
+
             var login = _host.Services.GetRequiredService<LoginWindow>();
             login.Show();
         }
@@ -209,6 +214,32 @@ public partial class App : Application
                $"User Id={Settings.Default.Application_DbUsername};" +
                $"Password={Settings.Default.Application_DbPassword};" +
                $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
+    }
+
+
+    public void ShowMainWindow()
+    {
+        if (mainWindow == null)
+        {
+            mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            Application.Current.MainWindow = mainWindow;
+        }
+
+        if (!mainWindow.IsVisible)
+        {
+            mainWindow.Show();
+        }
+
+        mainWindow.Activate();
+    }
+
+    public void CloseMainWindow()
+    {
+        if (mainWindow != null)
+        {
+            mainWindow.Close();
+            mainWindow = null;
+        }
     }
 
     private static bool _dbErrorWindowOpen = false;
@@ -264,97 +295,85 @@ public partial class App : Application
             Directory.CreateDirectory(logDirectory);
 
         var logFilePath = Path.Combine(logDirectory, "log.txt");
-        var crashFilePath = Path.Combine(logDirectory, "crash-log.txt"); // Crash logs
+        var crashFilePath = Path.Combine(logDirectory, "crash-log.txt");
 
         var loggerConfig = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
             .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
-            .MinimumLevel.Debug()
 
-            .WriteTo.File(logFilePath,
+            .MinimumLevel.Information()
+
+            .WriteTo.File(
+                logFilePath,
                 rollingInterval: RollingInterval.Infinite,
                 shared: true,
                 retainedFileCountLimit: null,
                 rollOnFileSizeLimit: false,
+
                 restrictedToMinimumLevel: LogEventLevel.Information,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
 
-            .WriteTo.File(crashFilePath,
+            .WriteTo.File(
+                crashFilePath,
                 rollingInterval: RollingInterval.Infinite,
                 shared: true,
                 retainedFileCountLimit: null,
                 rollOnFileSizeLimit: false,
+
                 restrictedToMinimumLevel: LogEventLevel.Error,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+            );
 
         if (Settings.Default.Application_Logging_In_Elastic)
         {
-            loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
-            {
-                AutoRegisterTemplate = true,
-                IndexFormat = "logs-{0:yyyy.MM.dd}",
-                MinimumLogEventLevel = LogEventLevel.Information,
-                ModifyConnectionSettings = x =>
-                    x.BasicAuthentication(Settings.Default.Application_Logs_Elastic_Username,
-                                          Settings.Default.Application_Logs_Elastic_Pass)
-            });
+            loggerConfig.WriteTo.Elasticsearch(
+                new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
+                {
+                    AutoRegisterTemplate = true,
+                    IndexFormat = "logs-{0:yyyy.MM.dd}",
+                    MinimumLogEventLevel = LogEventLevel.Information,
+                    ModifyConnectionSettings = x =>
+                        x.BasicAuthentication(
+                            Settings.Default.Application_Logs_Elastic_Username,
+                            Settings.Default.Application_Logs_Elastic_Pass
+                        )
+                });
         }
 
         Log.Logger = loggerConfig.CreateLogger();
         _logger = Log.Logger;
         _logger.Information("Logger configured successfully.");
     }
-    private void MainWindow_Closed(object sender, ExitEventArgs e)
-    {
-        if (mainWindow != null)
-        {
-            Application.Current.MainWindow = mainWindow;
-            mainWindow.Close();
-        }
-    }
-    public void CloseMainWindow()
-    {
-        if (mainWindow != null)
-        {
-            Application.Current.MainWindow = mainWindow;
-            mainWindow.Close();
-        }
-    }
 
-    public void ShowMainWindow()
-    {
-        if (mainWindow == null)
-        {
-            mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            Application.Current.MainWindow = mainWindow;
-
-            mainWindow = new MainWindow();
-        }
-
-        if (!mainWindow.IsVisible)
-        {
-            mainWindow.Show();
-        }
-
-        mainWindow.Activate();
-    }
-
-    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-
-    }
 
     private async Task SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
     {
-        var applicationRole = App.GetService<RoleManager<ApplicationRole>>();
+        var applicationRole = GetService<RoleManager<ApplicationRole>>();
         await PermissionSeeder.SeedPermissionsAsync(options, applicationRole);
-
     }
 
     private void Application_Exit(object sender, ExitEventArgs e)
     {
         SingleInstanceApp.Cleanup();
     }
-}
 
+    private static string GetLocalIPAddress()
+    {
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    return ip.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to get IP: " + ex.Message);
+        }
+        return "Unknown";
+    }
+}
