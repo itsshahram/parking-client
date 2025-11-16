@@ -169,15 +169,10 @@ namespace Parking.App.Views.Windows
                         TokenStore.SetPermissions(permissions);
 
                         if (parking.Succeeded)
-                        {
                             TokenStore.ParkingLotId = parking.Result.Id;
-                        }
                         TokenStore.FullName = user.Firstname + " " + user.Lastname;
                         TokenStore.Username = username;
                         TokenStore.UserId = user.Id;
-
-
-
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
                         SingleInstanceApp.SetMainWindow(mainWindow ?? new MainWindow());
