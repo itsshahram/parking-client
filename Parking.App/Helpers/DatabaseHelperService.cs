@@ -1,5 +1,7 @@
 ﻿namespace Parking.App.Helpers;
 
+using static Parking.App.Helpers.Constants;
+
 public class DatabaseMonitorService
 {
     private readonly DbContextOptions<ApplicationDbContext> _options;
@@ -27,9 +29,10 @@ public class DatabaseMonitorService
     private async Task CheckDatabaseAsync()
     {
         bool reachable;
+
         try
         {
-            var connected = await DatabaseConnectionTester.TestConnectionAsync(Settings.Default.Application_DbHostAddress, Settings.Default.Application_DbUsername, Settings.Default.Application_DbPassword);
+            var connected = await DatabaseConnectionTester.TestConnectionAsync(DatabaseCredentials.Host, DatabaseCredentials.DbUserName, DatabaseCredentials.DbPassword);
             reachable = connected.Item1;
         }
         catch
@@ -40,6 +43,7 @@ public class DatabaseMonitorService
         if (reachable != _isReachable)
         {
             _isReachable = reachable;
+
             if (!_isReachable)
                 DatabaseLost?.Invoke();
             else
@@ -49,4 +53,3 @@ public class DatabaseMonitorService
 
     public bool IsReachable => _isReachable;
 }
-

@@ -6,12 +6,10 @@ public class BackgroundTask : IInvocable
 {
     private readonly ISynchronizationService? _synchronizationService;
     private readonly ILogger<BackgroundTask> _logger;
-    private readonly IParkingService? _parkingService;
     private readonly MainWindow _mainWindow;
 
     public BackgroundTask(MainWindow mainWindow)
     {
-        _parkingService = App.GetService<IParkingService>();
         _synchronizationService = App.GetService<ISynchronizationService>();
         _logger = App.GetService<ILogger<BackgroundTask>>();
         _mainWindow = mainWindow;

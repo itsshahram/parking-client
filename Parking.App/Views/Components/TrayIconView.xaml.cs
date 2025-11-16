@@ -1,5 +1,4 @@
 ﻿
-
 namespace Parking.App.Views.Components;
 
 [ObservableObject]
@@ -19,7 +18,6 @@ public partial class TrayIconView : UserControl
         ViewModel = new TrayIconViewModel();
         DataContext = ViewModel;
         InitializeComponent();
-        //string imagePath = "Assets/ServerIconUpdate.ico";
         _themeService = App.GetService<IThemeService>();
 
         _imagePath = "Assets/icon.ico";
@@ -134,18 +132,6 @@ public partial class TrayIconView : UserControl
         ViewModel.IconSource = bitmap;
         notifyTray.TooltipText = errorMessage;
     }
-    //private void MenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
-    //{
-    //    string imagePath = "Assets/ServerIconUpdate.ico";
-
-    //    // بارگذاری تصویر به عنوان ImageSource
-    //    BitmapImage bitmap = new BitmapImage();
-    //    bitmap.BeginInit();
-    //    bitmap.UriSource = new Uri(imagePath, UriKind.Relative);
-    //    bitmap.EndInit();
-
-    //    notifyTray.Icon = bitmap;
-    //}
 
 
     private void ShowWindowBtn_Click(object sender, System.Windows.RoutedEventArgs e)

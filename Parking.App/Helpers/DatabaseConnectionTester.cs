@@ -22,7 +22,6 @@ public static class DatabaseConnectionTester
             string errorMessage = $"Connection failed: {ex.Message} \nStackTrace: {ex.StackTrace}";
             Console.WriteLine(errorMessage);
 
-            // نوشتن لاگ به فایل
             File.AppendAllText("connection_errors.log", errorMessage + Environment.NewLine);
 
             return (false, errorMessage);

@@ -7,370 +7,432 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using System.Net;
+using static Parking.App.Helpers.Constants;
 using Log = Serilog.Log;
 using MessageBox = System.Windows.MessageBox;
 
-namespace Parking.App;
-
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
-public partial class App : Application
+namespace Parking.App
 {
-    public App()
+    public partial class App : Application
     {
-        DispatcherUnhandledException += App_DispatcherUnhandledException;
-        AppDomain.CurrentDomain.UnhandledException += UnHandleException;
-        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-    }
-
-    private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-        _logger?.Error(e.Exception, "Unhandled Dispatcher (UI) exception occurred.");
-
-        if (e.Exception is ArgumentException or InvalidOperationException)
+        public App()
         {
-            e.Handled = true;
-            return;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += UnHandleException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
         }
 
-        e.Handled = false;
-    }
+        // === GLOBALS ===
+        public IConfiguration? Configuration { get; private set; }
+        public Serilog.ILogger _logger;
+        public static CancellationTokenSource GlobalCancellationTokenSource { get; private set; } = new();
+        public static DatabaseMonitorService DatabaseMonitor { get; private set; }
 
-    private void UnHandleException(object sender, UnhandledExceptionEventArgs e)
-    {
-        if (e.ExceptionObject is Exception ex)
-            _logger?.Error(ex, "Unhandled domain exception occurred.");
-        else
-            _logger?.Error("Unhandled domain exception: {0}", e.ExceptionObject);
-
-        // برنامه را در حالت ناقص رها نکن؛ بهتره تمیز ببنده
-        Environment.Exit(1);
-    }
-
-    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        _logger?.Error(e.Exception, "Unobserved Task exception occurred.");
-        e.SetObserved();
-    }
-
-    public IConfiguration? Configuration { get; private set; }
-
-    public Serilog.ILogger _logger;
-    public static CancellationTokenSource GlobalCancellationTokenSource { get; private set; } = new();
-    public static DatabaseMonitorService DatabaseMonitor { get; private set; }
-
-    private static readonly IHost _host = Host
-        .CreateDefaultBuilder()
-        .ConfigureServices((context, services) =>
+        private static void LoadDatabaseCredentials()
         {
-            if (Settings.Default.Application_DbActiveStatus)
+            var key = AesEncryption.LoadOrCreateAesKey(SecKeyPath);
+
+            string hostBase64 = EnsureEncrypted(
+                Settings.Default.Application_DbHostAddress,
+                nameof(Settings.Default.Application_DbHostAddress),
+                key);
+
+            string dbNameBase64 = EnsureEncrypted(
+                Settings.Default.Application_DbName,
+                nameof(Settings.Default.Application_DbName),
+                key);
+
+            string userBase64 = EnsureEncrypted(
+                Settings.Default.Application_DbUsername,
+                nameof(Settings.Default.Application_DbUsername),
+                key);
+
+            string passBase64 = EnsureEncrypted(
+                Settings.Default.Application_DbPassword,
+                nameof(Settings.Default.Application_DbPassword),
+                key);
+
+            DatabaseCredentials.Host =
+                AesEncryption.Decrypt(Convert.FromBase64String(hostBase64), key);
+
+            DatabaseCredentials.DbName =
+                AesEncryption.Decrypt(Convert.FromBase64String(dbNameBase64), key);
+
+            DatabaseCredentials.DbUserName =
+                AesEncryption.Decrypt(Convert.FromBase64String(userBase64), key);
+
+            DatabaseCredentials.DbPassword =
+                AesEncryption.Decrypt(Convert.FromBase64String(passBase64), key);
+        }
+
+
+
+        private static string BuildConnectionString()
+        {
+            return $"Server={DatabaseCredentials.Host};" +
+                   $"Database={DatabaseCredentials.DbName};" +
+                   $"User Id={DatabaseCredentials.DbUserName};" +
+                   $"Password={DatabaseCredentials.DbPassword};" +
+                   $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
+        }
+
+
+        private static readonly IHost _host = Host
+            .CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
             {
-                var connectionString =
-                    $"Server={Settings.Default.Application_DbHostAddress};" +
-                    $"Database={Settings.Default.Application_DbName};" +
-                    $"User Id={Settings.Default.Application_DbUsername};" +
-                    $"Password={Settings.Default.Application_DbPassword};" +
-                    $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
-
-
-                services.AddDbContextFactory<ApplicationDbContext>(options =>
+                if (Settings.Default.Application_DbActiveStatus)
                 {
-                    options.UseSqlServer(connectionString);
-                });
+                    var connectionString = BuildConnectionString();
 
-                services.AddIdentity<ApplicationUser, ApplicationRole>()
-                    .AddEntityFrameworkStores<ApplicationDbContext>()
-                    .AddDefaultTokenProviders();
+                    services.AddDbContextFactory<ApplicationDbContext>(opt =>
+                        opt.UseSqlServer(connectionString));
+
+                    services.AddIdentity<ApplicationUser, ApplicationRole>()
+                        .AddEntityFrameworkStores<ApplicationDbContext>()
+                        .AddDefaultTokenProviders();
+
+                    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+                    services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+                    services.AddScoped<IParkingService, ParkingService>();
+                    services.AddScoped<IRoleService, RoleService>();
+                    services.AddScoped<ISynchronizationService, SynchronizationService>();
+                    services.AddScoped<IUserService, UserService>();
+                    services.AddScoped<ITicketQueueService, TicketQueueService>();
+                    services.AddScoped<IThemeService, ThemeService>();
+
+                    services.AddScheduler();
+                    services.AddTransient<BackgroundTask>();
+
+                    // UI Windows & Pages
+                    services.AddScoped<MainWindow>();
+                    services.AddTransient<LoginWindow>();
+                    services.AddTransient<DatabaseErrorWindow>();
+                    services.AddTransient<AddUserWindow>();
+                    services.AddTransient<TicketDetailsWindow>();
+                    services.AddTransient<CustomAmountPaymentModalWindow>();
+
+                    services.AddScoped<MainPage>();
+                    services.AddScoped<MainWindowViewModel>();
+                    services.AddScoped<SettingsPageViewModel>();
+                    services.AddScoped<LicensePlateGroupPage>();
+                    services.AddScoped<LicensePlateTabsPage>();
+                    services.AddScoped<LicensePlateGroupViewModel>();
+                    services.AddScoped<AddCardPage>();
+                    services.AddScoped<AddCardPageViewModel>();
+                    services.AddScoped<UsersListPage>();
+                    services.AddScoped<UsersListPageViewModel>();
+                    services.AddScoped<AddCardHistoryPageViewModel>();
+
+                    services.AddScoped<UserManager<ApplicationUser>>();
+                    services.AddScoped<RoleManager<IdentityRole<Guid>>>();
+
+                    services.AddHttpClient();
+                }
+                else
+                {
+                    services.AddScoped<ConfigDatabaseWindow>();
+                }
+            })
+            .UseSerilog()
+            .Build();
 
 
-                services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-                services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-                //  Business Services
-                services.AddScoped<IParkingService, ParkingService>();
-                services.AddScoped<IRoleService, RoleService>();
-                services.AddScoped<ISynchronizationService, SynchronizationService>();
-                services.AddScoped<IUserService, UserService>();
-                services.AddScoped<ITicketQueueService, TicketQueueService>();
-                services.AddScoped<IThemeService, ThemeService>();
+        public static T? GetService<T>() where T : class =>
+            _host.Services.GetService(typeof(T)) as T;
 
+        public MainWindow? mainWindow { get; private set; }
 
-                services.AddScheduler();
-                services.AddTransient<BackgroundTask>();
-
-
-                services.AddScoped<MainWindow>();
-                services.AddTransient<LoginWindow>();
-                services.AddTransient<DatabaseErrorWindow>();
-                services.AddTransient<AddUserWindow>();
-                services.AddTransient<TicketDetailsWindow>();
-                services.AddTransient<CustomAmountPaymentModalWindow>();
-
-
-                services.AddScoped<MainPage>();
-                services.AddScoped<MainWindowViewModel>();
-                services.AddScoped<SettingsPageViewModel>();
-                services.AddScoped<LicensePlateGroupPage>();
-                services.AddScoped<LicensePlateTabsPage>();
-                services.AddScoped<LicensePlateGroupViewModel>();
-                services.AddScoped<AddCardPage>();
-                services.AddScoped<AddCardPageViewModel>();
-                services.AddScoped<UsersListPage>();
-                services.AddScoped<UsersListPageViewModel>();
-                services.AddScoped<AddCardHistoryPageViewModel>();
-
-
-                services.AddScoped<UserManager<ApplicationUser>>();
-                services.AddScoped<RoleManager<IdentityRole<Guid>>>();
-
-
-                services.AddHttpClient();
-            }
-            else
+        private async void OnStartup(object sender, StartupEventArgs e)
+        {
+            if (Settings.Default.IsFirstRun)
             {
-                services.AddScoped<ConfigDatabaseWindow>();
+                Settings.Default.Upgrade();
+                Settings.Default.IsFirstRun = false;
+                Settings.Default.Save();
             }
-        })
-        .UseSerilog()
-        .Build();
 
-    public static T? GetService<T>() where T : class
-        => _host.Services.GetService(typeof(T)) as T;
+            ConfigureLogging();
+            Log.Information("Application Started.");
 
-    public MainWindow? mainWindow { get; private set; }
-
-
-
-    private async void OnStartup(object sender, StartupEventArgs e)
-    {
-        if (Settings.Default.IsFirstRun)
-        {
-            Settings.Default.Upgrade();
-            Settings.Default.IsFirstRun = false;
-            Settings.Default.Save();
-        }
-
-        ConfigureLogging();
-        Log.Information("Application Started.");
-
-        if (!Settings.Default.Application_DbActiveStatus)
-        {
-            var dbWindow = _host.Services.GetRequiredService<ConfigDatabaseWindow>();
-            dbWindow.Show();
-            return;
-        }
-
-        if (!SingleInstanceApp.IsFirstInstance())
-        {
-            SingleInstanceApp.ActivatePreviousInstance();
-            Shutdown();
-            return;
-        }
-
-        var connectionString = BuildConnectionString();
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        try
-        {
-            bool canConnect = await CanConnectToDatabaseAsync();
-            if (!canConnect)
+            if (!Settings.Default.Application_DbActiveStatus)
             {
-                ShowDatabaseErrorWindow();
+                var dbWindow = _host.Services.GetRequiredService<ConfigDatabaseWindow>();
+                dbWindow.Show();
                 return;
             }
 
-            using (var context = new ApplicationDbContext(optionsBuilder.Options))
+            if (!SingleInstanceApp.IsFirstInstance())
             {
-                await context.Database.MigrateAsync();
+                SingleInstanceApp.ActivatePreviousInstance();
+                Shutdown();
+                return;
             }
 
-            DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
-            DatabaseMonitor.DatabaseLost += () =>
-                Dispatcher.BeginInvoke(ShowDatabaseErrorWindow);
-            DatabaseMonitor.StartMonitoring();
+            // LOAD decrypted DB credentials into memory
+            LoadDatabaseCredentials();
 
-            await SyncPermissionsWithDatabase(optionsBuilder.Options);
+            var connectionString = BuildConnectionString();
 
-            _host.Start();
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer(connectionString);
 
-            var login = _host.Services.GetRequiredService<LoginWindow>();
-            login.Show();
+            try
+            {
+                bool canConnect = await CanConnectToDatabaseAsync();
+
+                if (!canConnect)
+                {
+                    ShowDatabaseErrorWindow();
+                    return;
+                }
+
+                using (var context = new ApplicationDbContext(optionsBuilder.Options))
+                    await context.Database.MigrateAsync();
+
+                DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
+                DatabaseMonitor.DatabaseLost += () =>
+                    Dispatcher.BeginInvoke(ShowDatabaseErrorWindow);
+
+                DatabaseMonitor.StartMonitoring();
+
+                await SyncPermissionsWithDatabase(optionsBuilder.Options);
+
+                _host.Start();
+
+                var login = _host.Services.GetRequiredService<LoginWindow>();
+                login.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
-        catch (Exception ex)
+
+        private static string EnsureEncrypted(string value, string keyName, byte[] aesKey)
         {
-            MessageBox.Show(ex.ToString());
+            if (string.IsNullOrWhiteSpace(value))
+                return "";
+
+            if (IsBase64String(value))
+                return value;
+
+            var encrypted = Convert.ToBase64String(AesEncryption.Encrypt(value, aesKey));
+
+            switch (keyName)
+            {
+                case nameof(Settings.Default.Application_DbHostAddress):
+                    Settings.Default.Application_DbHostAddress = encrypted;
+                    break;
+                case nameof(Settings.Default.Application_DbName):
+                    Settings.Default.Application_DbName = encrypted;
+                    break;
+                case nameof(Settings.Default.Application_DbUsername):
+                    Settings.Default.Application_DbUsername = encrypted;
+                    break;
+                case nameof(Settings.Default.Application_DbPassword):
+                    Settings.Default.Application_DbPassword = encrypted;
+                    break;
+            }
+
+            Settings.Default.Save();
+            return encrypted;
         }
-    }
-
-    private static string BuildConnectionString()
-    {
-        return $"Server={Settings.Default.Application_DbHostAddress};" +
-               $"Database={Settings.Default.Application_DbName};" +
-               $"User Id={Settings.Default.Application_DbUsername};" +
-               $"Password={Settings.Default.Application_DbPassword};" +
-               $"TrustServerCertificate=true;MultipleActiveResultSets=True;";
-    }
 
 
-    public void ShowMainWindow()
-    {
-        if (mainWindow == null)
+        private static async Task<bool> CanConnectToDatabaseAsync()
         {
-            mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            Application.Current.MainWindow = mainWindow;
+            try
+            {
+                string host = DatabaseCredentials.Host;
+                string user = DatabaseCredentials.DbUserName;
+                string pass = DatabaseCredentials.DbPassword;
+
+                var connected = await DatabaseConnectionTester.TestConnectionAsync(host, user, pass);
+                return connected.Item1;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        if (!mainWindow.IsVisible)
+
+
+        public void ShowMainWindow()
         {
-            mainWindow.Show();
+            if (mainWindow == null)
+            {
+                mainWindow = _host.Services.GetRequiredService<MainWindow>();
+                Application.Current.MainWindow = mainWindow;
+            }
+
+            if (!mainWindow.IsVisible)
+                mainWindow.Show();
+
+            mainWindow.Activate();
         }
 
-        mainWindow.Activate();
-    }
 
-    public void CloseMainWindow()
-    {
-        if (mainWindow != null)
+        public void CloseMainWindow()
         {
-            mainWindow.Close();
+            mainWindow?.Close();
             mainWindow = null;
         }
-    }
+        private static bool _dbErrorWindowOpen = false;
 
-    private static bool _dbErrorWindowOpen = false;
-
-    private static void ShowDatabaseErrorWindow()
-    {
-        if (_dbErrorWindowOpen) return;
-
-        _dbErrorWindowOpen = true;
-        try
+        private static void ShowDatabaseErrorWindow()
         {
-            var dbWindow = new DatabaseErrorWindow(Settings.Default.Application_DbHostAddress)
-            {
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
-            };
+            if (_dbErrorWindowOpen) return;
+            _dbErrorWindowOpen = true;
 
-            if (Application.Current.MainWindow is not null
-                && Application.Current.MainWindow != dbWindow
-                && Application.Current.MainWindow is not LoginWindow)
+            try
             {
-                dbWindow.Owner = Application.Current.MainWindow;
-                dbWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                var dbWindow = new DatabaseErrorWindow(DatabaseCredentials.Host)
+                {
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen
+                };
+
+                if (Application.Current.MainWindow != null &&
+                    Application.Current.MainWindow is not LoginWindow &&
+                    Application.Current.MainWindow != dbWindow)
+                {
+                    dbWindow.Owner = Application.Current.MainWindow;
+                    dbWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
+
+                dbWindow.ShowDialog();
             }
+            finally
+            {
+                _dbErrorWindowOpen = false;
+            }
+        }
 
-            dbWindow.ShowDialog();
-        }
-        finally
-        {
-            _dbErrorWindowOpen = false;
-        }
-    }
 
-    private static async Task<bool> CanConnectToDatabaseAsync()
-    {
-        try
+        private void ConfigureLogging()
         {
-            var connected = await DatabaseConnectionTester.TestConnectionAsync(
-                Settings.Default.Application_DbHostAddress,
-                Settings.Default.Application_DbUsername,
-                Settings.Default.Application_DbPassword);
-            return connected.Item1;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private void ConfigureLogging()
-    {
-        var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-        if (!Directory.Exists(logDirectory))
+            var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             Directory.CreateDirectory(logDirectory);
 
-        var logFilePath = Path.Combine(logDirectory, "log.txt");
-        var crashFilePath = Path.Combine(logDirectory, "crash-log.txt");
+            var logFilePath = Path.Combine(logDirectory, "log.txt");
+            var crashFilePath = Path.Combine(logDirectory, "crash-log.txt");
 
-        var loggerConfig = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
+            var loggerConfig = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithProperty("IP_Address", GetLocalIPAddress())
+                .MinimumLevel.Information()
+                .WriteTo.File(logFilePath,
+                    rollingInterval: RollingInterval.Infinite,
+                    shared: true,
+                    retainedFileCountLimit: null,
+                    rollOnFileSizeLimit: false,
+                    restrictedToMinimumLevel: LogEventLevel.Information,
+                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(crashFilePath,
+                    rollingInterval: RollingInterval.Infinite,
+                    shared: true,
+                    retainedFileCountLimit: null,
+                    rollOnFileSizeLimit: false,
+                    restrictedToMinimumLevel: LogEventLevel.Error,
+                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
 
-            .MinimumLevel.Information()
+            if (Settings.Default.Application_Logging_In_Elastic)
+            {
+                loggerConfig.WriteTo.Elasticsearch(
+                    new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
+                    {
+                        AutoRegisterTemplate = true,
+                        IndexFormat = "logs-{0:yyyy.MM.dd}",
+                        MinimumLogEventLevel = LogEventLevel.Information,
+                        ModifyConnectionSettings = x =>
+                            x.BasicAuthentication(
+                                Settings.Default.Application_Logs_Elastic_Username,
+                                Settings.Default.Application_Logs_Elastic_Pass)
+                    });
+            }
 
-            .WriteTo.File(
-                logFilePath,
-                rollingInterval: RollingInterval.Infinite,
-                shared: true,
-                retainedFileCountLimit: null,
-                rollOnFileSizeLimit: false,
-
-                restrictedToMinimumLevel: LogEventLevel.Information,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
-            )
-
-            .WriteTo.File(
-                crashFilePath,
-                rollingInterval: RollingInterval.Infinite,
-                shared: true,
-                retainedFileCountLimit: null,
-                rollOnFileSizeLimit: false,
-
-                restrictedToMinimumLevel: LogEventLevel.Error,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
-            );
-
-        if (Settings.Default.Application_Logging_In_Elastic)
-        {
-            loggerConfig.WriteTo.Elasticsearch(
-                new ElasticsearchSinkOptions(new Uri(Settings.Default.Application_Logs_Elastic_Server))
-                {
-                    AutoRegisterTemplate = true,
-                    IndexFormat = "logs-{0:yyyy.MM.dd}",
-                    MinimumLogEventLevel = LogEventLevel.Information,
-                    ModifyConnectionSettings = x =>
-                        x.BasicAuthentication(
-                            Settings.Default.Application_Logs_Elastic_Username,
-                            Settings.Default.Application_Logs_Elastic_Pass
-                        )
-                });
+            Log.Logger = loggerConfig.CreateLogger();
+            _logger = Log.Logger;
+            _logger.Information("Logger configured successfully.");
         }
 
-        Log.Logger = loggerConfig.CreateLogger();
-        _logger = Log.Logger;
-        _logger.Information("Logger configured successfully.");
-    }
 
-
-    private async Task SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
-    {
-        var applicationRole = GetService<RoleManager<ApplicationRole>>();
-        await PermissionSeeder.SeedPermissionsAsync(options, applicationRole);
-    }
-
-    private void Application_Exit(object sender, ExitEventArgs e)
-    {
-        SingleInstanceApp.Cleanup();
-    }
-
-    private static string GetLocalIPAddress()
-    {
-        try
+        private async Task SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            var applicationRole = GetService<RoleManager<ApplicationRole>>();
+            await PermissionSeeder.SeedPermissionsAsync(options, applicationRole);
+        }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            SingleInstanceApp.Cleanup();
+        }
+
+
+        private static string GetLocalIPAddress()
+        {
+            try
             {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    return ip.ToString();
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        return ip.ToString();
+            }
+            catch { }
+
+            return "Unknown";
+        }
+
+
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            _logger?.Error(e.Exception, "Unhandled Dispatcher (UI) exception occurred.");
+
+            if (e.Exception is ArgumentException or InvalidOperationException)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = false;
+        }
+
+        private void UnHandleException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+                _logger?.Error(ex, "Unhandled domain exception occurred.");
+            else
+                _logger?.Error("Unhandled domain exception: {0}", e.ExceptionObject);
+
+            Environment.Exit(1);
+        }
+
+        private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            _logger?.Error(e.Exception, "Unobserved Task exception occurred.");
+            e.SetObserved();
+        }
+
+        private static bool IsBase64String(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            input = input.Trim();
+
+            if (input.Length % 4 != 0) return false;
+
+            try
+            {
+                Convert.FromBase64String(input);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Failed to get IP: " + ex.Message);
-        }
-        return "Unknown";
     }
 }
