@@ -28,15 +28,12 @@ public partial class App : Application
     {
         _logger?.Error(e.Exception, "Unhandled Dispatcher (UI) exception occurred.");
 
-        // اگر بخوای همه چیز رو قورت بدی، برنامه در حالت خراب ادامه می‌ده و Freeze می‌کنی.
-        // اینجا فقط خطاهای "نرم" رو swallow می‌کنیم، بقیه اجازه‌ی کرش دارند.
         if (e.Exception is ArgumentException or InvalidOperationException)
         {
             e.Handled = true;
             return;
         }
 
-        // خطای جدی → اجازه کرش تمیز (به‌جای هنگ کردن)
         e.Handled = false;
     }
 

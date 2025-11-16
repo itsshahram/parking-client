@@ -152,14 +152,9 @@ namespace Parking.App.Views.Windows
 
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
-                        if (parking.Succeeded)
-                        {
-                            TokenStore.ParkingLotId = parking.Result.Id;
-                        }
-                        TokenStore.FullName = user.Firstname + " " + user.Lastname;
-                        TokenStore.Username = username;
+
+
                         TokenStore.RoleName = _userService.GetUserRoleByUserId(user.Id);
-                        TokenStore.UserId = user.Id;
 
                         var role = await _roleService.GetRoleByName(TokenStore.RoleName);
 
@@ -168,9 +163,20 @@ namespace Parking.App.Views.Windows
 
                         var permissions = rolePermissions.Select(x => x.Permission.Name)
                                                          .Concat(userPermissions.Select(x => x.Permission.Name))
-                                                         .Distinct();
+                                                         .Distinct()
+                                                         .ToList();
                         TokenStore.DeletePermissions();
                         TokenStore.SetPermissions(permissions);
+
+                        if (parking.Succeeded)
+                        {
+                            TokenStore.ParkingLotId = parking.Result.Id;
+                        }
+                        TokenStore.FullName = user.Firstname + " " + user.Lastname;
+                        TokenStore.Username = username;
+                        TokenStore.UserId = user.Id;
+
+
 
                         var mainWindow = App.GetService<MainWindow>();
                         Application.Current.MainWindow = mainWindow;
