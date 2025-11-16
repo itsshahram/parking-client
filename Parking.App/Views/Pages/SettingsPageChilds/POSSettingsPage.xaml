@@ -18,7 +18,6 @@
             <StackPanel >
                 <ui:InfoBar Title="Title" Message="Essential message."/>
                 <WrapPanel>
-
                     <StackPanel Margin="5" Width="200">
                         <TextBlock Text="انتخاب نوع کارتخوان"/>
                         <ComboBox x:Name="POSTypeCombo" 
@@ -61,11 +60,22 @@
                     </StackPanel>
                     <StackPanel Margin="5 5" Width="200">
                         <TextBlock Text="پورت"/>
-                        <ui:TextBox                                      x:Name="POSPortTextBox"
-                                                                         TextChanged="POSPortTextBox_TextChanged"
-                                     Text="{Binding Source={x:Static Properties:Settings.Default}, 
-                                    Path=POS_Port, Mode=TwoWay}" FlowDirection="LeftToRight" PlaceholderText="0000"/>
+                        <ui:TextBox 
+                        x:Name="POSPortTextBox"
+                        FlowDirection="LeftToRight"
+                        PlaceholderText="0000"
+
+                        Text="{Binding Source={x:Static Properties:Settings.Default}, 
+                                      Path=POS_Port, 
+                                      Mode=TwoWay, 
+                                      UpdateSourceTrigger=PropertyChanged}"
+
+                        PreviewTextInput="POSPortTextBox_PreviewTextInput"
+                        TextChanged="POSPortTextBox_TextChanged"
+                    />
+
                     </StackPanel>
+
                     <StackPanel Margin="5">
                         <TextBlock Text=" "/>
                         <ui:Button x:Name="SavePOSConfigBtn" Click="SavePOSConfigBtn_Click" HorizontalAlignment="Center" Padding="20 8" Icon="{ui:SymbolIcon Symbol=Checkmark24}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Content="ذخیره اطلاعات" Appearance="Primary"/>
@@ -75,7 +85,7 @@
 
             </StackPanel>
         </Border>
-      
-        
+
+
     </StackPanel>
 </Page>

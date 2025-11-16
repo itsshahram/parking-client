@@ -41,10 +41,29 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             Settings.Default.Save();
         }
 
+        private void POSPortTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
         private void POSPortTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            Settings.Default.POS_Port = int.Parse(((TextBox)sender).Text);
-            Settings.Default.Save();
+            if (int.TryParse(POSPortTextBox.Text, out int port))
+            {
+                if (port >= 0 && port <= 65535)
+                {
+                    POSPortTextBox.BorderBrush = new SolidColorBrush(Colors.Green);
+                    Settings.Default.POS_Port = int.Parse(POSPortTextBox.Text);
+                    Settings.Default.Save();
+                }
+                else
+                {
+                    POSPortTextBox.BorderBrush = new SolidColorBrush(Colors.Red);
+                }
+            }
+            else
+            {
+                POSPortTextBox.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
         }
     }
 }
