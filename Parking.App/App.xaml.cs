@@ -66,7 +66,6 @@ namespace Parking.App
         }
 
 
-
         private static string BuildConnectionString()
         {
             return $"Server={DatabaseCredentials.Host};" +
@@ -192,7 +191,7 @@ namespace Parking.App
                 using (var context = new ApplicationDbContext(optionsBuilder.Options))
                     await context.Database.MigrateAsync();
 
-                DatabaseMonitor = new DatabaseMonitorService(optionsBuilder.Options);
+                DatabaseMonitor = new DatabaseMonitorService();
                 DatabaseMonitor.DatabaseLost += () =>
                     Dispatcher.BeginInvoke(ShowDatabaseErrorWindow);
 
@@ -241,7 +240,6 @@ namespace Parking.App
             return encrypted;
         }
 
-
         private static async Task<bool> CanConnectToDatabaseAsync()
         {
             try
@@ -259,8 +257,6 @@ namespace Parking.App
             }
         }
 
-
-
         public void ShowMainWindow()
         {
             if (mainWindow == null)
@@ -275,12 +271,12 @@ namespace Parking.App
             mainWindow.Activate();
         }
 
-
         public void CloseMainWindow()
         {
             mainWindow?.Close();
             mainWindow = null;
         }
+
         private static bool _dbErrorWindowOpen = false;
 
         private static void ShowDatabaseErrorWindow()
@@ -310,7 +306,6 @@ namespace Parking.App
                 _dbErrorWindowOpen = false;
             }
         }
-
 
         private void ConfigureLogging()
         {
@@ -360,7 +355,6 @@ namespace Parking.App
             _logger.Information("Logger configured successfully.");
         }
 
-
         private async Task SyncPermissionsWithDatabase(DbContextOptions<ApplicationDbContext> options)
         {
             var applicationRole = GetService<RoleManager<ApplicationRole>>();
@@ -371,7 +365,6 @@ namespace Parking.App
         {
             SingleInstanceApp.Cleanup();
         }
-
 
         private static string GetLocalIPAddress()
         {
@@ -386,7 +379,6 @@ namespace Parking.App
 
             return "Unknown";
         }
-
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {

@@ -36,6 +36,7 @@ public static class DatabaseConnectionTester
                 await connection.OpenAsync();
                 Console.WriteLine("Connection successful.");
                 return (true, "");
+
             }
         }
         catch (Exception ex)
@@ -47,5 +48,4 @@ public static class DatabaseConnectionTester
             return (false, errorMessage);
         }
     }
-
 }
