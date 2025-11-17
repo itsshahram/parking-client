@@ -3368,7 +3368,8 @@ public class ParkingService : IParkingService
         var query = unitOfWork
             .LicensePlateGroups
             .GetAll()
-            .Include(g => g.LicensePlates);
+            .Include(g => g.LicensePlates)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(name))
             query = query.Where(g => g.Name != null && g.Name.Contains(name));

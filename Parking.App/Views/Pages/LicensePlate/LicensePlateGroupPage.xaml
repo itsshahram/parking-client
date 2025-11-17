@@ -9,239 +9,474 @@
       FontFamily="{StaticResource IranYekanFont}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       FlowDirection="RightToLeft"
-      d:DesignWidth="1024"
+      d:DesignWidth="1100"
       d:DesignHeight="768"
       Title="LicensePlateGroupPage">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20" FlowDirection="RightToLeft">
-            <DockPanel LastChildFill="False" FlowDirection="RightToLeft">
-                <TextBlock Text="مدیریت گروه‌های پلاک"
-                           FontSize="22"
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"
-                           DockPanel.Dock="Right"/>
-                <ui:Button Content="افزودن گروه"
-                           Appearance="Primary"
-                           Padding="16 6"
-                           Margin="10 0 0 0"
-                           Click="AddLicensePlate_Click"
-                           DockPanel.Dock="Left"/>
-            </DockPanel>
 
-            <Border CornerRadius="10" Padding="16" Background="{DynamicResource ControlFillColorSecondaryBrush}" Margin="0 10 0 0">
-                <StackPanel>
-                    <TextBlock Text="فیلترها" FontWeight="Bold" Margin="0 0 0 8"/>
-                    <WrapPanel FlowDirection="RightToLeft" ItemWidth="260" ItemHeight="Auto" MinWidth="0">
-                        <StackPanel Margin="8 4" Width="240">
-                            <TextBlock Text="نام گروه"/>
-                            <ui:TextBox Text="{Binding FilterName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="نام گروه"/>
-                        </StackPanel>
-                        <StackPanel Margin="8 4" Width="160">
-                            <TextBlock Text="درصد تخفیف"/>
-                            <ui:TextBox Text="{Binding FilterDiscount, UpdateSourceTrigger=PropertyChanged}"
-                                        PlaceholderText="0"
-                                        PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                        </StackPanel>
-                        <StackPanel Margin="8 4" Width="360">
-                            <TextBlock Text="تاریخ شروع"/>
-                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                <ui:TextBox Width="60" MaxLength="4" Margin="0 0 4 0" PlaceholderText="1403" Text="{Binding StartYear, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="/" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="01" Text="{Binding StartMonth, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="/" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="01" Text="{Binding StartDay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="|" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="00" Text="{Binding StartHour, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text=":" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" PlaceholderText="00" Text="{Binding StartMinute, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Margin="8 4" Width="360">
-                            <TextBlock Text="تاریخ پایان"/>
-                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                <ui:TextBox Width="60" MaxLength="4" Margin="0 0 4 0" PlaceholderText="1403" Text="{Binding EndYear, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="/" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="12" Text="{Binding EndMonth, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="/" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="29" Text="{Binding EndDay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text="|" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" Margin="0 0 4 0" PlaceholderText="23" Text="{Binding EndHour, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                <TextBlock Text=":" Margin="0 0 4 0" VerticalAlignment="Center"/>
-                                <ui:TextBox Width="40" MaxLength="2" PlaceholderText="59" Text="{Binding EndMinute, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Margin="8 4" Orientation="Horizontal" Width="240" HorizontalAlignment="Stretch">
-                            <ui:Button Content="پاکسازی"
-                                       Appearance="Secondary"
-                                       Margin="0 0 8 0"
-                                       Padding="16 6"
-                                       Click="ClearFilter_Click"/>
-                            <ui:Button Content="جستجو"
-                                       Appearance="Primary"
-                                       Padding="16 6"
-                                       Click="SearchBtn_Click"/>
-                        </StackPanel>
-                    </WrapPanel>
+    <StackPanel Margin="20" FlowDirection="RightToLeft">
+
+        <!-- ADD BUTTON -->
+        <DockPanel LastChildFill="False">
+            <ui:Button Content="افزودن گروه"
+                       Appearance="Primary"
+                       Padding="16 6"
+                       Margin="10 0 0 0"
+                       Click="AddLicensePlate_Click"
+                       DockPanel.Dock="Left"/>
+        </DockPanel>
+
+        <!-- FILTERS -->
+        <Border CornerRadius="6"
+                Padding="10"
+                Background="#20E9E9E9"
+                Margin="0 10">
+
+            <WrapPanel FlowDirection="RightToLeft">
+
+                <!-- NAME -->
+                <StackPanel Margin="10 5">
+                    <TextBlock Text="نام گروه" />
+                    <ui:TextBox Width="180"
+                                Text="{Binding FilterName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                PlaceholderText="جستجو..." />
+                </StackPanel>
+
+                <!-- DISCOUNT -->
+                <StackPanel Margin="10 5">
+                    <TextBlock Text="درصد تخفیف" />
+                    <ui:TextBox Width="120"
+                                Text="{Binding FilterDiscount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                PreviewTextInput="NumberOnly_PreviewTextInput"
+                                PlaceholderText="0-100"/>
+                </StackPanel>
+
+                <!-- START DATE -->
+                <StackPanel Margin="10 5">
+                    <TextBlock Text="تاریخ شروع از" />
+                    <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+
+                        <ui:TextBox x:Name="startYearTextBox"
+                                    MaxLength="4"
+                                    PlaceholderText="1403"
+                                    Margin="2 0"
+                                    MinWidth="55"
+                                    Text="{Binding StartYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="startMonthTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="01"
+                                    Margin="2 0"
+                                    MinWidth="35"
+                                    Text="{Binding StartMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="startDayTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="01"
+                                    Margin="2 0"
+                                    MinWidth="35"
+                                    Text="{Binding StartDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
+                        <ui:TextBox x:Name="startHourTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="00"
+                                    Margin="2 0"
+                                    MinWidth="30"
+                                    Text="{Binding StartHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text=":" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="startMinuteTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="00"
+                                    Margin="2 0"
+                                    MinWidth="30"
+                                    Text="{Binding StartMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- END DATE -->
+                <StackPanel Margin="10 5">
+                    <TextBlock Text="تا تاریخ پایان" />
+                    <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+
+                        <ui:TextBox x:Name="endYearTextBox"
+                                    MaxLength="4"
+                                    PlaceholderText="1403"
+                                    Margin="2 0"
+                                    MinWidth="55"
+                                    Text="{Binding EndYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="endMonthTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="12"
+                                    Margin="2 0"
+                                    MinWidth="35"
+                                    Text="{Binding EndMonth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="/" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="endDayTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="29"
+                                    Margin="2 0"
+                                    MinWidth="35"
+                                    Text="{Binding EndDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
+                        <ui:TextBox x:Name="endHourTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="23"
+                                    Margin="2 0"
+                                    MinWidth="30"
+                                    Text="{Binding EndHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                        <TextBlock Text=":" VerticalAlignment="Center"/>
+                        <ui:TextBox x:Name="endMinuteTextBox"
+                                    MaxLength="2"
+                                    PlaceholderText="59"
+                                    Margin="2 0"
+                                    MinWidth="30"
+                                    Text="{Binding EndMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
+
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- CLEAR -->
+                <StackPanel Margin="0 5">
+                    <TextBlock Text=" "/>
+                    <ui:Button x:Name="ClearBtn"
+                               Click="ClearFilter_Click"
+                               HorizontalAlignment="Center"
+                               Appearance="Secondary"
+                               Padding="6"
+                               Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}"
+                               FontSize="22"/>
+                </StackPanel>
+
+                <!-- SEARCH -->
+                <StackPanel Margin="10 5" MinWidth="100">
+                    <TextBlock Text=" " />
+                    <ui:Button x:Name="SearchBtn"
+                               Appearance="Primary"
+                               Content="جستجو"
+                               Click="SearchBtn_Click"
+                               Icon="{ui:SymbolIcon Symbol=Search20}"
+                               VerticalAlignment="Stretch"
+                               FontSize="21"
+                               HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+            </WrapPanel>
+        </Border>
+
+        <!-- SUMMARY CARDS -->
+        <Grid Margin="0 0 0 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- TOTAL -->
+            <Border Grid.Column="0"
+                    Margin="8" Padding="20"
+                    CornerRadius="14"
+                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                    BorderThickness="1">
+                <StackPanel HorizontalAlignment="Center">
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0 0 0 10">
+                        <ui:SymbolIcon Symbol="PeopleCommunity20"
+                                       FontSize="22"
+                                       Foreground="{DynamicResource AccentFillColorPrimaryBrush}"
+                                       Margin="0 0 6 0"/>
+                        <TextBlock Text="تعداد کل گروه‌ها"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding TotalGroups}"
+                               FontWeight="Bold"
+                               FontSize="30"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource AccentFillColorPrimaryBrush}"/>
                 </StackPanel>
             </Border>
 
-            <Grid Margin="0 0 0 10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <!-- ACTIVE -->
+            <Border Grid.Column="1"
+                    Margin="8" Padding="20"
+                    CornerRadius="14"
+                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                    BorderThickness="1">
+                <StackPanel HorizontalAlignment="Center">
 
-                <Border Margin="6" Padding="16" CornerRadius="10" BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1" Background="{DynamicResource ControlFillColorSecondaryBrush}">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="تعداد کل گروه‌ها" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding TotalGroups}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AccentFillColorPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0 0 0 10">
+                        <ui:SymbolIcon Symbol="CheckmarkCircle20"
+                                       FontSize="22"
+                                       Foreground="{DynamicResource SuccessFillColorDefaultBrush}"
+                                       Margin="0 0 6 0"/>
+                        <TextBlock Text="گروه‌های فعال"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                     </StackPanel>
-                </Border>
-                <Border Grid.Column="1" Margin="6" Padding="16" CornerRadius="10" BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1" Background="{DynamicResource ControlFillColorSecondaryBrush}">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="گروه‌های فعال" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding TotalActiveGroups}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessFillColorDefaultBrush}"/>
+
+                    <TextBlock Text="{Binding TotalActiveGroups}"
+                               FontWeight="Bold"
+                               FontSize="30"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource SuccessFillColorDefaultBrush}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- INACTIVE -->
+            <Border Grid.Column="2"
+                    Margin="8" Padding="20"
+                    CornerRadius="14"
+                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                    BorderThickness="1">
+                <StackPanel HorizontalAlignment="Center">
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0 0 0 10">
+                        <ui:SymbolIcon Symbol="DismissCircle20"
+                                       FontSize="22"
+                                       Foreground="{DynamicResource DangerFillColorDefaultBrush}"
+                                       Margin="0 0 6 0"/>
+                        <TextBlock Text="گروه‌های غیرفعال"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                     </StackPanel>
-                </Border>
-                <Border Grid.Column="2" Margin="6" Padding="16" CornerRadius="10" BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1" Background="{DynamicResource ControlFillColorSecondaryBrush}">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="گروه‌های غیرفعال" FontWeight="Bold"/>
-                        <TextBlock Text="{Binding TotalInactiveGroups}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerFillColorDefaultBrush}"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
 
-            <Border CornerRadius="10" BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1" Margin="0 0 0 10">
-                <StackPanel>
-                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}" Padding="12" CornerRadius="10 10 0 0">
-                        <TextBlock Text="لیست گروه‌ها" FontWeight="Bold"/>
-                    </Border>
-                    <ItemsControl ItemsSource="{Binding LicensePlateGroups}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Margin="12" Padding="16" BorderThickness="1" BorderBrush="{DynamicResource ControlElevationBorderBrush}" CornerRadius="8">
-                                    <StackPanel>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Margin="0 0 0 8">
-                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
-                                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Top">
-                                                <Border Padding="8 2" CornerRadius="20" BorderThickness="1" BorderBrush="{DynamicResource ControlElevationBorderBrush}" Margin="0 0 4 0">
-                                                    <TextBlock Text="{Binding DiscountPercent, StringFormat='{}{0}% تخفیف'}" FontWeight="Bold"/>
-                                                </Border>
-                                                <Border Padding="8 2" CornerRadius="20" BorderThickness="1" Margin="0 0 4 0">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}"/>
-                                                            <Setter Property="Background" Value="#1900FF00"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
-                                                                    <Setter Property="Background" Value="#19FF0000"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
-                                                    <TextBlock Text="{Binding StatusText}" Margin="4 0" FontWeight="Bold"/>
-                                                </Border>
-                                                <ui:Button Content="ویرایش" Appearance="Secondary" Padding="12 4" Margin="0 0 4 0" Click="EditLicensePlateGroup_Click"/>
-                                                <ui:Button Content="حذف" Appearance="Danger" Padding="12 4" Margin="0 0 4 0" Click="DeleteLicensePlateGroup_Click"/>
-                                                <ui:Button Content="افزودن پلاک" Appearance="Primary" Padding="12 4" Click="AddPlateToGroup_Click"/>
-                                            </StackPanel>
-                                        </Grid>
+                    <TextBlock Text="{Binding TotalInactiveGroups}"
+                               FontWeight="Bold"
+                               FontSize="30"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource DangerFillColorDefaultBrush}"/>
+                </StackPanel>
+            </Border>
 
-                                        <Grid Margin="0 8 0 0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="تاریخ شروع: " FontWeight="Bold"/>
-                                                <TextBlock Text="{Binding StartDateString}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                                <TextBlock Text="تاریخ پایان: " FontWeight="Bold"/>
-                                                <TextBlock Text="{Binding EndDateString}"/>
-                                            </StackPanel>
-                                        </Grid>
+        </Grid>
 
+        <!-- GROUP LIST (ONLY THIS SCROLLS) -->
+        <StackPanel>
+
+            <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                    Padding="12" CornerRadius="10 10 0 0">
+                <TextBlock Text="لیست گروه‌ها" FontWeight="Bold"/>
+            </Border>
+
+            <!-- SCROLLABLE AREA -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          MaxHeight="600" Padding="6">
+
+                <ItemsControl ItemsSource="{Binding LicensePlateGroups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+
+                            <!-- CARD -->
+                            <Border Margin="0 12"
+                                    Padding="16"
+                                    CornerRadius="12"
+                                    Background="White"
+                                    BorderBrush="#DDD"
+                                    BorderThickness="1">
+
+                                <StackPanel>
+
+                                    <!-- HEADER -->
+                                    <Grid Margin="0 0 0 10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- TITLE -->
                                         <StackPanel>
-                                            <TextBlock Text="پلاک‌ها" FontWeight="Bold" Margin="0 8 0 4"/>
-                                            <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="0">
-                                                <StackPanel>
-                                <Grid Background="{DynamicResource ControlFillColorSecondaryBrush}" Padding="8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="2*"/>
-                                        <ColumnDefinition Width="2*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="پلاک فارسی" FontWeight="Bold"/>
-                                    <TextBlock Grid.Column="1" Text="پلاک انگلیسی" FontWeight="Bold"/>
-                                    <TextBlock Grid.Column="2" Text="عملیات" FontWeight="Bold"/>
-                                </Grid>
-                                <ItemsControl ItemsSource="{Binding Plates}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderBrush="{DynamicResource ControlElevationBorderBrush}" BorderThickness="0 0 0 1">
-                                                <Grid Padding="8">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="2*"/>
-                                                        <ColumnDefinition Width="2*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding PersianPlate}"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding EnglishPlate}"/>
-                                                    <ui:Button Grid.Column="2"
-                                                               Content="حذف"
-                                                               Appearance="Danger"
-                                                               Padding="10 2"
-                                                               Margin="0 0 0 0"
-                                                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                               Click="DeletePlate_Click"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock Text="هیچ پلاکی ثبت نشده است"
-                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                           FontStyle="Italic"
-                                           HorizontalAlignment="Center"
-                                           Margin="0 8"
-                                           Visibility="Collapsed">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Plates.Count}" Value="0">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="18"/>
+                                            <TextBlock Text="{Binding Description}"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
 
-            <DockPanel Margin="0 10" FlowDirection="RightToLeft">
-                <components:PaginationControl FlowDirection="LeftToRight"
-                                              CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
-                                              TotalPages="{Binding TotalPages}"
-                                              PageChanged="PaginationControl_PageChanged"/>
-            </DockPanel>
+                                        <!-- ACTION BUTTONS -->
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    FlowDirection="LeftToRight"
+                                                    VerticalAlignment="Top">
+
+                                            <Border Padding="8 2"
+                                                    CornerRadius="20"
+                                                    BorderThickness="1"
+                                                    BorderBrush="#CCC"
+                                                    Margin="0 0 6 0">
+                                                <TextBlock Text="{Binding DiscountPercent, StringFormat='٪{0}'}"
+                                                           FontWeight="Bold"/>
+                                            </Border>
+
+                                            <Border Padding="8 2"
+                                                    CornerRadius="20"
+                                                    BorderThickness="1"
+                                                    Margin="0 0 6 0">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#D0FFD0"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                                <Setter Property="Background" Value="#FFD0D0"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding StatusText}"
+                                                           FontWeight="Bold" Margin="4 0"/>
+                                            </Border>
+
+                                            <ui:Button Content="ویرایش"
+                                                       Appearance="Secondary"
+                                                       Padding="12 4"
+                                                       Margin="0 0 4 0"
+                                                       Click="EditLicensePlateGroup_Click"/>
+
+                                            <ui:Button Content="حذف"
+                                                       Appearance="Danger"
+                                                       Foreground="White"
+                                                       Padding="12 4"
+                                                       Margin="0 0 4 0"
+                                                       Click="DeleteLicensePlateGroup_Click"/>
+
+                                            <ui:Button Content="افزودن پلاک"
+                                                       Appearance="Primary"
+                                                       Padding="12 4"
+                                                       Click="AddPlateToGroup_Click"/>
+
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- DATES -->
+                                    <Grid Margin="0 8 0 0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="تاریخ شروع: " FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding StartDateString}" Margin="4 0"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                                            <TextBlock Text="تاریخ پایان: " FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding EndDateString}" Margin="4 0"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- PLATES -->
+                                    <StackPanel Margin="0 12 0 0">
+                                        <TextBlock Text="پلاک‌ها"
+                                                   FontWeight="Bold"
+                                                   Margin="0 8 0 6"/>
+
+                                        <Border Padding="6"
+                                                BorderThickness="1"
+                                                BorderBrush="#DDD"
+                                                CornerRadius="8">
+
+                                            <StackPanel>
+
+                                                <!-- HEADER -->
+                                                <Grid Margin="4" Background="#F5F5F5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Text="پلاک فارسی" FontWeight="Bold"/>
+                                                    <TextBlock Grid.Column="1" Text="پلاک انگلیسی" FontWeight="Bold"/>
+                                                    <TextBlock Grid.Column="2" Text="عملیات" FontWeight="Bold"/>
+                                                </Grid>
+
+                                                <!-- ROWS -->
+                                                <ItemsControl ItemsSource="{Binding Plates}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+
+                                                            <Border BorderBrush="#EEE"
+                                                                    BorderThickness="0 0 0 1"
+                                                                    Padding="4">
+
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <TextBlock Text="{Binding PersianPlate}"/>
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding EnglishPlate}"/>
+
+                                                                    <ui:Button Grid.Column="2"
+                                                                               Content="حذف"
+                                                                               Appearance="Danger"
+                                                                               Padding="8 2"
+                                                                               Foreground="White"
+                                                                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                               Click="DeletePlate_Click"/>
+                                                                </Grid>
+
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                            </StackPanel>
+
+                                        </Border>
+
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </Border>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </ScrollViewer>
+
         </StackPanel>
-    </ScrollViewer>
+
+        <!-- PAGINATION -->
+        <DockPanel Margin="0 10">
+            <components:PaginationControl FlowDirection="LeftToRight"
+                                          CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
+                                          TotalPages="{Binding TotalPages}"
+                                          PageChanged="PaginationControl_PageChanged"/>
+        </DockPanel>
+
+    </StackPanel>
+
 </Page>

@@ -63,7 +63,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Content = "گروه ها",
             Icon = new SymbolIcon { Symbol = SymbolRegular.AlignSpaceEvenlyVertical20 },
-            TargetPageType = typeof(LicensePlateTabsPage)
+            TargetPageType = typeof(LicensePlateGroupPage)
         });
         MenuItems.Add(new NavigationViewItem()
         {

@@ -116,7 +116,6 @@ namespace Parking.App
                     services.AddScoped<MainWindowViewModel>();
                     services.AddScoped<SettingsPageViewModel>();
                     services.AddScoped<LicensePlateGroupPage>();
-                    services.AddScoped<LicensePlateTabsPage>();
                     services.AddScoped<LicensePlateGroupViewModel>();
                     services.AddScoped<AddCardPage>();
                     services.AddScoped<AddCardPageViewModel>();
@@ -170,7 +169,6 @@ namespace Parking.App
                 return;
             }
 
-            // LOAD decrypted DB credentials into memory
             LoadDatabaseCredentials();
 
             var connectionString = BuildConnectionString();

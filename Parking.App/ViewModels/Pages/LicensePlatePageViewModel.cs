@@ -28,8 +28,8 @@ public class LicensePlateGroupCardViewModel : INotifyPropertyChanged
         }
     }
 
-    public string StartDateString => StartDate.ToShamsi(includeTime: true);
-    public string EndDateString => EndDate.ToShamsi(includeTime: true);
+    public string StartDateString => StartDate.ToShamsi(includeTime: false);
+    public string EndDateString => EndDate.ToShamsi(includeTime: false);
     public string StatusText => IsActive ? "فعال" : "غیرفعال";
 
     public event PropertyChangedEventHandler? PropertyChanged;

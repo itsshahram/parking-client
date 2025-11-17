@@ -307,8 +307,8 @@
                         <TextBlock Text="نتایج" FontWeight="Bold" DockPanel.Dock="Left"/>
                     </DockPanel>
                     <DockPanel  DockPanel.Dock="Top"  HorizontalAlignment="Stretch" Margin="20 5" FlowDirection="RightToLeft">
-                        <components:PaginationControl 
-              FlowDirection="LeftToRight"
+                        <components:PaginationControl
+                      FlowDirection="LeftToRight"
                       CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
                       TotalPages="{Binding TotalPages}"
                       PageChanged="PaginationControl_PageChanged"

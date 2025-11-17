@@ -138,7 +138,7 @@ namespace Parking.App.Views.Pages.LicensePlate
 
             if (addPlateWindow.ShowDialog() == true)
             {
-                var newPlate = new LicensePlate
+                var newPlate = new Domain.Entities.Vehicles.LicensePlate
                 {
                     EnLicensePlate = addPlateWindow.EnLicensePlate,
                     GroupId = addPlateWindow.SelectedGroupId ?? group.Id
@@ -220,7 +220,7 @@ namespace Parking.App.Views.Pages.LicensePlate
                     {
                         var ms = new Wpf.Ui.Controls.MessageBox
                         {
-                            FlowDirection = FlowDirection.RightToLeft,
+                            FlowDirection = System.Windows.FlowDirection.RightToLeft,
                             Title = title,
                             Content = message,
                             IsPrimaryButtonEnabled = false,
@@ -234,7 +234,7 @@ namespace Parking.App.Views.Pages.LicensePlate
             }
             catch
             {
-                MessageBox.Show(message, title);
+                System.Windows.MessageBox.Show(message, title);
             }
         }
     }
