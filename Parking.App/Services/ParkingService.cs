@@ -3352,5 +3352,76 @@ public class ParkingService : IParkingService
         return (pagedData, totalCount);
     }
 
+    public async Task<LicensePlateGroupWithPlatesPaginatedResult> GetLicensePlateGroupWithPlatesPaginatedList(
+        int page,
+        int take,
+        string? name,
+        int? discount,
+        DateTime? startDate,
+        DateTime? endDate)
+    {
+        if (page < 1)
+            page = 1;
+        if (take <= 0)
+            take = 10;
+
+        var query = unitOfWork
+            .LicensePlateGroups
+            .GetAll()
+            .Include(g => g.LicensePlates);
+
+        if (!string.IsNullOrWhiteSpace(name))
+            query = query.Where(g => g.Name != null && g.Name.Contains(name));
+
+        if (discount.HasValue)
+            query = query.Where(g => g.DiscountPercent == discount.Value);
+
+        if (startDate.HasValue)
+            query = query.Where(g => g.StartDate >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(g => g.EndDate <= endDate.Value);
+
+        var totalCount = await query.CountAsync();
+
+        var data = await query
+            .OrderByDescending(g => g.StartDate)
+            .Skip((page - 1) * take)
+            .Take(take)
+            .Select(g => new LicensePlateGroupWithPlatesDto
+            {
+                Id = g.Id,
+                Name = g.Name ?? string.Empty,
+                Description = g.Description ?? string.Empty,
+                DiscountPercent = g.DiscountPercent,
+                IsActive = g.IsActive,
+                StartDate = g.StartDate,
+                EndDate = g.EndDate,
+                Plates = g.LicensePlates != null
+                    ? g.LicensePlates.Select(p => new LicensePlatePlateItemDto
+                    {
+                        Id = p.Id,
+                        PersianPlate = p.FaLicensePlate ?? string.Empty,
+                        EnglishPlate = p.EnLicensePlate ?? string.Empty
+                    }).ToList()
+                    : new List<LicensePlatePlateItemDto>()
+            })
+            .ToListAsync();
+
+        var totalGroupsQuery = unitOfWork.LicensePlateGroups.GetAll();
+        var totalGroups = await totalGroupsQuery.CountAsync();
+        var totalActiveGroups = await totalGroupsQuery.Where(g => g.IsActive).CountAsync();
+        var totalInactiveGroups = totalGroups - totalActiveGroups;
+
+        return new LicensePlateGroupWithPlatesPaginatedResult
+        {
+            TotalCount = totalCount,
+            TotalGroups = totalGroups,
+            TotalActiveGroups = totalActiveGroups,
+            TotalInactiveGroups = totalInactiveGroups,
+            Data = data
+        };
+    }
+
 }
 
