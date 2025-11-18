@@ -3353,17 +3353,15 @@ public class ParkingService : IParkingService
     }
 
     public async Task<LicensePlateGroupWithPlatesPaginatedResult> GetLicensePlateGroupWithPlatesPaginatedList(
-        int page,
-        int take,
-        string? name,
-        int? discount,
-        DateTime? startDate,
-        DateTime? endDate)
+    int page,
+    int take,
+    string? name,
+    int? discount,
+    DateTime? startDate,
+    DateTime? endDate)
     {
-        if (page < 1)
-            page = 1;
-        if (take <= 0)
-            take = 10;
+        if (page < 1) page = 1;
+        if (take <= 0) take = 10;
 
         var query = unitOfWork
             .LicensePlateGroups
@@ -3371,17 +3369,26 @@ public class ParkingService : IParkingService
             .Include(g => g.LicensePlates)
             .AsQueryable();
 
+        // FILTER: NAME
         if (!string.IsNullOrWhiteSpace(name))
             query = query.Where(g => g.Name != null && g.Name.Contains(name));
 
+        // FILTER: DISCOUNT
         if (discount.HasValue)
             query = query.Where(g => g.DiscountPercent == discount.Value);
 
+        // FILTER: DATE RANGE (only StartDate matters)
         if (startDate.HasValue)
-            query = query.Where(g => g.StartDate >= startDate.Value);
+        {
+            var start = startDate.Value.Date; // 00:00:00
+            query = query.Where(g => g.StartDate >= start);
+        }
 
         if (endDate.HasValue)
-            query = query.Where(g => g.EndDate <= endDate.Value);
+        {
+            var end = endDate.Value.Date.AddDays(1).AddTicks(-1); 
+            query = query.Where(g => g.StartDate <= end);
+        }
 
         var totalCount = await query.CountAsync();
 
@@ -3423,6 +3430,7 @@ public class ParkingService : IParkingService
             Data = data
         };
     }
+
 
 }
 

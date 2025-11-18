@@ -50,9 +50,9 @@ namespace Parking.App.Views.Pages.LicensePlate
                 {
                     Name = vm.Name,
                     StartDate = vm.StartDate,
+                    EndDate = vm.EndDate!.Value,
                     Description = vm.Description,
                     DiscountPercent = vm.DiscountPercent,
-                    EndDate = vm.EndDate!.Value
                 });
 
                 if (!result)
@@ -141,6 +141,7 @@ namespace Parking.App.Views.Pages.LicensePlate
                 var newPlate = new Domain.Entities.Vehicles.LicensePlate
                 {
                     EnLicensePlate = addPlateWindow.EnLicensePlate,
+                    IsLocal = true,
                     GroupId = addPlateWindow.SelectedGroupId ?? group.Id
                 };
 

@@ -23,16 +23,12 @@ public class EditLicensePlateGroupViewModel : AddLicensePlateGroupViewModel
         StartYear = _pc.GetYear(start).ToString();
         StartMonth = _pc.GetMonth(start).ToString("00");
         StartDay = _pc.GetDayOfMonth(start).ToString("00");
-        StartHour = start.Hour.ToString("00");
-        StartMinute = start.Minute.ToString("00");
 
         var end = group.EndDate;
         EndDate = end;
         EndYear = _pc.GetYear(end).ToString();
         EndMonth = _pc.GetMonth(end).ToString("00");
         EndDay = _pc.GetDayOfMonth(end).ToString("00");
-        EndHour = end.Hour.ToString("00");
-        EndMinute = end.Minute.ToString("00");
         EndDateString = end.ToShamsi();
 
         var monthDiff = ((end.Year - start.Year) * 12) + (end.Month - start.Month);

@@ -12,6 +12,7 @@ public partial class AddLicensePlateWindow : FluentWindow
 
     public Guid? SelectedGroupId { get; private set; }
     public string? EnLicensePlate { get; private set; }
+    public string? FaLicensePlate { get; internal set; }
 
     public AddLicensePlateWindow(Guid? defaultGroupId = null, bool lockGroupSelection = false)
     {

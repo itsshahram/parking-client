@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Parking.App.ViewModels.Pages;
@@ -46,6 +47,8 @@ public class LicensePlatePlateItemViewModel
 
 public class LicensePlatePageViewModel : INotifyPropertyChanged
 {
+    private readonly PersianCalendar _pc = new PersianCalendar();
+
     private readonly IParkingService _parkingService;
     private int _currentPage = 1;
     private int _itemsPerPage = 10;
@@ -215,24 +218,59 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
     public string StartYear { get => _startYear; set { if (_startYear != value) { _startYear = value; OnPropertyChanged(); UpdateStartDate(); } } }
     public string StartMonth { get => _startMonth; set { if (_startMonth != value) { _startMonth = value; OnPropertyChanged(); UpdateStartDate(); } } }
     public string StartDay { get => _startDay; set { if (_startDay != value) { _startDay = value; OnPropertyChanged(); UpdateStartDate(); } } }
-    public string StartHour { get => _startHour; set { if (_startHour != value) { _startHour = value; OnPropertyChanged(); UpdateStartDate(); } } }
-    public string StartMinute { get => _startMinute; set { if (_startMinute != value) { _startMinute = value; OnPropertyChanged(); UpdateStartDate(); } } }
-
     public string EndYear { get => _endYear; set { if (_endYear != value) { _endYear = value; OnPropertyChanged(); UpdateEndDate(); } } }
     public string EndMonth { get => _endMonth; set { if (_endMonth != value) { _endMonth = value; OnPropertyChanged(); UpdateEndDate(); } } }
     public string EndDay { get => _endDay; set { if (_endDay != value) { _endDay = value; OnPropertyChanged(); UpdateEndDate(); } } }
-    public string EndHour { get => _endHour; set { if (_endHour != value) { _endHour = value; OnPropertyChanged(); UpdateEndDate(); } } }
-    public string EndMinute { get => _endMinute; set { if (_endMinute != value) { _endMinute = value; OnPropertyChanged(); UpdateEndDate(); } } }
 
     private void UpdateStartDate()
     {
-        FilterStartDate = BuildDate(_startYear, _startMonth, _startDay, _startHour, _startMinute);
+        FilterStartDate = BuildStartDateFromShamsi(StartYear, StartMonth, StartDay);
     }
 
     private void UpdateEndDate()
     {
-        FilterEndDate = BuildDate(_endYear, _endMonth, _endDay, _endHour, _endMinute);
+        FilterEndDate = BuildEndDateFromShamsi(EndYear, EndMonth, EndDay);
     }
+
+    private DateTime? BuildStartDateFromShamsi(string year, string month, string day)
+    {
+        if (int.TryParse(year, out int y) &&
+            int.TryParse(month, out int m) &&
+            int.TryParse(day, out int d))
+        {
+            try
+            {
+                return _pc.ToDateTime(y, m, d, 0, 0, 0, 0);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private DateTime? BuildEndDateFromShamsi(string year, string month, string day)
+    {
+        if (int.TryParse(year, out int y) &&
+            int.TryParse(month, out int m) &&
+            int.TryParse(day, out int d))
+        {
+            try
+            {
+                var date = _pc.ToDateTime(y, m, d, 0, 0, 0, 0);
+                return date.Date.AddDays(1).AddTicks(-1);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
 
     private static DateTime? BuildDate(string year, string month, string day, string hour, string minute)
     {
@@ -256,11 +294,19 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
     {
         FilterName = string.Empty;
         FilterDiscount = null;
-        StartYear = StartMonth = StartDay = StartHour = StartMinute = string.Empty;
-        EndYear = EndMonth = EndDay = EndHour = EndMinute = string.Empty;
+
+        StartYear = string.Empty;
+        StartMonth = string.Empty;
+        StartDay = string.Empty;
+
+        EndYear = string.Empty;
+        EndMonth = string.Empty;
+        EndDay = string.Empty;
+
         FilterStartDate = null;
         FilterEndDate = null;
     }
+
 
     #endregion
 

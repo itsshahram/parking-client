@@ -66,9 +66,7 @@ public partial class AddLicenseGroupPlateWindows : FluentWindow
                     int.Parse(Vm.EndYear),
                     int.Parse(Vm.EndMonth),
                     int.Parse(Vm.EndDay),
-                    int.Parse(Vm.EndHour),
-                    int.Parse(Vm.EndMinute),
-                    0, 0);
+                    0, 0, 0, 0);
             }
             else
             {
@@ -92,9 +90,7 @@ public partial class AddLicenseGroupPlateWindows : FluentWindow
             int.Parse(Vm.StartYear),
             int.Parse(Vm.StartMonth),
             int.Parse(Vm.StartDay),
-            int.Parse(Vm.StartHour),
-            int.Parse(Vm.StartMinute),
-            0, 0);
+            0, 0, 0, 0);
     }
 
     private DateTime GetEndDateFromViewModel()
@@ -103,21 +99,17 @@ public partial class AddLicenseGroupPlateWindows : FluentWindow
             int.Parse(Vm.EndYear),
             int.Parse(Vm.EndMonth),
             int.Parse(Vm.EndDay),
-            int.Parse(Vm.EndHour),
-            int.Parse(Vm.EndMinute),
-            0, 0);
+            0, 0, 0, 0);
     }
+
 
     private void SetEndDate(DateTime end)
     {
         Vm.EndYear = _pc.GetYear(end).ToString();
         Vm.EndMonth = _pc.GetMonth(end).ToString("00");
         Vm.EndDay = _pc.GetDayOfMonth(end).ToString("00");
-        Vm.EndHour = end.Hour.ToString("00");
-        Vm.EndMinute = end.Minute.ToString("00");
-
         Vm.EndDate = end;
-        Vm.EndDateString = end.ToShamsi(); 
+        Vm.EndDateString = end.ToShamsi();
     }
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {

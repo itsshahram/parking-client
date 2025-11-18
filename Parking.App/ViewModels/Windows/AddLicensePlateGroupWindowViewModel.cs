@@ -16,8 +16,6 @@ namespace Parking.App.ViewModels.Windows
             StartYear = _pc.GetYear(now).ToString();
             StartMonth = _pc.GetMonth(now).ToString("00");
             StartDay = _pc.GetDayOfMonth(now).ToString("00");
-            StartHour = now.Hour.ToString("00");
-            StartMinute = now.Minute.ToString("00");
 
             SetEndDate(now.AddMonths(1));
         }
@@ -27,8 +25,6 @@ namespace Parking.App.ViewModels.Windows
             EndYear = _pc.GetYear(date).ToString();
             EndMonth = _pc.GetMonth(date).ToString("00");
             EndDay = _pc.GetDayOfMonth(date).ToString("00");
-            EndHour = date.Hour.ToString("00");
-            EndMinute = date.Minute.ToString("00");
             EndDate = date;
         }
 
@@ -63,8 +59,6 @@ namespace Parking.App.ViewModels.Windows
         public string StartYear { get; set; }
         public string StartMonth { get; set; }
         public string StartDay { get; set; }
-        public string StartHour { get; set; }
-        public string StartMinute { get; set; }
 
         private string? _endYear;
         public string? EndYear
@@ -87,19 +81,6 @@ namespace Parking.App.ViewModels.Windows
             set { SetField(ref _endDay, value); UpdateEndDateFromFields(); }
         }
 
-        private string? _endHour;
-        public string? EndHour
-        {
-            get => _endHour;
-            set { SetField(ref _endHour, value); UpdateEndDateFromFields(); }
-        }
-
-        private string? _endMinute;
-        public string? EndMinute
-        {
-            get => _endMinute;
-            set { SetField(ref _endMinute, value); UpdateEndDateFromFields(); }
-        }
 
         private string? _name;
         public string? Name { get => _name; set => SetField(ref _name, value); }
@@ -144,13 +125,11 @@ namespace Parking.App.ViewModels.Windows
         {
             if (int.TryParse(EndYear, out int year) &&
                 int.TryParse(EndMonth, out int month) &&
-                int.TryParse(EndDay, out int day) &&
-                int.TryParse(EndHour, out int hour) &&
-                int.TryParse(EndMinute, out int minute))
+                int.TryParse(EndDay, out int day))
             {
                 try
                 {
-                    EndDate = _pc.ToDateTime(year, month, day, hour, minute, 0, 0);
+                    EndDate = _pc.ToDateTime(year, month, day, 0, 0, 0, 0);
                     EndDateString = EndDate?.ToShamsi();
                 }
                 catch
@@ -190,31 +169,27 @@ namespace Parking.App.ViewModels.Windows
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         public bool Validate(out string errorMessage)
         {
-            // Name validation
             if (string.IsNullOrWhiteSpace(Name))
             {
                 errorMessage = "نام گروه نمی‌تواند خالی باشد.";
                 return false;
             }
 
-            // Discount validation
             if (DiscountPercent < 0 || DiscountPercent > 100)
             {
                 errorMessage = "درصد تخفیف باید بین 0 تا 100 باشد.";
                 return false;
             }
 
-            // Start date validation
-            if (!IsValidDate(StartYear, StartMonth, StartDay, StartHour, StartMinute))
+            if (!IsValidDate(StartYear, StartMonth, StartDay))
             {
                 errorMessage = "تاریخ شروع نامعتبر است.";
                 return false;
             }
 
-            // End date validation if optional is selected
             if (IsOptionalSelected)
             {
-                if (!IsValidDate(EndYear, EndMonth, EndDay, EndHour, EndMinute))
+                if (!IsValidDate(EndYear, EndMonth, EndDay))
                 {
                     errorMessage = "تاریخ پایان اختیاری نامعتبر است.";
                     return false;
@@ -225,19 +200,14 @@ namespace Parking.App.ViewModels.Windows
             return true;
         }
 
-        private bool IsValidDate(string? yearStr, string? monthStr, string? dayStr, string? hourStr, string? minuteStr)
+        private bool IsValidDate(string? yearStr, string? monthStr, string? dayStr)
         {
             if (!int.TryParse(yearStr, out int year)) return false;
             if (!int.TryParse(monthStr, out int month)) return false;
             if (!int.TryParse(dayStr, out int day)) return false;
-            if (!int.TryParse(hourStr, out int hour)) return false;
-            if (!int.TryParse(minuteStr, out int minute)) return false;
 
             if (month < 1 || month > 12) return false;
             if (day < 1 || day > GetMaxDayOfShamsiMonth(year, month)) return false;
-            if (hour < 0 || hour > 23) return false;
-            if (minute < 0 || minute > 59) return false;
-
             return true;
         }
 

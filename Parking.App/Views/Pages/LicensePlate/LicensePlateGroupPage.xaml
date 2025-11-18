@@ -80,25 +80,6 @@
                                     MinWidth="35"
                                     Text="{Binding StartDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
-                        <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                        <ui:TextBox x:Name="startHourTextBox"
-                                    MaxLength="2"
-                                    PlaceholderText="00"
-                                    Margin="2 0"
-                                    MinWidth="30"
-                                    Text="{Binding StartHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
-                        <TextBlock Text=":" VerticalAlignment="Center"/>
-                        <ui:TextBox x:Name="startMinuteTextBox"
-                                    MaxLength="2"
-                                    PlaceholderText="00"
-                                    Margin="2 0"
-                                    MinWidth="30"
-                                    Text="{Binding StartMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
                     </StackPanel>
                 </StackPanel>
 
@@ -132,25 +113,6 @@
                                     MinWidth="35"
                                     Text="{Binding EndDay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
-                        <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                        <ui:TextBox x:Name="endHourTextBox"
-                                    MaxLength="2"
-                                    PlaceholderText="23"
-                                    Margin="2 0"
-                                    MinWidth="30"
-                                    Text="{Binding EndHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
-                        <TextBlock Text=":" VerticalAlignment="Center"/>
-                        <ui:TextBox x:Name="endMinuteTextBox"
-                                    MaxLength="2"
-                                    PlaceholderText="59"
-                                    Margin="2 0"
-                                    MinWidth="30"
-                                    Text="{Binding EndMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    PreviewTextInput="NumberOnly_PreviewTextInput"/>
-
                     </StackPanel>
                 </StackPanel>
 
@@ -405,7 +367,6 @@
 
                                             <StackPanel>
 
-                                                <!-- HEADER -->
                                                 <Grid Margin="4" Background="#F5F5F5">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
@@ -418,7 +379,6 @@
                                                     <TextBlock Grid.Column="2" Text="عملیات" FontWeight="Bold"/>
                                                 </Grid>
 
-                                                <!-- ROWS -->
                                                 <ItemsControl ItemsSource="{Binding Plates}">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
@@ -436,7 +396,13 @@
 
                                                                     <TextBlock Text="{Binding PersianPlate}"/>
                                                                     <TextBlock Grid.Column="1"
-                                                                               Text="{Binding EnglishPlate}"/>
+           Text="{Binding EnglishPlate}"
+           FlowDirection="LeftToRight"
+           HorizontalAlignment="Stretch"
+           TextAlignment="Right"
+           Margin="0 0 10 0"
+           xml:lang="en-US" />
+
 
                                                                     <ui:Button Grid.Column="2"
                                                                                Content="حذف"
@@ -469,7 +435,6 @@
 
         </StackPanel>
 
-        <!-- PAGINATION -->
         <DockPanel Margin="0 10">
             <components:PaginationControl FlowDirection="LeftToRight"
                                           CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
