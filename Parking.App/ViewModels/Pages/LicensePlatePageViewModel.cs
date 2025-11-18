@@ -271,25 +271,6 @@ public class LicensePlatePageViewModel : INotifyPropertyChanged
         return null;
     }
 
-
-    private static DateTime? BuildDate(string year, string month, string day, string hour, string minute)
-    {
-        if (int.TryParse(year, out var y) && int.TryParse(month, out var m) && int.TryParse(day, out var d))
-        {
-            var h = int.TryParse(hour, out var hh) ? hh : 0;
-            var min = int.TryParse(minute, out var mm) ? mm : 0;
-            try
-            {
-                return new DateTime(y, m, d, h, min, 0);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        return null;
-    }
-
     public void ClearFilters()
     {
         FilterName = string.Empty;
