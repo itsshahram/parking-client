@@ -60,7 +60,7 @@ public interface IParkingService
     bool IsSeizedLicensePlate(string licenseEnPlate);
     List<SeizedLicensePlateModel> GetSeizedLicensePlatesList();
     Guid? GetGroupIdByEnLicensePlate(string enLicensePlate);
-    bool SetTicketPaidInfo(TicketPaidInfoModel request);
+    Task<bool> SetTicketPaidInfo(TicketPaidInfoModel request);
     LicensePlateGroup? GetLicensePlateGroupById(Guid id);
     List<string?> GetEntryRegistrars();
     List<string?> GetExitRegistrars();

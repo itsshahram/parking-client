@@ -23,16 +23,6 @@
                  >
     <!--Topmost="True"-->
     <DockPanel x:Name="MainPanel" >
-
-        <!--<ui:TitleBar
-        x:Name="TitleBar" 
-            DockPanel.Dock="Top"
-        Title="جزئیات قبض">
-            <ui:TitleBar.Icon>
-                <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
-            </ui:TitleBar.Icon>
-        </ui:TitleBar>-->
-
         <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
@@ -69,7 +59,42 @@
                             </Border>
 
                         </StackPanel>
-                        <ui:Button helpers:PermissionBehavior.Permission="PosPayment" x:Name="PaymentBtn" Grid.Row="1" Click="PaymentBtn_Click"  Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Success" Padding="20 5 20 5" Content="پرداخت" Icon="{ui:SymbolIcon Symbol=CreditCardPerson24}" FontSize="24"/>
+                        <ui:Button x:Name="PaymentBtn"
+           helpers:PermissionBehavior.Permission="PosPayment"
+           Grid.Row="1"
+           Grid.Column="0"
+           Click="PaymentBtn_Click"
+           VerticalAlignment="Stretch"
+           HorizontalAlignment="Stretch"
+           Margin="3"
+           Appearance="Success"
+           Padding="20 5 20 5"
+           FontSize="24">
+
+                            <ui:Button.Content>
+                                <Grid>
+
+                                    <StackPanel x:Name="PaymentBtnTextPanel"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="CreditCardPerson24"
+                               Width="26" Height="26" Margin="0 0 8 0"/>
+                                        <TextBlock Text="پرداخت" VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <ui:ProgressRing
+                                        x:Name="PaymentBtnLoader"
+                                        Width="28"
+                                        Height="28"
+                                        Visibility="Collapsed"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                                </Grid>
+                            </ui:Button.Content>
+
+                        </ui:Button>
+
                         <ui:Button  helpers:PermissionBehavior.Permission="CashPayment" x:Name="CashPaymentBtn" Grid.Row="1" Click="CashPayment_Click"  Grid.Column="1" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Margin="3" IsDefault="True" Appearance="Light" Padding="20 5 20 5" Content="پرداخت نقدی" Icon="{ui:SymbolIcon Symbol=Money20}" FontSize="24"/>
                         <ui:Button helpers:PermissionBehavior.Permission="PrintTicket"  x:Name="PrintBtn" VerticalAlignment="Stretch" Grid.Row="1"
                                    Click="Print_Btn_Click"
@@ -447,12 +472,5 @@
             </ScrollViewer >
 
         </Grid>
-
-
-
-
-
-
-
     </DockPanel>
 </ui:FluentWindow>

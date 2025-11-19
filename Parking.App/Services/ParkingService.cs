@@ -2027,31 +2027,31 @@ public class ParkingService : IParkingService
         }
     }
 
-    public bool SetTicketPaidInfo(TicketPaidInfoModel request)
+    public async Task<bool> SetTicketPaidInfo(TicketPaidInfoModel request)
     {
         try
         {
 
-            unitOfWork.ParkingTickets.ExecuteUpdate(g => g.Id == request.TicketId, update => update
-                                                .SetProperty(ticket => ticket.IsExited, product => true)
-                                                .SetProperty(ticket => ticket.EndTime, product => DateTime.Now)
-                                                .SetProperty(ticket => ticket.IsPaid, product => true)
-                                                .SetProperty(ticket => ticket.PaidAmount, product => request.PaidAmount)
-                                                .SetProperty(ticket => ticket.TotalAmount, ticket => request.TotalAmount ?? ticket.TotalAmount)
-                                                .SetProperty(ticket => ticket.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
-                                                .SetProperty(ticket => ticket.RefId, product => request.RefId)
-                                                .SetProperty(ticket => ticket.IsCustomPaid, product => request.IsCustomPaid)
-                                                .SetProperty(ticket => ticket.PaidType, product => request.PaidType)
-                                                .SetProperty(ticket => ticket.PaidDate, product => request.PaidDate)
-                                                .SetProperty(ticket => ticket.RRN, product => request.RRN)
-                                                .SetProperty(ticket => ticket.TraceNo, product => request.TraceNo)
-                                                .SetProperty(ticket => ticket.DeviceId, product => Settings.Default.Application_DeviceId)
-                                                .SetProperty(ticket => ticket.MerchantNumber, product => request.MerchantNumber)
-                                                .SetProperty(ticket => ticket.ExitGate, product => request.ExitGate)
-                                                .SetProperty(ticket => ticket.ExitImage, product => request.ExitImage)
-                                                .SetProperty(ticket => ticket.IsCardMissing, product => request.IsMissingCard)
-                                                .SetProperty(ticket => ticket.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
-                                                .SetProperty(ticket => ticket.TicketStatus, product => TicketStatus.Unsynced));
+            await unitOfWork.ParkingTickets.ExecuteUpdateAsync(g => g.Id == request.TicketId, update => update
+                                                   .SetProperty(ticket => ticket.IsExited, product => true)
+                                                   .SetProperty(ticket => ticket.EndTime, product => DateTime.Now)
+                                                   .SetProperty(ticket => ticket.IsPaid, product => true)
+                                                   .SetProperty(ticket => ticket.PaidAmount, product => request.PaidAmount)
+                                                   .SetProperty(ticket => ticket.TotalAmount, ticket => request.TotalAmount ?? ticket.TotalAmount)
+                                                   .SetProperty(ticket => ticket.PaidCreditCard, product => request.PaidCreditCard.Replace(@"\0", ""))
+                                                   .SetProperty(ticket => ticket.RefId, product => request.RefId)
+                                                   .SetProperty(ticket => ticket.IsCustomPaid, product => request.IsCustomPaid)
+                                                   .SetProperty(ticket => ticket.PaidType, product => request.PaidType)
+                                                   .SetProperty(ticket => ticket.PaidDate, product => request.PaidDate)
+                                                   .SetProperty(ticket => ticket.RRN, product => request.RRN)
+                                                   .SetProperty(ticket => ticket.TraceNo, product => request.TraceNo)
+                                                   .SetProperty(ticket => ticket.DeviceId, product => Settings.Default.Application_DeviceId)
+                                                   .SetProperty(ticket => ticket.MerchantNumber, product => request.MerchantNumber)
+                                                   .SetProperty(ticket => ticket.ExitGate, product => request.ExitGate)
+                                                   .SetProperty(ticket => ticket.ExitImage, product => request.ExitImage)
+                                                   .SetProperty(ticket => ticket.IsCardMissing, product => request.IsMissingCard)
+                                                   .SetProperty(ticket => ticket.ExitRegistrarUserId, product => request.ExitRegistrarUserId)
+                                                   .SetProperty(ticket => ticket.TicketStatus, product => TicketStatus.Unsynced));
             unitOfWork.Cards.ExecuteUpdate(s => s.CardSerialNo == request.CardUid, update => update.SetProperty(s => s.IsInUse, false));
             return true;
 
@@ -3386,7 +3386,7 @@ public class ParkingService : IParkingService
 
         if (endDate.HasValue)
         {
-            var end = endDate.Value.Date.AddDays(1).AddTicks(-1); 
+            var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
             query = query.Where(g => g.StartDate <= end);
         }
 
