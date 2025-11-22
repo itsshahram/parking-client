@@ -163,7 +163,6 @@ public partial class AddCardHistoryPage : Page
         // Update UI controls
         resultCount.Text = totalCount.ToString();
         HistoryDataGrid.ItemsSource = ViewModel.Items;
-
     }
 
     private void EndTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -187,11 +186,9 @@ public partial class AddCardHistoryPage : Page
                 }
             }
         }
-
     }
     private void StartTimeTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-
         if (StartYearTextBox != null && StartMountTextBox != null && StartDayTextBox != null)
         {
             if (StartYearTextBox.Text != null && StartYearTextBox.Text.Length == 4)
@@ -211,7 +208,6 @@ public partial class AddCardHistoryPage : Page
                 }
             }
         }
-
     }
 
     private void ClearBtn_Click(object sender, RoutedEventArgs e)
@@ -234,7 +230,5 @@ public partial class AddCardHistoryPage : Page
         plateCharacter.Text = null;
         rightNumbersNumberTextBox.Text = null;
         irNumberTextBox.Text = null;
-
-
     }
 }

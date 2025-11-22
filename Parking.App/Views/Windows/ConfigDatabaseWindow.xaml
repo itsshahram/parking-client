@@ -90,7 +90,7 @@
             </StackPanel>
             <StackPanel Width="300" Margin="5">
                 <TextBlock Text="رمز عبور پایگاه داده" />
-                <ui:TextBox x:Name="dbPassword" TextChanged="TextBox_TextChanged" FlowDirection="LeftToRight"/>
+                <ui:PasswordBox x:Name="dbPassword" TextChanged="TextBox_TextChanged" FlowDirection="LeftToRight"/>
             </StackPanel>
 
             <DockPanel >

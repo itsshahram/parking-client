@@ -7,15 +7,20 @@ public partial class AddLicensePlateWindow : FluentWindow
 {
     private readonly IParkingService _parkingService;
     private readonly ILogger<AddLicensePlateWindow> _logger;
+    private readonly Guid? _defaultGroupId;
+    private readonly bool _lockGroupSelection;
 
     public Guid? SelectedGroupId { get; private set; }
     public string? EnLicensePlate { get; private set; }
+    public string? FaLicensePlate { get; internal set; }
 
-    public AddLicensePlateWindow()
+    public AddLicensePlateWindow(Guid? defaultGroupId = null, bool lockGroupSelection = false)
     {
         InitializeComponent();
         _parkingService = App.GetService<IParkingService>();
         _logger = App.GetService<ILogger<AddLicensePlateWindow>>();
+        _defaultGroupId = defaultGroupId;
+        _lockGroupSelection = lockGroupSelection;
         LoadGroups();
         InitPlateChars();
     }
@@ -39,6 +44,15 @@ public partial class AddLicensePlateWindow : FluentWindow
         {
             var data = await _parkingService.GetLicensePlateList();
             GroupComboBox.ItemsSource = data;
+            if (_defaultGroupId.HasValue)
+            {
+                var selectedGroup = data.FirstOrDefault(g => g.Id == _defaultGroupId.Value);
+                if (selectedGroup != null)
+                {
+                    GroupComboBox.SelectedItem = selectedGroup;
+                }
+            }
+            GroupComboBox.IsEnabled = !_lockGroupSelection;
         }
         catch (Exception ex)
         {

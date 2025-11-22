@@ -355,7 +355,8 @@ public partial class FullTicketHistoryPage : Page
         request.HasDiscrepancy = DiscrepancyCheckBox.IsChecked == true ? true : null;
         request.RRN = RRNTextBox.Text;
         request.TrackNo = TrackNoTextBox.Text;
-
+        if (!string.IsNullOrEmpty(DiscountTextBox.Text))
+            request.Discount = int.Parse(DiscountTextBox.Text);
         return request;
     }
     private string BuildFilterDescription(GetTicketListRequestModel request)

@@ -9,8 +9,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
     private readonly ILogger<UserService> _logger = logger;
     private IUnitOfWork unitOfWork = _unitOfWork;
     private readonly PasswordHasher<ApplicationUser> _passwordHasher = new PasswordHasher<ApplicationUser>();
-    private readonly UserManager<ApplicationUser> _usermanager = usermanager;
-    private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
+    private readonly UserManager<ApplicationUser> _userManager = usermanager;
     public bool ChangePassword(Guid id, string newPassword)
     {
         try
@@ -156,7 +155,6 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                 return LoginStatus.NotFound;
             //check format is mobile
 
-
             if (!user.IsActive)
                 return LoginStatus.NotActice;
 
@@ -197,14 +195,14 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
     {
         try
         {
-            var isExsist = await _usermanager.FindByEmailAsync(user.UserName);
-            if (isExsist != null)
+            var isExist = await _userManager.FindByEmailAsync(user.UserName);
+            if (isExist != null)
                 return (false, true);
-            var result = await _usermanager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user, password);
             if (!result.Succeeded)
                 return (false, false);
 
-            var roleResult = await _usermanager.AddToRoleAsync(user, role);
+            var roleResult = await _userManager.AddToRoleAsync(user, role);
             if (!roleResult.Succeeded)
                 return (false, false);
 
@@ -215,7 +213,6 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return (false, false);
         }
     }
-
 
 
     public bool UpdateUser(ApplicationUser user)
@@ -241,13 +238,13 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
 
     public async Task<bool> ChangeStaus(Guid id, bool status)
     {
-        var existingUser = await _usermanager.FindByIdAsync(id.ToString());
+        var existingUser = await _userManager.FindByIdAsync(id.ToString());
         if (existingUser == null)
             return false;
 
         existingUser.IsActive = status;
 
-        await _usermanager.UpdateAsync(existingUser);
+        await _userManager.UpdateAsync(existingUser);
 
         return true;
     }

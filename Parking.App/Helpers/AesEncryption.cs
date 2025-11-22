@@ -9,7 +9,7 @@ namespace Parking.App.Helpers
             using var aes = Aes.Create();
             aes.KeySize = 256;
             aes.Key = key;
-            aes.GenerateIV(); 
+            aes.GenerateIV();
 
             using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
             using var ms = new MemoryStream();
@@ -52,6 +52,9 @@ namespace Parking.App.Helpers
             return aes.Key;
         }
 
+
+
+
         public static void SaveKey(byte[] key, string path)
         {
             var protectedKey = ProtectedData.Protect(key, null, DataProtectionScope.CurrentUser);
@@ -63,6 +66,17 @@ namespace Parking.App.Helpers
         {
             var protectedKey = File.ReadAllBytes(path);
             return ProtectedData.Unprotect(protectedKey, null, DataProtectionScope.CurrentUser);
+        }
+
+
+        public static byte[] LoadOrCreateAesKey(string path)
+        {
+            if (File.Exists(path))
+                return LoadKey(path);
+
+            var newKey = GenerateKey();
+            SaveKey(newKey, path);
+            return newKey;
         }
     }
 }

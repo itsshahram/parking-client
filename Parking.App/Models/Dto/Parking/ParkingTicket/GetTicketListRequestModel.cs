@@ -30,6 +30,7 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
     private bool? _hasDiscrepancy;
     private string? _rrn;
     private string? _trackNo;
+    private int? _discount;
 
     private TicketStatus? _ticketStatus;
     private VehicleStatus? _vehicleStatus;
@@ -420,6 +421,18 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
             }
         }
     }
+    public int? Discount
+    {
+        get => _discount;
+        set
+        {
+            if (_discount != value)
+            {
+                _discount = value;
+                OnPropertyChanged(nameof(Discount));
+            }
+        }
+    }
 
     public int CurrentPage
     {
@@ -473,7 +486,6 @@ public class GetTicketListRequestModel : INotifyPropertyChanged
         }
     }
     public int TotalPages => (int)Math.Ceiling((double)_totalCount / _itemsPerPage);
-
 
     protected void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

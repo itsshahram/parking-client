@@ -1,23 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Threading;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
+﻿using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Runtime.InteropServices.ComTypes;
-using Parking.App.ANPR;
 using static Parking.App.ANPR.SATPA_API;
 using Button = System.Windows.Forms.Button;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Rectangle = System.Drawing.Rectangle;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace Parking.App.ANPR
 {
     class SATPA

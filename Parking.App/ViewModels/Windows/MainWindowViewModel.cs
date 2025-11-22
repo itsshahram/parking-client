@@ -1,6 +1,7 @@
 ﻿using Parking.App.Attributes;
 using Parking.App.Views.Pages.CardsPageChilds;
 using Parking.App.Views.Pages.LicensePlate;
+using Parking.Domain.Entities.User;
 
 namespace Parking.App.ViewModels.Windows;
 
@@ -62,7 +63,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Content = "گروه ها",
             Icon = new SymbolIcon { Symbol = SymbolRegular.AlignSpaceEvenlyVertical20 },
-            TargetPageType = typeof(LicensePlateTabsPage)
+            TargetPageType = typeof(LicensePlateGroupPage)
         });
         MenuItems.Add(new NavigationViewItem()
         {
@@ -128,6 +129,7 @@ public partial class MainWindowViewModel : ObservableObject
     public void HandleLogout()
     {
         TokenStore.Clear();
+        PermissionManager.Instance.DeleteUserPermissions();
 
         string credentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
         if (File.Exists(credentialsPath))

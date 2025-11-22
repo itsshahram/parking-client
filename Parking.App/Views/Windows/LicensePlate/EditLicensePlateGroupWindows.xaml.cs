@@ -54,9 +54,7 @@ public partial class EditLicenseGroupPlateWindow : FluentWindow
                 int.Parse(Vm.StartYear),
                 int.Parse(Vm.StartMonth),
                 int.Parse(Vm.StartDay),
-                int.Parse(Vm.StartHour),
-                int.Parse(Vm.StartMinute),
-                0, 0);
+                0, 0, 0, 0);
 
             DateTime end;
 
@@ -66,9 +64,7 @@ public partial class EditLicenseGroupPlateWindow : FluentWindow
                     int.Parse(Vm.EndYear),
                     int.Parse(Vm.EndMonth),
                     int.Parse(Vm.EndDay),
-                    int.Parse(Vm.EndHour),
-                    int.Parse(Vm.EndMinute),
-                    0, 0);
+                    0, 0, 0, 0);
             }
             else
             {
@@ -76,9 +72,7 @@ public partial class EditLicenseGroupPlateWindow : FluentWindow
                     int.Parse(Vm.EndYear),
                     int.Parse(Vm.EndMonth),
                     int.Parse(Vm.EndDay),
-                    int.Parse(Vm.EndHour),
-                    int.Parse(Vm.EndMinute),
-                    0, 0);
+                    0, 0, 0, 0);
             }
 
             Vm.StartDate = start;

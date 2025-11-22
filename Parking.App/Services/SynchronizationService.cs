@@ -985,9 +985,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                 foreach (var item in toRemove)
                 {
                     await unitOfWork.LicensePlates.ExecuteDeleteAsync(l => l.GroupId == item.Id);
-                    //unitOfWork.Commit();
                     await unitOfWork.LicensePlateGroups.ExecuteDeleteAsync(l => l.Id == item.Id);
-                    //unitOfWork.Commit();
                 }
                 foreach (var groupItem in getListJsonResult.Data)
                 {
@@ -1009,7 +1007,6 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             IsLocal = false
                         };
                         unitOfWork.LicensePlateGroups.Add(newLicensePlateGroup);
-                        //await unitOfWork.CommitAsync(default);
 
                         foreach (var subitem in groupItem.LicensePlates)
                         {

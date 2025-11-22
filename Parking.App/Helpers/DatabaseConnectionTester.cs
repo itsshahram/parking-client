@@ -22,7 +22,6 @@ public static class DatabaseConnectionTester
             string errorMessage = $"Connection failed: {ex.Message} \nStackTrace: {ex.StackTrace}";
             Console.WriteLine(errorMessage);
 
-            // نوشتن لاگ به فایل
             File.AppendAllText("connection_errors.log", errorMessage + Environment.NewLine);
 
             return (false, errorMessage);
@@ -37,6 +36,7 @@ public static class DatabaseConnectionTester
                 await connection.OpenAsync();
                 Console.WriteLine("Connection successful.");
                 return (true, "");
+
             }
         }
         catch (Exception ex)
@@ -48,5 +48,4 @@ public static class DatabaseConnectionTester
             return (false, errorMessage);
         }
     }
-
 }

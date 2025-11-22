@@ -77,25 +77,49 @@
             </StackPanel>
         </Border>
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
-            <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                        <ui:TextBox  MinWidth="200" 
-                                     FlowDirection="LeftToRight"
-                                     Text="{Binding Source={x:Static Properties:Settings.Default}, Path=Application_MissingCardPrice, Mode=TwoWay}" 
-                                     TextChanged="TextBox_TextChanged"/>
-                        <TextBlock DockPanel.Dock="Left" Margin="5"  Text="ريال" VerticalAlignment="Center"/>
+            <StackPanel FlowDirection="RightToLeft">
+
+                <DockPanel LastChildFill="False">
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <ui:TextBox 
+                    x:Name="MissingCardPriceTextBox"
+                    MinWidth="180"
+                    FlowDirection="LeftToRight"
+
+                    PreviewTextInput="MissingCardPriceTextBox_PreviewTextInput"
+                    TextChanged="Application_MissingCardPrice_TextBoxChanged"
+
+                    Text="{Binding Source={x:Static Properties:Settings.Default},
+                                   Path=Application_MissingCardPrice,
+                                   Mode=OneWay,
+                                   UpdateSourceTrigger=PropertyChanged}"
+                />
+
+                        <TextBlock 
+                    Text="ریال"
+                    Margin="8 0 0 0"
+                    VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock DockPanel.Dock="Left" Margin="5"  Text="قیمت کارت مفقودی" VerticalAlignment="Center"/>
+
+                    <TextBlock 
+                DockPanel.Dock="Left" 
+                Margin="10 0" 
+                VerticalAlignment="Center"
+                FontWeight="SemiBold"
+                Text="قیمت کارت مفقودی" />
                 </DockPanel>
+
             </StackPanel>
         </Border>
+
+
         <Border Background="#20B9B9B9" Margin="5" Padding="10" CornerRadius="7">
             <StackPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
 
                 <TextBlock Margin="0,0,0,5" Text="توضیحات پیش فرض قبض" VerticalAlignment="Center"/>
 
-                <!-- ItemsControl to display badges -->
                 <ItemsControl ItemsSource="{Binding Descriptions, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

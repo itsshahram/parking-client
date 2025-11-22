@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -10,7 +11,7 @@
 		<Configurations>Debug;Release;DebugWithANPR</Configurations>
 		<UseWindowsForms>True</UseWindowsForms>
 		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-		<Version>1.0.23</Version>
+		<Version>1.0.24</Version>
 	</PropertyGroup>
 	<PropertyGroup>
 		<BuildDate>$([System.DateTime]::Now.ToString("yyyy-MM-dd"))</BuildDate>
@@ -34,6 +35,7 @@
 		<None Remove="Assets\placeholder.png" />
 		<None Remove="Assets\profile.png" />
 		<None Remove="Assets\Splash.png" />
+		
 		<None Remove="Assets\wpfui-icon-256.png" />
 	</ItemGroup>
 
@@ -45,6 +47,7 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Assets\nfc.png">
+			
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Assets\placeholder.png">

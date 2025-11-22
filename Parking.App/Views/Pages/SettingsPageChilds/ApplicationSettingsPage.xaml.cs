@@ -102,11 +102,67 @@ namespace Parking.App.Views.Pages.SettingsPageChilds
             }
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void MissingCardPriceTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Settings.Default.Application_MissingCardPrice = decimal.Parse(((TextBox)sender).Text);
-            Settings.Default.Save();
+            var t = sender as TextBox;
+
+            bool isDigit = e.Text.All(char.IsDigit);
+            bool isDot = e.Text == ".";
+
+            if (!isDigit && !isDot)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (isDot && t.Text.Contains("."))
+                e.Handled = true;
         }
+
+
+        private bool _isEditing = false;
+
+        private void Application_MissingCardPrice_TextBoxChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isEditing) return; 
+            _isEditing = true;
+
+            var textBox = sender as TextBox;
+            string input = textBox.Text;
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                textBox.BorderBrush = new SolidColorBrush(Colors.Red);
+                _isEditing = false;
+                return;
+            }
+
+            string raw = input.Replace(",", "");
+
+            if (!decimal.TryParse(raw, out decimal value))
+            {
+                textBox.BorderBrush = new SolidColorBrush(Colors.Red);
+                _isEditing = false;
+                return;
+            }
+
+            textBox.BorderBrush = new SolidColorBrush(Colors.Green);
+
+            Settings.Default.Application_MissingCardPrice = value;
+            Settings.Default.Save();
+
+            string formatted = string.Format("{0:N0}", value);
+
+            int cursor = textBox.SelectionStart;
+            int diff = formatted.Length - input.Length;
+
+            textBox.Text = formatted;
+            textBox.SelectionStart = Math.Max(0, cursor + diff);
+
+            _isEditing = false;
+        }
+
+
         private void GateTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             Settings.Default.Application_GatePCName = ((TextBox)sender).Text;
