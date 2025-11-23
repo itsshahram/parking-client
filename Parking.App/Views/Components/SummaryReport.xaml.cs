@@ -36,34 +36,6 @@ public partial class SummaryReport : UserControl
     {
         var request = new GetTicketListRequestModel();
 
-        if (!string.IsNullOrWhiteSpace(entryStartYearTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryStartMonthTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryStartDayTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryStartHourTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryStartMinutesTextBox.Text))
-        {
-            request.EntryFrom = DateConvertor.ShamsiToDateTime(
-                int.Parse(entryStartYearTextBox.Text),
-                int.Parse(entryStartMonthTextBox.Text),
-                int.Parse(entryStartDayTextBox.Text),
-                int.Parse(entryStartHourTextBox.Text),
-                int.Parse(entryStartMinutesTextBox.Text));
-        }
-
-        if (!string.IsNullOrWhiteSpace(entryEndYearTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryEndMonthTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryEndDayTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryEndHourTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(entryEndMinutesTextBox.Text))
-        {
-            request.EntryTo = DateConvertor.ShamsiToDateTime(
-                int.Parse(entryEndYearTextBox.Text),
-                int.Parse(entryEndMonthTextBox.Text),
-                int.Parse(entryEndDayTextBox.Text),
-                int.Parse(entryEndHourTextBox.Text),
-                int.Parse(entryEndMinutesTextBox.Text));
-        }
-
         if (!string.IsNullOrWhiteSpace(exitStartYearTextBox.Text) &&
             !string.IsNullOrWhiteSpace(exitStartMonthTextBox.Text) &&
             !string.IsNullOrWhiteSpace(exitStartDayTextBox.Text) &&
@@ -102,8 +74,6 @@ public partial class SummaryReport : UserControl
     {
         var textBoxes = new[]
         {
-        entryStartYearTextBox, entryStartMonthTextBox, entryStartDayTextBox, entryStartHourTextBox, entryStartMinutesTextBox,
-        entryEndYearTextBox, entryEndMonthTextBox, entryEndDayTextBox, entryEndHourTextBox, entryEndMinutesTextBox,
         exitStartYearTextBox, exitStartMonthTextBox, exitStartDayTextBox, exitStartHourTextBox, exitStartMinutesTextBox,
         exitEndYearTextBox, exitEndMonthTextBox, exitEndDayTextBox, exitEndHourTextBox, exitEndMinutesTextBox
     };
@@ -138,9 +108,7 @@ public partial class SummaryReport : UserControl
             SetFieldsEnabled(false);
             var request = FillParameters();
 
-            var filterDescription = $"ورود از: {request.EntryFrom?.ToShamsi(includeTime:true) ?? "-"} " +
-                                    $"تا: {request.EntryTo?.ToShamsi(includeTime: true) ?? "-"}, " +
-                                    $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: true) ?? "-"} " +
+            var filterDescription = $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: true) ?? "-"} " +
                                     $"تا: {request.ExitTo?.ToShamsi(includeTime: true) ?? "-"}, " +
                                     $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
                                     $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
@@ -198,20 +166,6 @@ public partial class SummaryReport : UserControl
 
     private void ClearBtn_Click(object sender, RoutedEventArgs e)
     {
-        // تاریخ ورود از
-        entryStartYearTextBox.Text = "";
-        entryStartMonthTextBox.Text = "";
-        entryStartDayTextBox.Text = "";
-        entryStartHourTextBox.Text = "";
-        entryStartMinutesTextBox.Text = "";
-
-        // تاریخ ورود تا
-        entryEndYearTextBox.Text = "";
-        entryEndMonthTextBox.Text = "";
-        entryEndDayTextBox.Text = "";
-        entryEndHourTextBox.Text = "";
-        entryEndMinutesTextBox.Text = "";
-
         // تاریخ خروج از
         exitStartYearTextBox.Text = "";
         exitStartMonthTextBox.Text = "";

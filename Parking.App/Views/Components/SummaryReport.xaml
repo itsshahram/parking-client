@@ -24,38 +24,6 @@
 
                     <WrapPanel FlowDirection="RightToLeft" HorizontalAlignment="Stretch">
 
-                        <!-- تاریخ ورود از -->
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تاریخ ورود از" />
-                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                <ui:TextBox x:Name="entryStartYearTextBox" MaxLength="4" PlaceholderText="1403" Margin="2 0"/>
-                                <TextBlock Text="/" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryStartMonthTextBox" MaxLength="2" PlaceholderText="06" Margin="2 0"/>
-                                <TextBlock Text="/" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryStartDayTextBox" MaxLength="2" PlaceholderText="29" Margin="2 0"/>
-                                <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                                <ui:TextBox x:Name="entryStartHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0"/>
-                                <TextBlock Text=":" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryStartMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- تاریخ ورود تا -->
-                        <StackPanel Margin="10 5">
-                            <TextBlock Text="تاریخ ورود تا" />
-                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                <ui:TextBox x:Name="entryEndYearTextBox" MaxLength="4" PlaceholderText="1403" Margin="2 0"/>
-                                <TextBlock Text="/" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryEndMonthTextBox" MaxLength="2" PlaceholderText="06" Margin="2 0"/>
-                                <TextBlock Text="/" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryEndDayTextBox" MaxLength="2" PlaceholderText="29" Margin="2 0"/>
-                                <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                                <ui:TextBox x:Name="entryEndHourTextBox" MaxLength="2" PlaceholderText="12" Margin="2 0"/>
-                                <TextBlock Text=":" VerticalAlignment="Center"/>
-                                <ui:TextBox x:Name="entryEndMinutesTextBox" MaxLength="2" PlaceholderText="00" Margin="2 0"/>
-                            </StackPanel>
-                        </StackPanel>
-
                         <!-- تاریخ خروج از -->
                         <StackPanel Margin="10 5">
                             <TextBlock Text="تاریخ خروج از" />
@@ -221,36 +189,13 @@
                             <StackPanel Margin="10 5">
                                 <TextBlock Text="مبلغ پرداخت با کارت" HorizontalAlignment="Center"/>
                                 <TextBlock Margin="0 8 0 0" HorizontalAlignment="Center" TextAlignment="Center">
-                <Run Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
-                <LineBreak/>
-                <Run Text="ريال" FontSize="14"/>
+                                <Run Text="{Binding Report.TotalPosPaidAmount, StringFormat={}{0:N0}}" FontSize="18" FontWeight="Bold"/>
+                                <LineBreak/>
+                                <Run Text="ريال" FontSize="14"/>
                                 </TextBlock>
                             </StackPanel>
                         </Border>
 
-                        <!-- تعداد ورود‌ها -->
-                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
-                            <StackPanel Margin="10 5">
-                                <TextBlock Text="تعداد ورود‌ها" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding Report.TotalEntries}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- تعداد خروج‌ها -->
-                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
-                            <StackPanel Margin="10 5">
-                                <TextBlock Text="تعداد خروج‌ها" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding Report.TotalExits}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- در حال حاضر داخل پارکینگ -->
-                        <Border CornerRadius="6" Padding="0 5" Background="#20B9B9B9" Margin="5">
-                            <StackPanel Margin="10 5">
-                                <TextBlock Text="در حال حاضر داخل پارکینگ" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding Report.CurrentlyInside}" FontWeight="Bold" Margin="0 8 0 0" FontSize="18" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
                     </WrapPanel>
 
                 </StackPanel>
