@@ -1382,7 +1382,7 @@ public class ParkingService : IParkingService
                                              LicensePlate = s.LicensePlate,
                                              ParkingSpaceID = s.ParkingSpaceID,
                                              StartTime = s.StartTime,
-                                             EndTime = (s.EndTime != s.StartTime) ? s.EndTime : null,
+                                             EndTime = s.EndTime,
                                              VehicleManufacturerName = s.VehicleManufacturerName,
                                              VehicleSegmentId = s.VehicleSegmentId,
                                              Discount = s.Discount,
@@ -3090,11 +3090,6 @@ public class ParkingService : IParkingService
     {
         var tickets = TicketListBaseQuery();
 
-        if (request.EntryFrom != null)
-            tickets = tickets.Where(t => t.StartTime >= request.EntryFrom);
-
-        if (request.EntryTo != null)
-            tickets = tickets.Where(t => t.StartTime <= request.EntryTo);
 
         if (request.ExitFrom != null)
             tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
@@ -3107,26 +3102,25 @@ public class ParkingService : IParkingService
 
         if (!string.IsNullOrEmpty(request.ExitRegistrar))
             tickets = tickets.Where(x => x.ExitGate == request.ExitRegistrar);
+        tickets = tickets.Where(x => x.IsExited == true && x.IsPaid == true);
 
-        var ticketList = await tickets.Where(x => x.IsExited == true && x.IsPaid.Value).ToListAsync();
+        var ticketList = await tickets.Where(x => x.IsExited == true && x.IsPaid == true).ToListAsync();
 
         var result = new TicketSummaryReportModel()
         {
             TotalTickets = await tickets.CountAsync(),
-            TotalAmount = Math.Round(await tickets.SumAsync(x => x.TotalAmount), 0),
-            TotalPaidAmount = Math.Round(await tickets.SumAsync(x => x.PaidAmount), 0),
-            CurrentlyInside = await tickets.CountAsync(x => !x.IsExited.Value),
-            TotalCreditPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "NAGHDI"),
-            TotalPosPaid = await tickets.CountAsync(x => x.IsPaid.Value && x.PaidType == "POS"),
-            TotalCreditPaidAmount = Math.Round(await tickets
-                .Where(x => x.IsPaid.Value && x.PaidType == "NAGHDI")
-                .SumAsync(x => x.PaidAmount), 0),
-            TotalPosPaidAmount = Math.Round(await tickets
-                .Where(x => x.IsPaid.Value && x.PaidType == "POS")
-                .SumAsync(x => x.PaidAmount), 0),
-            TotalDiscountAmount = Math.Round(await tickets
-                .Where(x => x.IsPaid.Value)
-                .SumAsync(x => (x.TotalAmount * x.DiscountPercent) / 100), 0),
+            TotalAmount = await tickets.SumAsync(x => x.TotalAmount),
+            TotalPaidAmount = await tickets.SumAsync(x => x.PaidAmount),
+            TotalCreditPaid = await tickets.CountAsync(x => x.PaidType == "NAGHDI"),
+            TotalPosPaid = await tickets.CountAsync(x => x.PaidType == "POS"),
+            TotalCreditPaidAmount = await tickets
+                .Where(x => x.PaidType == "NAGHDI")
+                .SumAsync(x => x.PaidAmount),
+            TotalPosPaidAmount = await tickets
+                .Where(x => x.PaidType == "POS")
+                .SumAsync(x => x.PaidAmount),
+            TotalDiscountAmount = await tickets
+                .SumAsync(x => (x.TotalAmount * x.DiscountPercent) / 100),
             TotalEntries = await tickets.CountAsync(x => !x.IsExited.Value),
             TotalExits = await tickets.CountAsync(x => x.IsExited.Value)
         };
@@ -3134,6 +3128,7 @@ public class ParkingService : IParkingService
 
         return result;
     }
+
 
     public async Task<(List<TicketsListViewModel> Data, int TotalCount)> GetTicketListReportAsync(GetTicketListRequestModel request)
     {
