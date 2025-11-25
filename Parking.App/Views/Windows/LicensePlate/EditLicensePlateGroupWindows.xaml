@@ -87,10 +87,6 @@
                 <ui:TextBox Width="70" Text="{Binding StartMonth}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 <TextBlock Text="/" VerticalAlignment="Center"/>
                 <ui:TextBox Width="70" Text="{Binding StartDay}" MaxLength="2" Margin="2 0" FontSize="20"/>
-                <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                <ui:TextBox Width="70" Text="{Binding StartHour}" MaxLength="2" Margin="2 0" FontSize="20"/>
-                <TextBlock Text=":" VerticalAlignment="Center"/>
-                <ui:TextBox Width="70" Text="{Binding StartMinute}" MaxLength="2" Margin="2 0" FontSize="20"/>
             </StackPanel>
 
             <!-- End Date -->
@@ -114,10 +110,6 @@
                     <ui:TextBox Width="70" Text="{Binding EndMonth}" MaxLength="2" Margin="2 0" FontSize="20"/>
                     <TextBlock Text="/" VerticalAlignment="Center"/>
                     <ui:TextBox Width="70" Text="{Binding EndDay}" MaxLength="2" Margin="2 0" FontSize="20"/>
-                    <TextBlock Text="|" VerticalAlignment="Center" Margin="5 0"/>
-                    <ui:TextBox Width="70" Text="{Binding EndHour}" MaxLength="2" Margin="2 0" FontSize="20"/>
-                    <TextBlock Text=":" VerticalAlignment="Center"/>
-                    <ui:TextBox Width="70" Text="{Binding EndMinute}" MaxLength="2" Margin="2 0" FontSize="20"/>
                 </StackPanel>
             </StackPanel>
 
