@@ -93,9 +93,16 @@ namespace Parking.App.Views.Pages.LicensePlate
                     EndDate = vm.EndDate!.Value
                 };
 
-                await _parkingService.UpdateLicensePlateGroup(updatedGroup);
-                await ShowMessage("موفقیت", "گروه به‌روزرسانی شد.");
-                await ViewModel.LoadDataAsync();
+                bool isSuccess = await _parkingService.UpdateLicensePlateGroup(updatedGroup);
+                if (isSuccess)
+                {
+                    await ShowMessage("موفقیت", "گروه به‌روزرسانی شد.");
+                    await ViewModel.LoadDataAsync();
+                }
+                else
+                {
+                    await ShowMessage("خطا", "به‌روزرسانی گروه با خطا مواجه شد.");
+                }
             }
         }
 

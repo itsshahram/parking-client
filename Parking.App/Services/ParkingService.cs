@@ -160,14 +160,6 @@ public class ParkingService : IParkingService
             var vehicleSegmentVariablePricesTask = unitOfWork.ParkingVehicleSegmentVariablePrices.ToListAsync();
 
 
-            //var vehicleSegmentVariablePricesTask = Task.Run(async () =>
-            //{
-            //    using (var uow = _unitOfWorkFactory.Create())
-            //    {
-            //        return await uow.ParkingVehicleSegmentVariablePrices.GetAll().ToListAsync();
-            //    }
-            //});
-
             await Task.WhenAll(vehicleSegmentsTask, vehicleSegmentPricesTask, vehicleSegmentVariablePricesTask);
             var vehicleSegments = await vehicleSegmentsTask;
             var vehicleSegmentPrices = await vehicleSegmentPricesTask;
@@ -3274,11 +3266,11 @@ public class ParkingService : IParkingService
               .SetProperty(x => x.StartDate, licensePlateGroup.StartDate)
               .SetProperty(x => x.EndDate, licensePlateGroup.EndDate));
 
-            unitOfWork.LicensePlateGroups.Commit();
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message, ex);
             return false;
         }
     }
@@ -3425,7 +3417,5 @@ public class ParkingService : IParkingService
             Data = data
         };
     }
-
-
 }
 
