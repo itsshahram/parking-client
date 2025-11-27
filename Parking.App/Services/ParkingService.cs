@@ -3084,10 +3084,22 @@ public class ParkingService : IParkingService
 
 
         if (request.ExitFrom != null)
-            tickets = tickets.Where(t => t.EndTime >= request.ExitFrom);
+        {
+            var from = request.ExitFrom.Value.Date;
+            tickets = tickets.Where(x =>
+                x.EndTime.HasValue &&
+                x.EndTime.Value >= from
+            );
+        }
 
         if (request.ExitTo != null)
-            tickets = tickets.Where(t => t.EndTime <= request.ExitTo);
+        {
+            var to = request.ExitTo.Value.Date.AddDays(1).AddTicks(-1);
+            tickets = tickets.Where(x =>
+                x.EndTime.HasValue &&
+                x.EndTime.Value <= to
+            );
+        }
 
         if (!string.IsNullOrEmpty(request.EntryRegistrar))
             tickets = tickets.Where(x => x.EntranceGate == request.EntryRegistrar);
@@ -3095,8 +3107,6 @@ public class ParkingService : IParkingService
         if (!string.IsNullOrEmpty(request.ExitRegistrar))
             tickets = tickets.Where(x => x.ExitGate == request.ExitRegistrar);
         tickets = tickets.Where(x => x.IsExited == true && x.IsPaid == true);
-
-        var ticketList = await tickets.Where(x => x.IsExited == true && x.IsPaid == true).ToListAsync();
 
         var result = new TicketSummaryReportModel()
         {

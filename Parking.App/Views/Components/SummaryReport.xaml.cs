@@ -38,35 +38,27 @@ public partial class SummaryReport : UserControl
 
         if (!string.IsNullOrWhiteSpace(exitStartYearTextBox.Text) &&
             !string.IsNullOrWhiteSpace(exitStartMonthTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitStartDayTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitStartHourTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitStartMinutesTextBox.Text))
+            !string.IsNullOrWhiteSpace(exitStartDayTextBox.Text))
         {
             request.ExitFrom = DateConvertor.ShamsiToDateTime(
                 int.Parse(exitStartYearTextBox.Text),
                 int.Parse(exitStartMonthTextBox.Text),
-                int.Parse(exitStartDayTextBox.Text),
-                int.Parse(exitStartHourTextBox.Text),
-                int.Parse(exitStartMinutesTextBox.Text));
+                int.Parse(exitStartDayTextBox.Text));
+
+            if (!string.IsNullOrWhiteSpace(exitEndYearTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndMonthTextBox.Text) &&
+                !string.IsNullOrWhiteSpace(exitEndDayTextBox.Text))
+            {
+                request.ExitTo = DateConvertor.ShamsiToDateTime(
+                    int.Parse(exitEndYearTextBox.Text),
+                    int.Parse(exitEndMonthTextBox.Text),
+                    int.Parse(exitEndDayTextBox.Text));
+            }
+
+            request.EntryRegistrar = EntryRegistrarCombo.Text == "همه" ? null : EntryRegistrarCombo.Text;
+            request.ExitRegistrar = ExitRegistrarCombo.Text == "همه" ? null : ExitRegistrarCombo.Text;
+
         }
-
-        if (!string.IsNullOrWhiteSpace(exitEndYearTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitEndMonthTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitEndDayTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitEndHourTextBox.Text) &&
-            !string.IsNullOrWhiteSpace(exitEndMinutesTextBox.Text))
-        {
-            request.ExitTo = DateConvertor.ShamsiToDateTime(
-                int.Parse(exitEndYearTextBox.Text),
-                int.Parse(exitEndMonthTextBox.Text),
-                int.Parse(exitEndDayTextBox.Text),
-                int.Parse(exitEndHourTextBox.Text),
-                int.Parse(exitEndMinutesTextBox.Text));
-        }
-
-        request.EntryRegistrar = EntryRegistrarCombo.Text == "همه" ? null : EntryRegistrarCombo.Text;
-        request.ExitRegistrar = ExitRegistrarCombo.Text == "همه" ? null : ExitRegistrarCombo.Text;
-
         return request;
     }
 
@@ -108,8 +100,8 @@ public partial class SummaryReport : UserControl
             SetFieldsEnabled(false);
             var request = FillParameters();
 
-            var filterDescription = $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: true) ?? "-"} " +
-                                    $"تا: {request.ExitTo?.ToShamsi(includeTime: true) ?? "-"}, " +
+            var filterDescription = $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: false) ?? "-"} " +
+                                    $"تا: {request.ExitTo?.ToShamsi(includeTime: false) ?? "-"}, " +
                                     $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
                                     $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
 
