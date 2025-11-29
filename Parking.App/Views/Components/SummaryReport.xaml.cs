@@ -66,8 +66,8 @@ public partial class SummaryReport : UserControl
     {
         var textBoxes = new[]
         {
-        exitStartYearTextBox, exitStartMonthTextBox, exitStartDayTextBox, exitStartHourTextBox, exitStartMinutesTextBox,
-        exitEndYearTextBox, exitEndMonthTextBox, exitEndDayTextBox, exitEndHourTextBox, exitEndMinutesTextBox
+        exitStartYearTextBox, exitStartMonthTextBox, exitStartDayTextBox,
+        exitEndYearTextBox, exitEndMonthTextBox, exitEndDayTextBox,
     };
 
         foreach (var tb in textBoxes)
@@ -162,16 +162,11 @@ public partial class SummaryReport : UserControl
         exitStartYearTextBox.Text = "";
         exitStartMonthTextBox.Text = "";
         exitStartDayTextBox.Text = "";
-        exitStartHourTextBox.Text = "";
-        exitStartMinutesTextBox.Text = "";
 
         // تاریخ خروج تا
         exitEndYearTextBox.Text = "";
         exitEndMonthTextBox.Text = "";
         exitEndDayTextBox.Text = "";
-        exitEndHourTextBox.Text = "";
-        exitEndMinutesTextBox.Text = "";
-
 
         // ComboBoxes reset
         EntryRegistrarCombo.SelectedIndex = 0;
