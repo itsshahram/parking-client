@@ -1408,6 +1408,7 @@ public class ParkingService : IParkingService
             try
             {
 
+
                 PaymentAmountCalculation(ticketId);
                 var ticket = unitOfWork.ParkingTickets.GetById(ticketId);
                 if (ticket == null)
@@ -1680,22 +1681,30 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var licensePlate = unitOfWork.LicensePlates.Find(l => l.EnLicensePlate == licenseEnPlate).FirstOrDefault();
-            if (licensePlate == null)
-            {
-                return 0;
-            }
-            var licensePlateGroup = unitOfWork.LicensePlateGroups.Find(l => l.Id == licensePlate.GroupId && l.StartDate < DateTime.Now && l.EndDate > DateTime.Now).FirstOrDefault();
-            if (licensePlateGroup == null)
-            {
-                return 0;
-            }
+            var licensePlate = unitOfWork.LicensePlates
+                .Find(l => l.EnLicensePlate == licenseEnPlate)
+                .FirstOrDefault();
 
-            return licensePlateGroup.DiscountPercent;
+            if (licensePlate == null)
+                return 0;
+
+            var now = DateTime.Now;
+
+            var validGroup = unitOfWork.LicensePlateGroups
+                .Find(g =>
+                    g.LicensePlates.Any(x => x.EnLicensePlate == licenseEnPlate) &&
+                    g.StartDate <= now &&
+                    g.EndDate >= now
+                )
+                .OrderByDescending(g => g.StartDate)
+                .ThenByDescending(g => g.EndDate)
+                .FirstOrDefault();
+
+            return validGroup?.DiscountPercent ?? 0;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, ex);
+            _logger.LogError(ex, ex.Message);
             return 0;
         }
     }
@@ -1703,27 +1712,35 @@ public class ParkingService : IParkingService
     {
         try
         {
-            var licensePlate = await unitOfWork.LicensePlates.Find(l => l.EnLicensePlate == licenseEnPlate).FirstOrDefaultAsync();
-            if (licensePlate == null)
-            {
-                return 0;
-            }
-            var licensePlateGroup = await unitOfWork.LicensePlateGroups
-                .Find(l => l.Id == licensePlate.GroupId && l.StartDate <= DateTime.Now && l.EndDate >= DateTime.Now)
+            var licensePlate = await unitOfWork.LicensePlates
+                .Find(l => l.EnLicensePlate == licenseEnPlate)
                 .FirstOrDefaultAsync();
-            if (licensePlateGroup == null)
-            {
-                return 0;
-            }
 
-            return licensePlateGroup.DiscountPercent;
+            if (licensePlate == null)
+                return 0;
+
+            var now = DateTime.Now;
+
+            var validGroup = await unitOfWork.LicensePlateGroups
+                .Find(g =>
+                    g.LicensePlates.Any(x => x.EnLicensePlate == licenseEnPlate) &&
+                    g.StartDate <= now &&
+                    g.EndDate >= now
+                )
+                .OrderByDescending(g => g.StartDate)
+                .ThenByDescending(g => g.EndDate)
+                .FirstOrDefaultAsync();
+
+            return validGroup?.DiscountPercent ?? 0;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
-            return 0;
+            return 0;  // Return 0 in case of any error
         }
     }
+
+
     public VehicleSegmentModel? GetVehicleSegmentById(int Id)
     {
         try
