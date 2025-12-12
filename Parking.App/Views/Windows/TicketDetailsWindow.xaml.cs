@@ -318,16 +318,12 @@ namespace Parking.App.Views.Windows
                 }
             }
         }
-        public async void Payment()
+        public async Task Payment()
         {
             if (!PermissionHelper.CheckUserPermission("PosPayment"))
                 return;
 
-
             ShowPaymentLoader();
-
-            await Task.Delay(50);
-
             try
             {
                 if (ViewModel.Item.IsPaid == true)
@@ -346,11 +342,11 @@ namespace Parking.App.Views.Windows
                     ? Settings.Default.Application_GatePCName
                     : Environment.MachineName;
 
-                OmidPayPcPos.OmidPayPcPosClass pos = new OmidPayPcPos.OmidPayPcPosClass();
+                var pos = new OmidPayPcPos.OmidPayPcPosClass();
 
                 if (ViewModel.Item.TotalAmount <= 1000)
                 {
-                    var rs = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
+                    bool rs = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
                     {
                         PaidAmount = 0,
                         PaidCreditCard = "",
@@ -379,24 +375,23 @@ namespace Parking.App.Views.Windows
                     {
                         SetPaymentStatus(false);
                     }
-
                     return;
                 }
 
+
                 string amount = ViewModel.Item.TotalAmount.RoundAndRemoveDecimals().ToString();
 
-
-                var posResult = await RunPosTransactionSafe(
-                    () => pos.DoTcpTransaction(
+                var posResult = await Task.Run(() =>
+                    pos.DoTcpTransaction(
                         Settings.Default.POS_IP,
                         Settings.Default.POS_Port,
                         amount,
                         null,
                         null,
                         OmidPayPcPos.OmidPayPcPosClass.POSAPPTYPE.OMD
-                    ),
-                    timeoutSeconds: 30
+                    )
                 );
+
 
                 if (posResult == null)
                 {
@@ -435,7 +430,7 @@ namespace Parking.App.Views.Windows
                     return;
                 }
 
-                // --- FINAL SUCCESS ---
+                // SUCCESS
                 await SetTicketData(ViewModel.Item.Id);
                 SetPaymentStatus(true);
                 SaveExtraImages();
@@ -448,7 +443,7 @@ namespace Parking.App.Views.Windows
             }
             finally
             {
-                HidePaymentLoader();
+                HidePaymentLoader(); // Loader always hides
             }
         }
 
@@ -930,30 +925,6 @@ namespace Parking.App.Views.Windows
                 PaymentBtnLoader.Visibility = Visibility.Collapsed;
             });
         }
-        private async Task<OmidPayPcPos.ResponseJson?> RunPosTransactionSafe(
-                    Func<OmidPayPcPos.ResponseJson> func,
-                    int timeoutSeconds = 10)
-        {
-            try
-            {
-                using var cts = new CancellationTokenSource();
-                var token = cts.Token;
 
-                var task = Task.Run(func, token);
-                var delay = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds), token);
-
-                var finished = await Task.WhenAny(task, delay);
-
-                if (finished == task)
-                    return task.Result;
-
-                cts.Cancel();
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
     }
 }
