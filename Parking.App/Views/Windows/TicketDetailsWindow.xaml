@@ -22,8 +22,13 @@
         Height="800" 
                  >
     <!--Topmost="True"-->
-    <DockPanel x:Name="MainPanel" >
-        <Grid x:Name="MainGrid">
+    <DockPanel >
+        <StackPanel x:Name="LoadingProgress" DockPanel.Dock="Top">
+            <ui:ProgressRing IsIndeterminate="True"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 50 0 0" />
+            <TextBlock  TextAlignment="Center" Text="در حال بارگزاری " Margin="10"/>
+        </StackPanel>
+
+        <Grid x:Name="MainPanel">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="0" x:Name="ExtraColumn" />
@@ -472,5 +477,6 @@
             </ScrollViewer >
 
         </Grid>
+
     </DockPanel>
 </ui:FluentWindow>

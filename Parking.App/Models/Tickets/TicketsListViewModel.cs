@@ -100,7 +100,7 @@ public class TicketSummaryReportItem
     [DisplayName("وضعیت پرداخت")]
     public string? IsPaid { get; set; }
 
-    [DisplayName("خروج شده")]
+    [DisplayName("خارج شده")]
     public string? IsExited { get; set; }
 
     [DisplayName("پرداخت دستی")]

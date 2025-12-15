@@ -1,5 +1,4 @@
-﻿using Parking.App.Models;
-using System.Printing;
+﻿using System.Printing;
 using System.Windows.Markup;
 using System.Windows.Xps;
 using Border = System.Windows.Controls.Border;
@@ -8,7 +7,6 @@ using FlowDirection = System.Windows.FlowDirection;
 using Grid = System.Windows.Controls.Grid;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Image = System.Windows.Controls.Image;
-using PrintDialog = System.Windows.Controls.PrintDialog;
 using StackPanel = System.Windows.Controls.StackPanel;
 using TextBlock = System.Windows.Controls.TextBlock;
 

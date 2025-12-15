@@ -1,4 +1,5 @@
-﻿using MessageBox = Wpf.Ui.Controls.MessageBox;
+﻿using System.Text.RegularExpressions;
+using MessageBox = Wpf.Ui.Controls.MessageBox;
 
 namespace Parking.App.Views.Components;
 
@@ -31,6 +32,42 @@ public partial class SummaryReport : UserControl
         ExitRegistrarCombo.ItemsSource = new ObservableCollection<string>(new[] { "همه" }.Concat(exitRegistrars));
 
     }
+    private static readonly Regex _numericRegex = new Regex("^[0-9]+$");
+
+    private void NumericOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = !_numericRegex.IsMatch(e.Text);
+    }
+
+    private void NumericOnly_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Back || e.Key == Key.Delete || e.Key == Key.Tab ||
+            e.Key == Key.Left || e.Key == Key.Right)
+            return;
+
+        if ((e.Key < Key.D0 || e.Key > Key.D9) &&
+            (e.Key < Key.NumPad0 || e.Key > Key.NumPad9))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void NumericOnly_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+        if (!e.DataObject.GetDataPresent(System.Windows.DataFormats.Text))
+        {
+            e.CancelCommand();
+            return;
+        }
+
+        var text = e.DataObject.GetData(System.Windows.DataFormats.Text) as string;
+
+        // allow only digits
+        if (string.IsNullOrEmpty(text) || !_numericRegex.IsMatch(text))
+            e.CancelCommand();
+    }
+
+
 
     private GetTicketListRequestModel FillParameters()
     {
@@ -98,27 +135,41 @@ public partial class SummaryReport : UserControl
         {
             progressBar.IsIndeterminate = true;
             SetFieldsEnabled(false);
+
             var request = FillParameters();
 
-            var filterDescription = $"خروج از: {request.ExitFrom?.ToShamsi(includeTime: false) ?? "-"} " +
-                                    $"تا: {request.ExitTo?.ToShamsi(includeTime: false) ?? "-"}, " +
-                                    $"ثبت ‌کننده ورود: {request.EntryRegistrar ?? "همه"}, " +
-                                    $"ثبت‌ کننده خروج: {request.ExitRegistrar ?? "همه"}";
+            string exitFrom = request.ExitFrom?.ToShamsi(includeTime: false) ?? "—";
+            string exitTo = request.ExitTo?.ToShamsi(includeTime: false) ?? "—";
 
+            string entryRegistrar = request.EntryRegistrar ?? "همه";
+            string exitRegistrar = request.ExitRegistrar ?? "همه";
+
+            var filterRows = new[]
+            {
+    "فیلترهای گزارش",
+    $"خروج: از {exitFrom}   |   تا {exitTo}",
+    $"ثبت‌کننده ورود: {entryRegistrar}",
+    $"ثبت‌کننده خروج: {exitRegistrar}"
+};
 
             var summaryData = new List<TicketSummaryReportModel>
         {
             ViewModel.Report
         };
 
-
-            byte[] fileBytes = ExcelHelper.ExportToExcel(summaryData, "SummaryReport", true, filterDescription);
+            byte[] fileBytes = ExcelHelper.ExportToExcel(
+                summaryData,
+                "SummaryReport",
+                true,
+                filterRows
+            );
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "Excel Workbook (*.xlsx)|*.xlsx",
                 FileName = "SummaryReport.xlsx"
             };
+
             progressBar.IsIndeterminate = false;
             SetFieldsEnabled(true);
 
@@ -128,13 +179,14 @@ public partial class SummaryReport : UserControl
                 ShowMessage("موفق", "فایل با موفقیت ذخیره شد.");
             }
         }
-        catch (Exception)
+        catch
         {
             progressBar.IsIndeterminate = false;
             SetFieldsEnabled(true);
             ShowMessage("خطا", "خطایی رخ داد.");
         }
     }
+
 
     private async void SearchBtn_Click(object sender, RoutedEventArgs e)
     {

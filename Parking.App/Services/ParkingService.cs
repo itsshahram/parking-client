@@ -127,7 +127,6 @@ public class ParkingService : IParkingService
                             })
                             .ToList();
                     }
-
                 }
             }
             return result;
@@ -860,7 +859,7 @@ public class ParkingService : IParkingService
                 CardUid = ticket.CardUid,
                 BarcodeId = ticket.BarcodeId,
                 QueueNumber = ticket.QueueNumber,
-                DriverDescription = ticket.DriverDescription
+                DriverDescription = ticket.DriverDescription,
             };
 
             if (ticket.IsExited)
@@ -1361,6 +1360,11 @@ public class ParkingService : IParkingService
             RRN = s.RRN,
             PaidDate = s.PaidDate,
             TraceNo = s.TraceNo,
+            ExitGate = s.ExitGate,
+            EntranceGate = s.ExitGate,
+            IsCustomPaid = s.IsCustomPaid,
+            IsSeized = s.IsSeized,
+            VehicleSegmentName = s.VehicleSegmentName,
         };
     }
 

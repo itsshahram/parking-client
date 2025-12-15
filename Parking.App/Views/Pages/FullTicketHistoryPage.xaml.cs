@@ -359,49 +359,106 @@ public partial class FullTicketHistoryPage : Page
             request.Discount = int.Parse(DiscountTextBox.Text);
         return request;
     }
-    private string BuildFilterDescription(GetTicketListRequestModel request)
+    private string[] BuildFilterRows(GetTicketListRequestModel request)
     {
-        var filters = new List<string>();
+        var rows = new List<string>
+    {
+        "فیلترهای گزارش"
+    };
 
+        // 🔹 Entry date range
         if (request.EntryFrom != null || request.EntryTo != null)
-            filters.Add($"ورود از {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} تا {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}");
+        {
+            rows.Add(
+                $"ورود: از {request.EntryFrom?.ToString("yyyy/MM/dd HH:mm") ?? "—"}" +
+                $"   |   تا {request.EntryTo?.ToString("yyyy/MM/dd HH:mm") ?? "—"}"
+            );
+        }
 
+        // 🔹 Exit date range
         if (request.ExitFrom != null || request.ExitTo != null)
-            filters.Add($"خروج از {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "-"} تا {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "-"}");
+        {
+            rows.Add(
+                $"خروج: از {request.ExitFrom?.ToString("yyyy/MM/dd HH:mm") ?? "—"}" +
+                $"   |   تا {request.ExitTo?.ToString("yyyy/MM/dd HH:mm") ?? "—"}"
+            );
+        }
 
+        // 🔹 Price range
         if (request.PriceFrom != null || request.PriceTo != null)
-            filters.Add($"مبلغ از {request.PriceFrom?.ToString("#,0")} تا {request.PriceTo?.ToString("#,0")} ریال");
+        {
+            rows.Add(
+                $"مبلغ: از {request.PriceFrom?.ToString("#,0") ?? "—"}" +
+                $"   |   تا {request.PriceTo?.ToString("#,0") ?? "—"} ریال"
+            );
+        }
 
+        // 🔹 Payment status
         if (request.IsPaid != null)
-            filters.Add($"وضعیت پرداخت: {(request.IsPaid == true ? "پرداخت شده" : "پرداخت نشده")}");
+        {
+            rows.Add(
+                $"وضعیت پرداخت: {(request.IsPaid == true ? "پرداخت شده" : "پرداخت نشده")}"
+            );
+        }
 
+        // 🔹 Payment type
         if (!string.IsNullOrEmpty(request.PaidType))
-            filters.Add($"نوع پرداخت:{(request.PaidType == "Naghdi" ? "پرداخت شده" : "پرداخت نشده")}");
+        {
+            rows.Add(
+                $"نوع پرداخت: {(request.PaidType == "Naghdi" ? "نقدی" : request.PaidType)}"
+            );
+        }
 
+        // 🔹 Gate type
         if (!string.IsNullOrEmpty(request.GateType))
-            filters.Add($"نوع درگاه: {request.GateType}");
+        {
+            rows.Add($"نوع درگاه: {request.GateType}");
+        }
 
+        // 🔹 Vehicle status
         if (request.VehicleStatus != null)
-            filters.Add($"وضعیت خودرو: {(request.VehicleStatus == Domain.General.VehicleStatus.Entered ? "داخل" : "خارج شده")}");
+        {
+            rows.Add(
+                $"وضعیت خودرو: {(request.VehicleStatus == Domain.General.VehicleStatus.Entered ? "داخل" : "خارج شده")}"
+            );
+        }
 
+        // 🔹 License plate
         if (!string.IsNullOrEmpty(request.LicensePlate))
-            filters.Add($"پلاک: {request.LicensePlate}");
+        {
+            rows.Add($"پلاک: {request.LicensePlate}");
+        }
 
-
+        // 🔹 Vehicle segment
         if (request.VehicleSegmentId != null)
-            filters.Add($"سگمنت خودرو: {request.VehicleSegmentId}");
+        {
+            rows.Add($"سگمنت خودرو: {request.VehicleSegmentId}");
+        }
 
+        // 🔹 Registrars
         if (!string.IsNullOrEmpty(request.EntryRegistrar))
-            filters.Add($"ثبت‌کننده ورود: {request.EntryRegistrar}");
+        {
+            rows.Add($"ثبت‌کننده ورود: {request.EntryRegistrar}");
+        }
 
         if (!string.IsNullOrEmpty(request.ExitRegistrar))
-            filters.Add($"ثبت‌کننده خروج: {request.ExitRegistrar}");
+        {
+            rows.Add($"ثبت‌کننده خروج: {request.ExitRegistrar}");
+        }
 
-        if (request.HasDiscrepancy != null && request.HasDiscrepancy == true)
-            filters.Add("فقط با مغایرت");
+        // 🔹 Discrepancy
+        if (request.HasDiscrepancy == true)
+        {
+            rows.Add("فقط قبض‌های دارای مغایرت");
+        }
 
-        return filters.Count > 0 ? string.Join(" | ", filters) : "بدون فیلتر";
+        // fallback
+        if (rows.Count == 1)
+            rows.Add("بدون فیلتر");
+
+        return rows.ToArray();
     }
+
 
     private async void TicketsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
@@ -485,31 +542,72 @@ public partial class FullTicketHistoryPage : Page
     {
         GetTicketListRequestModel request = FillParameters();
 
-        string filterDescription = BuildFilterDescription(request);
+        var filterRows = BuildFilterRows(request);
+
         var report = await _parkingService.GetTicketListReportAsync(request);
 
-        var data = report.Data.Select(x => new TicketSummaryReportItem()
-        {
-            StartTime = x.StartTime.ToShamsi(),
-            EndTime = x.EndTime?.ToShamsi(),
-            LicensePlate = x.LicensePlate,
-            VehicleSegmentName = x.VehicleSegmentName,
-            ParkingName = x.ParkingName,
-            EntranceGate = x.EntranceGate,
-            ExitGate = x.ExitGate,
-            DurationMinutes = x.DurationMinutes,
-            TotalAmount = x.TotalAmount,
-            Discount = x.Discount,
-            PaidAmount = x.PaidAmount,
-            PaidType = x.PaidType == "Naghdi" ? "نقدی" : "پوز",
-            PaidCreditCard = x.PaidCreditCard,
-            IsPaid = x.IsPaid.Value == true ? "پرداخت شده" : "پرداخت نشده",
-            IsExited = x.IsExited.Value == true ? "خارج شده" : "وارد شده",
-            IsCustomPaid = x.IsCustomPaid.Value == true ? "پرداخت دستی" : "عادی"
-        }).ToList();
+
+        var data = report.Data?
+            .Select(x => new TicketSummaryReportItem
+            {
+                StartTime = x.StartTime != null
+                    ? x.StartTime.ToShamsi()
+                    : "—",
+
+                EndTime = x.EndTime?.ToShamsi(),
+
+                LicensePlate = string.IsNullOrWhiteSpace(x.LicensePlate)
+                    ? "—"
+                    : x.LicensePlate,
+
+                VehicleSegmentName = x.VehicleSegmentName ?? "—",
+                ParkingName = x.ParkingName ?? "—",
+                EntranceGate = x.EntranceGate ?? "—",
+                ExitGate = x.ExitGate ?? "—",
+
+                DurationMinutes = x.DurationMinutes,
+
+                TotalAmount = x.TotalAmount,
+                Discount = x.Discount,
+                PaidAmount = x.PaidAmount,
+
+                PaidType = x.PaidType switch
+                {
+                    "Naghdi" => "نقدی",
+                    "POS" => "پوز",
+                    null => "—",
+                    _ => x.PaidType
+                },
+
+                PaidCreditCard = x.PaidCreditCard ?? "—",
+
+                IsPaid = x.IsPaid switch
+                {
+                    true => "پرداخت شده",
+                    false => "پرداخت نشده",
+                    null => "—"
+                },
+
+                IsExited = x.IsExited switch
+                {
+                    true => "خارج شده",
+                    false => "وارد شده",
+                    null => "—"
+                },
+
+                IsCustomPaid = x.IsCustomPaid switch
+                {
+                    true => "پرداخت دستی",
+                    false => "عادی",
+                    null => "—"
+                }
+            })
+            .ToList()
+            ?? new List<TicketSummaryReportItem>();
 
 
-        byte[] fileBytes = ExcelHelper.ExportToExcel(data, "FullReport", true, filterDescription);
+
+        byte[] fileBytes = ExcelHelper.ExportToExcel(data, "FullReport", true, filterRows);
 
         var saveFileDialog = new Microsoft.Win32.SaveFileDialog
         {
