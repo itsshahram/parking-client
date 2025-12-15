@@ -13,21 +13,27 @@ using TextBlock = Wpf.Ui.Controls.TextBlock;
 
 namespace Parking.App.Views.Windows
 {
-    /// <summary>
-    /// Interaction logic for TicketDetailsWindow.xaml
-    /// </summary>
     public partial class TicketDetailsWindow : FluentWindow
     {
         public List<CameraConfigModel> Cameras { get; set; }
         public TicketDetailsWindowViewModel ViewModel { get; set; } = new TicketDetailsWindowViewModel();
         public HotKeyManagementViewModel _hotKeyVm { get; set; } = new HotKeyManagementViewModel();
+
         private readonly IParkingService? _parkingService;
+        private readonly ILogger<TicketDetailsWindow> _logger;
+
         private bool IsMissingCard { get; set; } = false;
         private bool PaymentPermission { get; set; } = true;
-        private string ExitImage { get; set; }
-        private readonly ILogger<TicketDetailsWindow> _logger;
-        private List<(ImageSource ImageSource, string Name, bool ForSave)> ExtraImagesList = new List<(ImageSource ImageSource, string Name, bool ForSave)>();
+        private string ExitImage { get; set; } = string.Empty;
+        private string GateName { get; set; } = string.Empty;
+
+        private readonly List<(ImageSource ImageSource, string Name, bool ForSave)> ExtraImagesList = new();
         private DispatcherTimer _closeTimer;
+
+        private bool _ticketLoaded;
+
+        private readonly SemaphoreSlim _paymentGate = new(1, 1);
+
         public TicketDetailsWindow(Guid ticketId, BitmapSource currentImage, List<(string Image, string Name)>? extraimages, long? cardUid)
         {
             try
@@ -36,288 +42,316 @@ namespace Parking.App.Views.Windows
                 _logger = App.GetService<ILogger<TicketDetailsWindow>>();
                 Cameras = CameraConfigManager.GetActiveCameras();
 
-                if (ticketId != null)
-                {
-                    this.DataContext = ViewModel;
-                    ViewModel.TicketId = ticketId;
-                    InitializeComponent();
-                    if (Cameras.Any())
-                    {
-                        ExtraColumn.Width = new GridLength(1, GridUnitType.Star);
-                        ExtraImages.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        ExtraColumn.Width = new GridLength(0);
-                        ExtraImages.Visibility = Visibility.Collapsed;
-                    }
-                    if (currentImage != null)
-                    {
-                        currentImg.Source = currentImage;
-                        ExitImage = currentImage.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
-                    }
-                    SetTicketData(ticketId);
+                this.DataContext = ViewModel;
+                ViewModel.TicketId = ticketId;
 
-                    if (extraimages != null)
-                    {
-                        foreach (var image in extraimages)
-                        {
-                            if (image.Image != null)
-                            {
-                                ExtraImagesList.Add((ImageHelper.Base64ToImageSource(image.Image), image.Name, true));
-                            }
-                        }
-                    }
-                    if (cardUid != null)
-                    {
-                        if (cardUid == 0 && !PermissionHelper.CheckUserPermission("ForceExitRequest"))
-                        {
-                            PaymentPermission = false;
-                        }
-                    }
+                InitializeComponent();
+
+                if (Cameras.Any())
+                {
+                    ExtraColumn.Width = new GridLength(1, GridUnitType.Star);
+                    ExtraImages.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
-                    this.Close();
+                    ExtraColumn.Width = new GridLength(0);
+                    ExtraImages.Visibility = Visibility.Collapsed;
+                }
+
+                if (currentImage != null)
+                {
+                    currentImg.Source = currentImage;
+                    ExitImage = currentImage.ResizeAndCompressBitmap(1024, 768, 72, 72, 65);
+                }
+
+                _ = SetTicketData(ticketId);
+
+                if (extraimages != null)
+                {
+                    foreach (var image in extraimages)
+                    {
+                        if (image.Image != null)
+                            ExtraImagesList.Add((ImageHelper.Base64ToImageSource(image.Image), image.Name, true));
+                    }
+                }
+
+                if (cardUid != null)
+                {
+                    if (cardUid == 0 && !PermissionHelper.CheckUserPermission("ForceExitRequest"))
+                        PaymentPermission = false;
                 }
             }
             catch (Exception ex)
             {
                 ShowMessage("خطا", "خطا در نمایش، لطفا دوباره تلاش کنید");
-                _logger.LogError("Error in Ticket Details", ex);
+                _logger?.LogError(ex, "Error in Ticket Details");
+                Close();
             }
+
             UpdateButtonsTitle();
         }
+
         private void UpdateButtonsTitle()
         {
             PaymentBtn.Content = $"پرداخت ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace))})";
             CashPaymentBtn.Content = $"پرداخت نقدی ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.CashPayment))})";
             PrintBtn.Content = $"چاپ رسید ({_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt))})";
-            MissingCardToggleLabel.Content = $"آیا کارت مفقود شده است؟ (کلید {_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.LostCard))} برای فعال شدن)";
+            MissingCardToggleLabel.Content =
+                $"آیا کارت مفقود شده است؟ (کلید {_hotKeyVm.FormatHotkey(_hotKeyVm.GetHotKey(HotKeyActionType.LostCard))} برای فعال شدن)";
         }
+
         private void InitializeCloseTimer()
         {
             if (Settings.Default.Appearance_InvoiceShowTime > 0)
             {
-                _closeTimer = new DispatcherTimer();
-                _closeTimer.Interval = TimeSpan.FromSeconds(Settings.Default.Appearance_InvoiceShowTime);
+                _closeTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(Settings.Default.Appearance_InvoiceShowTime)
+                };
                 _closeTimer.Tick += CloseTimer_Tick;
                 _closeTimer.Start();
             }
         }
+
         private void CloseTimer_Tick(object sender, EventArgs e)
         {
             _closeTimer.Stop();
-            this.Close();
+            Close();
         }
+
 
         private async Task SetTicketData(Guid ticketId)
         {
+            _ticketLoaded = false;
+
             try
             {
+
+                LoadingProgress.Visibility = Visibility.Visible;
+                MainPanel.Visibility = Visibility.Collapsed;
+
                 var ticket = await _parkingService?.GetTicketDetailsAsync(ticketId);
 
-                if (ticket != null)
+                if (ticket == null)
                 {
-                    ticket.PaidType = ticket.PaidType?.ToLower().Replace("naghdi", "نقدی").Replace("POS", "دستگاه کارتخوان");
-
-                    if (!(bool)ticket.IsExited)
+                    var ms = new Wpf.Ui.Controls.MessageBox
                     {
-                        if (ticket.StartTime.Date == DateTime.Now.Date)
-                        {
-                            ticket.StartTimeString = "امروز";
-                        }
-                        if (ticket.EndTime?.Date == DateTime.Now.Date)
-                        {
-                            ticket.EndTimeString = "امروز";
-                        }
-                        ticket.EndTimeString = string.Empty;
-                        ticket.EndTimeOnlyString = string.Empty;
-                    }
-
-                    ViewModel.Item = ticket;
-                    SetPlate(ViewModel.Item?.EnLicensePlate ?? "--_-_---_IR--");
-                    ViewModel.Title = ticket.LicensePlate;
-
-                    var entryimage = await _parkingService.GetTicketImages(ticketId);
-                    await this.Dispatcher.InvokeAsync(() => EntryImage.Source = entryimage.StartImage);
-                    if (entryimage.ExitImage != null)
-                    {
-                        await this.Dispatcher.InvokeAsync(() => currentImg.Source = entryimage.ExitImage);
-                    }
-                    LoadImages(ticketId);
-                    CheckSeizedPlate();
-                    this.Topmost = true;
-                    this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-
-                    //DataContext = ViewModel;
-                    InitializeCloseTimer();
-
-                    if (ViewModel.Item?.IsPaid ?? false)
-                    {
-                        SetPaymentStatus(true);
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CashPaymentBtn.Visibility = Visibility.Collapsed;
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
-                        //MissingCardToggle.IsChecked = true;
-                        MissingCardToggle.IsEnabled = false;
-                    }
-                    // ورودی=0   خروجی=1
-                    if (!Settings.Default.Application_GateType.ToString().Contains("1"))
-                    {
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CashPaymentBtn.Visibility = Visibility.Collapsed;
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
-                        MissingCardToggle.IsEnabled = false;
-                    }
-                    if (!PaymentPermission)
-                    {
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CashPaymentBtn.Visibility = Visibility.Collapsed;
-                        PaymentBtn.Visibility = Visibility.Collapsed;
-                        CustomPayment_Btn.Visibility = Visibility.Collapsed;
-                        MissingCardToggle.IsEnabled = false;
-                    }
-                    MainPanel.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
-                    ms.Title = "خطا";
-                    ms.Content = "خطا در دریافت اطلاعات";
-                    ms.IsPrimaryButtonEnabled = false;
-                    ms.IsSecondaryButtonEnabled = false;
-                    ms.CloseButtonText = "متوجه شدم";
+                        Title = "خطا",
+                        Content = "خطا در دریافت اطلاعات",
+                        IsPrimaryButtonEnabled = false,
+                        IsSecondaryButtonEnabled = false,
+                        CloseButtonText = "متوجه شدم"
+                    };
                     await ms.ShowDialogAsync();
                     return;
                 }
 
+                ticket.PaidType = ticket.PaidType?
+                    .ToLower()
+                    .Replace("naghdi", "نقدی")
+                    .Replace("POS", "دستگاه کارتخوان");
+
+                if (ticket.IsExited != true)
+                {
+                    if (ticket.StartTime.Date == DateTime.Now.Date)
+                        ticket.StartTimeString = "امروز";
+
+                    if (ticket.EndTime?.Date == DateTime.Now.Date)
+                        ticket.EndTimeString = "امروز";
+
+                    ticket.EndTimeString = string.Empty;
+                    ticket.EndTimeOnlyString = string.Empty;
+                }
+
+                ViewModel.Item = ticket;
+
+                SetPlate(ticket.EnLicensePlate ?? "--_-_---_IR--");
+                ViewModel.Title = ticket.LicensePlate;
+
+                // --- Images
+                var entryimage = await _parkingService.GetTicketImages(ticketId);
+
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    EntryImage.Source = entryimage.StartImage;
+                    if (entryimage.ExitImage != null)
+                        currentImg.Source = entryimage.ExitImage;
+                });
+
+                LoadImages(ticketId);
+
+                CheckSeizedPlate();
+
+                Topmost = true;
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+                InitializeCloseTimer();
+
+                if (ticket.IsPaid == true)
+                {
+                    SetPaymentStatus(true);
+                    PaymentBtn.Visibility = Visibility.Collapsed;
+                    CashPaymentBtn.Visibility = Visibility.Collapsed;
+                    CustomPayment_Btn.Visibility = Visibility.Collapsed;
+                    MissingCardToggle.IsEnabled = false;
+                }
+
+                // ورودی=0   خروجی=1
+                if (!Settings.Default.Application_GateType.ToString().Contains("1"))
+                {
+                    PaymentBtn.Visibility = Visibility.Collapsed;
+                    CashPaymentBtn.Visibility = Visibility.Collapsed;
+                    CustomPayment_Btn.Visibility = Visibility.Collapsed;
+                    MissingCardToggle.IsEnabled = false;
+                }
+
+                if (!PaymentPermission)
+                {
+                    PaymentBtn.Visibility = Visibility.Collapsed;
+                    CashPaymentBtn.Visibility = Visibility.Collapsed;
+                    CustomPayment_Btn.Visibility = Visibility.Collapsed;
+                    MissingCardToggle.IsEnabled = false;
+                }
+
+                _ticketLoaded = true;
+                UpdateExitedStatus();
+                LoadingProgress.Visibility=Visibility.Collapsed;
+                MainPanel.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error in SetTicketData in Ticket Details", ex);
+                _ticketLoaded = true;
+                _logger?.LogError(ex, "Error in SetTicketData in Ticket Details");
             }
-
         }
+
+        private void UpdateExitedStatus()
+        {
+            if (!_ticketLoaded || ViewModel.Item == null)
+                return;
+
+            exitedStatus.IsExited = ViewModel.Item.IsExited ?? false;
+        }
+
+
         private void CheckSeizedPlate()
         {
             if (_parkingService?.IsSeizedLicensePlate(ViewModel.Item.EnLicensePlate ?? "_") == true)
-            {
-                //TitleBar.Background = new SolidColorBrush(System.Windows.Media.Colors.Red);
                 seizedBox.Visibility = Visibility.Visible;
-            }
+
             exitedStatus.IsExited = ViewModel.Item.IsExited ?? false;
         }
+
         private void SetPlate(string enLicensePlate)
         {
             var plate = enLicensePlate.ParsePlate();
+
             if (plate.IsIranianPlate)
             {
-                this.Dispatcher.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
-                    this.OtherPlateBox.Visibility = Visibility.Collapsed;
-                    this.IRPlateBox.Visibility = Visibility.Visible;
-
+                    OtherPlateBox.Visibility = Visibility.Collapsed;
+                    IRPlateBox.Visibility = Visibility.Visible;
                 });
+
                 plate_LeftNumber.Text = plate.LeftTwoDigits;
                 plate_RightNumber.Text = plate.RightThreeDigits;
                 plate_IRNumber.Text = plate.IranCode.Replace("IR", "");
                 plate_Char.Text = plate.Letter.ConvertEnCharToFaCharIndex();
-
             }
             else
             {
-                this.Dispatcher.Invoke(() =>
+                Dispatcher.Invoke(() =>
                 {
-                    this.IRPlateBox.Visibility = Visibility.Collapsed;
-                    this.OtherPlateBox.Visibility = Visibility.Visible;
-                    this.OtherPlateTextBox.Text = enLicensePlate;
+                    IRPlateBox.Visibility = Visibility.Collapsed;
+                    OtherPlateBox.Visibility = Visibility.Visible;
+                    OtherPlateTextBox.Text = enLicensePlate;
                 });
             }
 
-
             PlateCharName.Content = plate.Letter.ConvertToString();
-
         }
-        private void TicketDetailsWindow_KeyUp(object sender, KeyEventArgs e)
+
+        private async void TicketDetailsWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
-                this.Close();
+                Close();
                 return;
             }
 
-            ModifierKeys currentModifiers = Keyboard.Modifiers;
+            var currentModifiers = Keyboard.Modifiers;
 
-            bool IsHotKeyPressed(HotKeyConfig? config)
+            bool IsHotKeyPressed(HotKeyConfig? config) =>
+                config != null &&
+                config.Key == (e.Key == Key.System ? e.SystemKey : e.Key) &&
+                config.Modifiers == currentModifiers;
+
+            if (!Settings.Default.Application_GateType.Contains("1"))
+                return;
+
+            if (PermissionHelper.CheckUserPermission("CashPayment"))
             {
-                return config != null &&
-                       config.Key == (e.Key == Key.System ? e.SystemKey : e.Key) &&
-                       config.Modifiers == currentModifiers;
-            }
-
-            if (Settings.Default.Application_GateType.Contains("1"))
-            {
-                if (PermissionHelper.CheckUserPermission("CashPayment"))
-                {
-                    var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
-                    if (IsHotKeyPressed(cashPaymentHotKey))
-                    {
-                        if (!ViewModel.Item?.IsPaid ?? false)
-                        {
-                            CashPayment();
-                        }
-                        else
-                        {
-                            ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
-                        }
-                    }
-                }
-
-                if (PermissionHelper.CheckUserPermission("PosPayment"))
-                {
-                    var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
-                    if (IsHotKeyPressed(paymentWithSpaceHotKey))
-                    {
-                        if (!ViewModel.Item?.IsPaid ?? false)
-                        {
-                            Payment();
-                        }
-                        else
-                        {
-                            ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
-                        }
-                    }
-                }
-
-
-
-                var missingCardHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.LostCard);
-                if (IsHotKeyPressed(missingCardHotKey))
+                var cashPaymentHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.CashPayment);
+                if (IsHotKeyPressed(cashPaymentHotKey))
                 {
                     if (!ViewModel.Item?.IsPaid ?? false)
-                    {
-                        MissingCardToggle.IsChecked = !IsMissingCard;
-                    }
+                        await CashPayment();
                     else
-                    {
                         ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
-                    }
-                }
-
-                var printReceiptHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
-                if (IsHotKeyPressed(printReceiptHotKey))
-                {
-                    if (PermissionHelper.CheckUserPermission("PrintTicket"))
-                    {
-                        PrintTicket();
-                    }
                 }
             }
+
+            if (PermissionHelper.CheckUserPermission("PosPayment"))
+            {
+                var paymentWithSpaceHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PaymentWithSpace);
+                if (IsHotKeyPressed(paymentWithSpaceHotKey))
+                {
+                    if (!ViewModel.Item?.IsPaid ?? false)
+                        await Payment();
+                    else
+                        ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+                }
+            }
+
+            var missingCardHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.LostCard);
+            if (IsHotKeyPressed(missingCardHotKey))
+            {
+                if (!ViewModel.Item?.IsPaid ?? false)
+                    MissingCardToggle.IsChecked = !IsMissingCard;
+                else
+                    ShowMessage("توجه", "این قبض قبلا پرداخت شده، امکان پرداخت دوباره یا تغییر وجود ندارد");
+            }
+
+            var printReceiptHotKey = _hotKeyVm.GetHotKey(HotKeyActionType.PrintReceipt);
+            if (IsHotKeyPressed(printReceiptHotKey))
+            {
+                if (PermissionHelper.CheckUserPermission("PrintTicket"))
+                    PrintTicket();
+            }
         }
+
+        private void EnsureGateName()
+        {
+            GateName = Settings.Default.Application_GatePCName.Length > 3
+                ? Settings.Default.Application_GatePCName
+                : Environment.MachineName;
+        }
+
+        private (Guid ticketId, decimal totalAmount, decimal paidAmount, long? cardUid, bool isMissing, string exitImage, Guid? userId) SnapshotPaymentState()
+        {
+            return (
+                ViewModel.Item.Id,
+                ViewModel.Item.TotalAmount,
+                ViewModel.Item.PaidAmount,
+                ViewModel.Item.CardUid,
+                IsMissingCard,
+                ExitImage,
+                TokenStore.UserId
+            );
+        }
+
+        [RequiresPermission("PosPayment", "پرداخت با پوز")]
         public async Task Payment()
         {
             if (!PermissionHelper.CheckUserPermission("PosPayment"))
@@ -338,35 +372,35 @@ namespace Parking.App.Views.Windows
                     return;
                 }
 
-                GateName = Settings.Default.Application_GatePCName.Length > 3
-                    ? Settings.Default.Application_GatePCName
-                    : Environment.MachineName;
+                EnsureGateName();
+
+                var snap = SnapshotPaymentState();
 
                 var pos = new OmidPayPcPos.OmidPayPcPosClass();
 
-                if (ViewModel.Item.TotalAmount <= 1000)
+                if (snap.totalAmount <= 1000)
                 {
-                    bool rs = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
+                    bool rs = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel
                     {
                         PaidAmount = 0,
                         PaidCreditCard = "",
                         PaidType = "Naghdi",
                         RefId = "0000",
-                        TicketId = ViewModel.Item.Id,
+                        TicketId = snap.ticketId,
                         MerchantNumber = "00",
                         PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
                         RRN = "000",
                         TraceNo = "00000",
                         ExitGate = GateName,
-                        IsMissingCard = IsMissingCard,
-                        CardUid = ViewModel.Item.CardUid,
-                        ExitRegistrarUserId = TokenStore.UserId,
-                        ExitImage = ExitImage
+                        IsMissingCard = snap.isMissing,
+                        CardUid = snap.cardUid,
+                        ExitRegistrarUserId = snap.userId,
+                        ExitImage = snap.exitImage
                     });
 
                     if (rs)
                     {
-                        await SetTicketData(ViewModel.Item.Id);
+                        await SetTicketData(snap.ticketId);
                         SetPaymentStatus(true);
                         SaveExtraImages();
                         CloseAfterSuccessPayment();
@@ -375,11 +409,11 @@ namespace Parking.App.Views.Windows
                     {
                         SetPaymentStatus(false);
                     }
+
                     return;
                 }
 
-
-                string amount = ViewModel.Item.TotalAmount.RoundAndRemoveDecimals().ToString();
+                string amount = snap.totalAmount.RoundAndRemoveDecimals().ToString();
 
                 var posResult = await Task.Run(() =>
                     pos.DoTcpTransaction(
@@ -392,35 +426,28 @@ namespace Parking.App.Views.Windows
                     )
                 );
 
-
-                if (posResult == null)
+                if (posResult == null || posResult.Result != "OK")
                 {
                     SetPaymentStatus(false);
                     return;
                 }
 
-                if (posResult.Result != "OK")
-                {
-                    SetPaymentStatus(false);
-                    return;
-                }
-
-                var saveResult = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
+                var saveResult = await _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel
                 {
                     PaidAmount = decimal.Parse(posResult.SpentAmount),
                     PaidCreditCard = posResult.CardNo,
                     PaidType = "POS",
                     RefId = posResult.RRN,
-                    TicketId = ViewModel.Item.Id,
+                    TicketId = snap.ticketId,
                     MerchantNumber = ViewModel.Item.MerchantNumber,
                     PaidDate = ViewModel.Item.PaidDate,
                     RRN = posResult.RRN,
                     TraceNo = posResult.TraceNo,
                     ExitGate = GateName,
-                    IsMissingCard = IsMissingCard,
-                    CardUid = ViewModel.Item.CardUid,
-                    ExitRegistrarUserId = TokenStore.UserId,
-                    ExitImage = ExitImage
+                    IsMissingCard = snap.isMissing,
+                    CardUid = snap.cardUid,
+                    ExitRegistrarUserId = snap.userId,
+                    ExitImage = snap.exitImage
                 });
 
                 if (!saveResult)
@@ -430,25 +457,27 @@ namespace Parking.App.Views.Windows
                     return;
                 }
 
-                // SUCCESS
-                await SetTicketData(ViewModel.Item.Id);
+                await SetTicketData(snap.ticketId);
                 SetPaymentStatus(true);
                 SaveExtraImages();
                 CloseAfterSuccessPayment();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in POS Payment");
+                _logger?.LogError(ex, "Error in POS Payment");
                 ShowMessage("خطا", "خطا در پرداخت با دستگاه کارتخوان");
             }
             finally
             {
-                HidePaymentLoader(); // Loader always hides
+                HidePaymentLoader();
             }
         }
 
+        private async void CashPayment_Click(object sender, RoutedEventArgs e) => await CashPayment();
 
-        private void CashPayment_Click(object sender, RoutedEventArgs e) => CashPayment();
+        [RequiresPermission("PosPayment", "پرداخت با پوز")]
+        private async void PaymentBtn_Click(object sender, RoutedEventArgs e) => await Payment();
+
         private void MissingCardToggle_Checked(object sender, RoutedEventArgs e)
         {
             if (!IsMissingCard)
@@ -468,6 +497,7 @@ namespace Parking.App.Views.Windows
                 ViewModel.Item = ViewModel.Item;
             }
         }
+
         private void SetPaymentStatus(bool result)
         {
             if (result)
@@ -478,7 +508,6 @@ namespace Parking.App.Views.Windows
 
                 PaymentBtn.Visibility = Visibility.Collapsed;
                 CashPaymentBtn.Visibility = Visibility.Collapsed;
-                PaymentBtn.Visibility = Visibility.Collapsed;
                 MissingCardToggle.IsEnabled = false;
             }
             else
@@ -488,6 +517,7 @@ namespace Parking.App.Views.Windows
                 paymentResultText.Text = "پرداخت ناموفق";
             }
         }
+
         private void ShowMessage(string title, string message)
         {
             try
@@ -496,13 +526,15 @@ namespace Parking.App.Views.Windows
                 {
                     Application.Current.Dispatcher.Invoke(async () =>
                     {
-                        Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
-                        ms.FlowDirection = System.Windows.FlowDirection.RightToLeft;
-                        ms.Title = title;
-                        ms.Content = message;
-                        ms.IsPrimaryButtonEnabled = false;
-                        ms.IsSecondaryButtonEnabled = false;
-                        ms.CloseButtonText = "متوجه شدم";
+                        var ms = new Wpf.Ui.Controls.MessageBox
+                        {
+                            FlowDirection = System.Windows.FlowDirection.RightToLeft,
+                            Title = title,
+                            Content = message,
+                            IsPrimaryButtonEnabled = false,
+                            IsSecondaryButtonEnabled = false,
+                            CloseButtonText = "متوجه شدم"
+                        };
                         await ms.ShowDialogAsync();
                     });
                 }
@@ -512,248 +544,230 @@ namespace Parking.App.Views.Windows
                 System.Windows.MessageBox.Show(message, title);
             }
         }
+
         private async void LoadImages(Guid ticketId)
         {
             try
             {
-
-
                 var extraImages = await _parkingService.GetTicketExtraImageSourcesAsync(ticketId, true);
                 if (extraImages != null)
                 {
                     foreach (var image in extraImages)
                     {
                         if (image.ImageSource != null)
-                        {
                             ExtraImagesList.Add(new(image.ImageSource, image.FaName ?? "_", false));
-                        }
                     }
                 }
 
-                await this.Dispatcher.InvokeAsync(async () =>
-                {
-                    AddImageListToExtraImageBox(ExtraImagesList);
-                });
-
+                await Dispatcher.InvokeAsync(() => AddImageListToExtraImageBox(ExtraImagesList));
             }
             catch
             {
-                //EntryImage.Source = null;
+                // ignore
             }
-
         }
-
-        [RequiresPermission("PosPayment", "پرداخت با پوز")]
-        private void PaymentBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Payment();
-        }
-        private string GateName { get; set; }
 
         [RequiresPermission("CashPayment", "پرداخت نقدی")]
-        public async void CashPayment()
+        public async Task CashPayment()
         {
             if (!PermissionHelper.CheckUserPermission("CashPayment"))
                 return;
+
+            if (!await _paymentGate.WaitAsync(0))
+                return;
+
             try
             {
-                if (ViewModel.Item.IsPaid == false)
-                {
-                    if (PaymentPermission)
-                    {
-                        if (Settings.Default.Application_GatePCName.Length > 3)
-                            GateName = Settings.Default.Application_GatePCName;
-                        else
-                            GateName = Environment.MachineName;
-
-
-                        if (ViewModel.Item.TotalAmount > 1000)
-                        {
-                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
-                            {
-                                PaidAmount = ViewModel.Item.TotalAmount,
-                                TotalAmount = ViewModel.Item.TotalAmount,
-                                PaidCreditCard = "",
-                                PaidType = "Naghdi",
-                                RefId = "0000",
-                                TicketId = ViewModel.Item.Id,
-                                MerchantNumber = "00",
-                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
-                                RRN = "000",
-                                TraceNo = "00000",
-                                ExitGate = GateName,
-                                IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid,
-                                ExitRegistrarUserId = TokenStore.UserId,
-                                ExitImage = ExitImage,
-                            });
-
-                        }
-                        else
-                        {
-                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
-                            {
-                                TotalAmount = ViewModel.Item.TotalAmount,
-                                PaidAmount = ViewModel.Item.TotalAmount,
-                                PaidCreditCard = "",
-                                PaidType = "Naghdi",
-                                RefId = "0000",
-                                TicketId = ViewModel.Item.Id,
-                                MerchantNumber = "00",
-                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
-                                RRN = "000",
-                                TraceNo = "00000",
-                                ExitGate = GateName,
-                                IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid,
-                                ExitImage = ExitImage
-                            });
-                        }
-                        SaveExtraImages();
-                        SetTicketData(ViewModel.Item.Id);
-                        SetPaymentStatus(true);
-                    }
-                }
-                else
+                if (ViewModel.Item?.IsPaid == true)
                 {
                     ShowMessage("خطا", "قبلا پرداخت شده");
                     return;
                 }
 
+                if (!PaymentPermission)
+                    return;
+
+                EnsureGateName();
+
+                var snap = SnapshotPaymentState();
+
+                var model = new TicketPaidInfoModel
+                {
+                    TicketId = snap.ticketId,
+                    TotalAmount = snap.totalAmount,
+                    PaidAmount = snap.totalAmount,
+                    PaidCreditCard = "",
+                    PaidType = "Naghdi",
+                    RefId = "0000",
+                    MerchantNumber = "00",
+                    PaidDate = DateTime.Now.ToString("yyyyMMdd"),
+                    RRN = "000",
+                    TraceNo = "00000",
+                    ExitGate = GateName,
+                    IsMissingCard = snap.isMissing,
+                    CardUid = snap.cardUid,
+                    ExitImage = snap.exitImage,
+                    ExitRegistrarUserId = snap.totalAmount > 1000 ? snap.userId : null
+                };
+
+                await _parkingService.SetTicketPaidInfo(model);
+
+                SaveExtraImages();
+                await SetTicketData(snap.ticketId);
+                SetPaymentStatus(true);
             }
-            catch
+            catch (Exception ex)
             {
-                ShowMessage("خطا", "خطا در پرداخت با دستگاه کارتخوان");
-                return;
+                _logger?.LogError(ex, "CashPayment failed");
+                ShowMessage("خطا", "خطا در پرداخت نقدی");
+            }
+            finally
+            {
+                _paymentGate.Release();
             }
         }
 
-        public async void CustomPayment()
+        public async Task CustomPayment()
         {
             if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment"))
                 return;
+
+            // Lock: prevent overlapping payments
+            if (!await _paymentGate.WaitAsync(0))
+                return;
+
             try
             {
-                if (ViewModel.Item.IsPaid == false)
-                {
-                    if (PaymentPermission)
-                    {
-                        if (Settings.Default.Application_GatePCName.Length > 3)
-                            GateName = Settings.Default.Application_GatePCName;
-                        else
-                            GateName = Environment.MachineName;
-
-
-                        if (ViewModel.Item.TotalAmount > 1000)
-                        {
-                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
-                            {
-                                PaidAmount = ViewModel.Item.PaidAmount,
-                                TotalAmount = ViewModel.Item.TotalAmount,
-                                PaidCreditCard = "",
-                                PaidType = "Naghdi",
-                                RefId = "0000",
-                                TicketId = ViewModel.Item.Id,
-                                MerchantNumber = "00",
-                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
-                                RRN = "000",
-                                TraceNo = "00000",
-                                ExitGate = GateName,
-                                IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid,
-                                ExitRegistrarUserId = TokenStore.UserId,
-                                ExitImage = ExitImage,
-                                IsCustomPaid = true
-                            });
-
-                        }
-                        else
-                        {
-                            var rs = _parkingService.SetTicketPaidInfo(new TicketPaidInfoModel()
-                            {
-                                TotalAmount = ViewModel.Item.TotalAmount,
-                                PaidAmount = ViewModel.Item.PaidAmount,
-                                PaidCreditCard = "",
-                                PaidType = "Naghdi",
-                                RefId = "0000",
-                                TicketId = ViewModel.Item.Id,
-                                MerchantNumber = "00",
-                                PaidDate = DateTime.Now.Date.ToString("yyyyMMdd"),
-                                RRN = "000",
-                                TraceNo = "00000",
-                                ExitGate = GateName,
-                                IsMissingCard = IsMissingCard,
-                                CardUid = ViewModel.Item.CardUid,
-                                ExitImage = ExitImage,
-                                IsCustomPaid = true
-                            });
-
-                        }
-                        SaveExtraImages();
-                        SetTicketData(ViewModel.Item.Id);
-                        SetPaymentStatus(true);
-                    }
-
-                }
-                else
+                if (ViewModel.Item?.IsPaid == true)
                 {
                     ShowMessage("خطا", "قبلا پرداخت شده");
                     return;
                 }
 
+                if (!PaymentPermission)
+                    return;
+
+                EnsureGateName();
+
+                var snap = SnapshotPaymentState();
+
+                TicketPaidInfoModel model;
+
+                if (snap.totalAmount > 1000)
+                {
+                    model = new TicketPaidInfoModel
+                    {
+                        TicketId = snap.ticketId,
+                        TotalAmount = snap.totalAmount,
+                        PaidAmount = snap.paidAmount,
+                        PaidCreditCard = "",
+                        PaidType = "Naghdi",
+                        RefId = "0000",
+                        MerchantNumber = "00",
+                        PaidDate = DateTime.Now.ToString("yyyyMMdd"),
+                        RRN = "000",
+                        TraceNo = "00000",
+                        ExitGate = GateName,
+                        IsMissingCard = snap.isMissing,
+                        CardUid = snap.cardUid,
+                        ExitRegistrarUserId = snap.userId,
+                        ExitImage = snap.exitImage,
+                        IsCustomPaid = true
+                    };
+                }
+                else
+                {
+                    model = new TicketPaidInfoModel
+                    {
+                        TicketId = snap.ticketId,
+                        TotalAmount = snap.totalAmount,
+                        PaidAmount = snap.paidAmount,
+                        PaidCreditCard = "",
+                        PaidType = "Naghdi",
+                        RefId = "0000",
+                        MerchantNumber = "00",
+                        PaidDate = DateTime.Now.ToString("yyyyMMdd"),
+                        RRN = "000",
+                        TraceNo = "00000",
+                        ExitGate = GateName,
+                        IsMissingCard = snap.isMissing,
+                        CardUid = snap.cardUid,
+                        ExitImage = snap.exitImage,
+                        IsCustomPaid = true
+                    };
+                }
+
+                await _parkingService.SetTicketPaidInfo(model);
+
+                SaveExtraImages();
+                await SetTicketData(snap.ticketId);
+                SetPaymentStatus(true);
             }
-            catch
+            catch (Exception ex)
             {
-                ShowMessage("خطا", "خطا در پرداخت با دستگاه کارتخوان");
+                _logger?.LogError(ex, "CustomPayment failed");
+                ShowMessage("خطا", "خطا در پرداخت با مبلغ دلخواه");
+            }
+            finally
+            {
+                _paymentGate.Release();
+            }
+        }
+
+        [RequiresPermission("CustomAmouontPayment", "خروج با مبلغ دلخواه")]
+        private async void CustomPayment_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment"))
                 return;
+
+            var modal = new CustomAmountPaymentModalWindow(ViewModel.TicketId)
+            {
+                Owner = this
+            };
+
+            var result = modal.ShowDialog();
+            if (result == true)
+            {
+                ViewModel.Item.PaidAmount = modal.ViewModel.Amount;
+                await CustomPayment();
             }
         }
 
         private void AddImageListToExtraImageBox(List<(ImageSource imageSource, string title, bool ForSave)> list)
         {
-
             try
             {
-
                 foreach (var image in list)
                 {
-                    Border border = new Border
+                    var border = new Border
                     {
                         BorderThickness = new Thickness(2),
                         BorderBrush = new SolidColorBrush(Color.FromArgb(16, 206, 206, 206)),
                         Background = Brushes.Transparent,
-                        Margin = new Thickness()
-                        {
-                            Bottom = 0,
-                            Left = 5,
-                            Right = 5,
-                            Top = 5
-                        }
+                        Margin = new Thickness { Bottom = 0, Left = 5, Right = 5, Top = 5 }
                     };
 
+                    var grid = new Grid();
 
-                    Grid grid = new Grid();
-
-                    Image imageControl = new Image
+                    var imageControl = new Image
                     {
                         Stretch = Stretch.Fill,
                         Source = image.imageSource,
                         Height = 200
                     };
 
-                    StackPanel overlayPanel = new StackPanel
+                    var overlayPanel = new StackPanel
                     {
                         VerticalAlignment = VerticalAlignment.Top,
                         Background = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0))
                     };
 
-                    TextBlock textBlock = new TextBlock
+                    var textBlock = new TextBlock
                     {
                         Text = image.title,
                         Foreground = Brushes.White,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                         Margin = new Thickness(5)
-
                     };
 
                     overlayPanel.Children.Add(textBlock);
@@ -763,15 +777,11 @@ namespace Parking.App.Views.Windows
 
                     ExtraImages.Children.Add(border);
                 }
-
-
             }
             catch (Exception ex)
             {
                 Console.Write(ex.Message);
             }
-
-
         }
 
         private void SaveExtraImages()
@@ -782,48 +792,27 @@ namespace Parking.App.Views.Windows
             }
         }
 
-        private void ExitBtn_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        private void ExitBtn_Click(object sender, RoutedEventArgs e) => Close();
 
         [RequiresPermission("PrintTicket", "چاپ قبض")]
-        private async void Print_Btn_Click(object sender, RoutedEventArgs e)
+        private void Print_Btn_Click(object sender, RoutedEventArgs e)
         {
             if (!PermissionHelper.CheckUserPermission("PrintTicket"))
                 return;
+
             PrintTicket();
         }
 
-        [RequiresPermission("CustomAmouontPayment", "خروج با مبلغ دلخواه")]
-        private void CustomPayment_Btn_Click(object sender, RoutedEventArgs e)
-        {
-            if (!PermissionHelper.CheckUserPermission("CustomAmouontPayment"))
-                return;
-            CustomAmountPaymentModalWindow customAmountPaymentModalWindow = new CustomAmountPaymentModalWindow(ViewModel.TicketId)
-            {
-                Owner = this
-            };
-            var result = customAmountPaymentModalWindow.ShowDialog();
-
-            if (result == true)
-            {
-                ViewModel.Item.PaidAmount = customAmountPaymentModalWindow.ViewModel.Amount;
-                CustomPayment();
-            }
-        }
         private async void PrintTicket()
         {
             try
             {
                 var ticket = await _parkingService?.GetTicketDetailsAsync(ViewModel.Item.Id);
 
-
                 double dpi = Settings.Default.Application_Print_dpi;
                 double widthMm = Settings.Default.Application_Print_widthMm;
                 double widthInches = widthMm / 25.4;
                 double widthPixels = dpi * widthInches;
-
 
                 var receiptContent = ReceiptPrinter.GenerateInvoiceContent(new InvoiceModel
                 {
@@ -835,42 +824,36 @@ namespace Parking.App.Views.Windows
                     ParkingName = ticket.ParkingName,
                     StartTime = ticket.StartTime.ToShamsi() + "  " + ticket.StartTime.ToString("HH:mm"),
                     VehicleSegmentName = ticket.VehicleManufacturerName,
-                    EndTime = ((ticket.IsExited ?? false) && ticket.EndTime != null) ? ticket.EndTime?.ToShamsi() + " " + ticket.EndTime?.ToString("HH:mm") : "",
+                    EndTime = ((ticket.IsExited ?? false) && ticket.EndTime != null)
+                        ? ticket.EndTime?.ToShamsi() + " " + ticket.EndTime?.ToString("HH:mm")
+                        : "",
                     PaidAmount = ticket.PaidAmount.ToString("N0"),
                     TotalAmount = ticket.TotalAmount.ToString("N0"),
                     TotalDiscount = ticket.Discount.ToString("N0")
                 }, widthPixels);
-                // Print the receipt 
-                // PrintHelper.Print(receiptContent);
 
                 DirectPrint(receiptContent);
             }
             catch
             {
-
                 ShowMessage("خطا در پرینت", "خطا");
-                return;
             }
         }
 
         private void DirectPrint(UIElement contentToPrint)
         {
-            // تنظیمات پرینتر
             PrintQueue printQueue = LocalPrintServer.GetDefaultPrintQueue();
             PrintTicket printTicket = printQueue.DefaultPrintTicket;
-
 
             double dpi = Settings.Default.Application_Print_dpi;
             double widthMm = Settings.Default.Application_Print_widthMm;
             double widthInches = widthMm / 25.4;
             double widthPixels = dpi * widthInches;
 
-
             contentToPrint.Measure(new Size(widthPixels, double.PositiveInfinity));
             contentToPrint.Arrange(new Rect(new System.Windows.Point(0, 0), contentToPrint.DesiredSize));
             double contentHeight = contentToPrint.DesiredSize.Height;
 
-            // تنظیم اندازه صفحه بر اساس محتوای واقعی
             Size pageSize = new Size(widthPixels, contentHeight);
 
             FixedDocument fixedDoc = new FixedDocument();
@@ -890,22 +873,21 @@ namespace Parking.App.Views.Windows
             ((IAddChild)pageContent).AddChild(fixedPage);
             fixedDoc.Pages.Add(pageContent);
 
-            // ارسال به پرینتر
             XpsDocumentWriter writer = PrintQueue.CreateXpsDocumentWriter(printQueue);
             writer.Write(fixedDoc, printTicket);
         }
 
         [RequiresPermission("ForceExitRequest", "درخواست خروج اجباری")]
-
         private async void CloseAfterSuccessPayment()
         {
             bool active = Settings.Default.Application_CloseTicketAfterSuccessPayment;
             if (active)
             {
                 await Task.Delay(2000);
-                this.Close();
+                Close();
             }
         }
+
         private void ShowPaymentLoader()
         {
             Dispatcher.Invoke(() =>
@@ -925,6 +907,5 @@ namespace Parking.App.Views.Windows
                 PaymentBtnLoader.Visibility = Visibility.Collapsed;
             });
         }
-
     }
 }
