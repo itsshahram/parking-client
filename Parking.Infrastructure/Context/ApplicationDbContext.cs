@@ -10,12 +10,8 @@ using Parking.Domain.Entities.Vehicles;
 
 namespace Parking.Infrastructure.Context;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-
-    }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
     }
