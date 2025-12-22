@@ -21,4 +21,18 @@ public class VehicleSegmentsService(
 
         return vehicleSegments;
     }
+
+    public async Task<VehicleSegmentResponse?> GetTariffByIdAsync(int id)
+    {
+        var tariff = await context.VehicleSegments
+            .Where(v => v.Id == id)
+            .Select(v => new VehicleSegmentResponse
+            {
+                Id = v.Id,
+                NameFa = v.NameFa
+            })
+            .FirstOrDefaultAsync();
+
+        return tariff;
+    }
 }
