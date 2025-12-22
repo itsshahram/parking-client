@@ -7,17 +7,14 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddApplicationServices();
+builder.Services.AddToDi();
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
