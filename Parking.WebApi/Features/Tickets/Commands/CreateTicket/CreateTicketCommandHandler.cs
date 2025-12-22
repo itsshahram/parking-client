@@ -10,51 +10,29 @@ using Parking.WebApi.Services.Contracts;
 
 namespace Parking.WebApi.Features.Tickets.Commands.CreateTicket;
 
-public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, Result<CreateTicketResponse>>
+public class CreateTicketCommandHandler(
+    IParkingTicketRepository parkingTicketRepository,
+    ICardRepository cardRepository,
+    IVehicleSegmentRepository vehicleSegmentRepository,
+    IParkingLotRepository parkingLotRepository,
+    ILicensePlateRepository licensePlateRepository,
+    ILicensePlateGroupRepository licensePlateGroupRepository,
+    ITicketExtraImageRepository ticketExtraImageRepository,
+    ICurrentUserService currentUserService,
+    IUnitOfWork unitOfWork)
+    : IRequestHandler<CreateTicketCommand, Result<CreateTicketResponse>>
 {
-    private readonly IParkingTicketRepository _parkingTicketRepository;
-    private readonly ICardRepository _cardRepository;
-    private readonly IVehicleSegmentRepository _vehicleSegmentRepository;
-    private readonly IParkingLotRepository _parkingLotRepository;
-    private readonly ILicensePlateRepository _licensePlateRepository;
-    private readonly ILicensePlateGroupRepository _licensePlateGroupRepository;
-    private readonly ITicketExtraImageRepository _ticketExtraImageRepository;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CreateTicketCommandHandler(
-        IParkingTicketRepository parkingTicketRepository,
-        ICardRepository cardRepository,
-        IVehicleSegmentRepository vehicleSegmentRepository,
-        IParkingLotRepository parkingLotRepository,
-        ILicensePlateRepository licensePlateRepository,
-        ILicensePlateGroupRepository licensePlateGroupRepository,
-        ITicketExtraImageRepository ticketExtraImageRepository,
-        ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork)
-    {
-        _parkingTicketRepository = parkingTicketRepository;
-        _cardRepository = cardRepository;
-        _vehicleSegmentRepository = vehicleSegmentRepository;
-        _parkingLotRepository = parkingLotRepository;
-        _licensePlateRepository = licensePlateRepository;
-        _licensePlateGroupRepository = licensePlateGroupRepository;
-        _ticketExtraImageRepository = ticketExtraImageRepository;
-        _currentUserService = currentUserService;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<CreateTicketResponse>> Handle(CreateTicketCommand request, CancellationToken cancellationToken)
     {
-        var card = await _cardRepository.GetByCardSerialNoAsync(request.CardUid);
+        var card = await cardRepository.GetByCardSerialNoAsync(request.CardUid);
         if (card is { IsInUse: true })
             return Result<CreateTicketResponse>.Failure("کارت در حال استفاده است", "صدور بلیط با خطا مواجه شد");
 
-        var parkingLot = await _parkingLotRepository.GetFirstAsync();
+        var parkingLot = await parkingLotRepository.GetFirstAsync();
         if (parkingLot == null)
             return Result<CreateTicketResponse>.Failure("پارکینگی یافت نشد");
 
-        var vehicleSegment = await _vehicleSegmentRepository.GetByIdAsync(request.VehicleSegmentId);
+        var vehicleSegment = await vehicleSegmentRepository.GetByIdAsync(request.VehicleSegmentId);
         if (vehicleSegment == null)
             return Result<CreateTicketResponse>.Failure("تعرفه یافت نشد");
 
@@ -75,17 +53,17 @@ public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, R
             VehicleSegmentId = request.VehicleSegmentId,
             ParkingSpaceID = Guid.Empty,
             ParkingSectionId = Guid.Empty,
-            UserId = _currentUserService.UserId,
+            UserId = currentUserService.UserId,
             IsExited = false,
             IsPaid = false,
             StartTime = DateTime.Now,
             EntranceGate = request.DeviceName
         };
 
-        var licensePlate = await _licensePlateRepository.GetByEnLicensePlateAsync(request.EnLicensePlate);
+        var licensePlate = await licensePlateRepository.GetByEnLicensePlateAsync(request.EnLicensePlate);
         if (licensePlate != null)
         {
-            var licensePlateGroup = await _licensePlateGroupRepository.GetActiveByIdAsync(licensePlate.GroupId);
+            var licensePlateGroup = await licensePlateGroupRepository.GetActiveByIdAsync(licensePlate.GroupId);
             ticket.LicensePlateGroupId = licensePlateGroup?.Id ?? Guid.Empty;
         }
 
@@ -112,14 +90,14 @@ public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, R
                     })
                     .ToList();
 
-                await _ticketExtraImageRepository.AddRangeImagesAsync(extraImages);
+                await ticketExtraImageRepository.AddRangeImagesAsync(extraImages);
             }
         }
 
-        await _parkingTicketRepository.AddAsync(ticket);
-        await _cardRepository.UpdateCardUsageStatusAsync(request.CardUid, true);
+        await parkingTicketRepository.AddAsync(ticket);
+        await cardRepository.UpdateCardUsageStatusAsync(request.CardUid, true);
 
-        await _unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new CreateTicketResponse
         {

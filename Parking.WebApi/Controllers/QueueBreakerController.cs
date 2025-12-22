@@ -12,7 +12,8 @@ namespace Parking.WebApi.Controllers;
 
 [ApiController]
 [Route("api/queue-breaker")]
-public class QueueBreakerController(IMediator mediator) : ControllerBase
+public class QueueBreakerController(
+    IMediator mediator) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
@@ -88,13 +89,11 @@ public class QueueBreakerController(IMediator mediator) : ControllerBase
         var query = new GetCardDetailsQuery(cardUid);
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            // Determine status code based on the message
-            var statusCode = result.Message?.Contains("یافت نشد") == true ? 404 : 400;
-            return StatusCode(statusCode, ApiResponse<object>.Fail(result.Errors, result.Message, statusCode));
-        }
-
-        return Ok(ApiResponse<PlateAndTariffResponse>.Success(result.Data!, result.Message));
+        if (result.IsSuccess) 
+            return Ok(ApiResponse<PlateAndTariffResponse>.Success(result.Data!, result.Message));
+        
+        var statusCode = result.Message?.Contains("یافت نشد") == true ? 404 : 400;
+        
+        return StatusCode(statusCode, ApiResponse<object>.Fail(result.Errors, result.Message, statusCode));
     }
 }

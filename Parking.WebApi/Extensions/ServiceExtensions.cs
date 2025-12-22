@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Parking.Domain.Entities.User;
 using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Application.Abstractions.UnitOfWork;
+using Parking.WebApi.Application.Common.Behaviors;
 using Parking.WebApi.Infrastructure.Implementation;
 using Parking.WebApi.Services.Contracts;
 using Parking.WebApi.Services.Implementations;
@@ -32,5 +34,13 @@ public static class ServiceExtensions
         
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
+        
+        services.AddValidatorsFromAssembly(typeof(Program).Assembly);
     }
 }
