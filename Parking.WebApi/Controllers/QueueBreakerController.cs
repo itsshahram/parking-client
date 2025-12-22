@@ -1,59 +1,49 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Parking.Domain.Entities.User;
+using Parking.WebApi.Features.Auth.Commands.Login;
+using Parking.WebApi.Features.Cards.Queries.GetCardDetails;
+using Parking.WebApi.Features.Tariffs.Queries.GetTariffs;
+using Parking.WebApi.Features.Tickets.Commands.CreateTicket;
 using Parking.WebApi.Requests;
 using Parking.WebApi.Responses;
-using Parking.WebApi.Services.Contracts;
 
 namespace Parking.WebApi.Controllers;
 
 [ApiController]
 [Route("api/queue-breaker")]
-public class QueueBreakerController(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
-    IJwtService jwtService,
-    IVehicleSegmentsService vehicleSegmentsService,
-    ICardService cardService,
-    IParkingService parkingService,
-    ITicketsService ticketsService)
-    : ControllerBase
+public class QueueBreakerController(IMediator mediator) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {
-        var user = await userManager.FindByNameAsync(loginRequest.Username);
+        var command = new LoginCommand(loginRequest.Username, loginRequest.Password);
+        var result = await mediator.Send(command);
 
-        if (user == null)
-            return Unauthorized(ApiResponse<object>.Fail("نام کاربری یا رمز عبور اشتباه است", statusCode: 401));
+        if (!result.IsSuccess)
+            return Unauthorized(ApiResponse<object>.Fail(result.Errors, result.Message, 401));
 
-        var signInResult = await signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, lockoutOnFailure: false);
-
-        if (!signInResult.Succeeded)
-            return Unauthorized(ApiResponse<object>.Fail("نام کاربری یا رمز عبور اشتباه است", statusCode: 401));
-
-        var token = await jwtService.GenerateTokenAsync(user);
-        var response = new LoginResponse
-        {
-            Token = token,
-            FirstName = user.Firstname,
-            LastName = user.Lastname
-        };
-
-        return Ok(ApiResponse<LoginResponse>.Success(response, "ورود موفق"));
+        return Ok(ApiResponse<LoginResponse>.Success(result.Data!, result.Message));
     }
     
     [Authorize]
     [HttpPost("create-ticket")]
     public async Task<IActionResult> CreateTicket([FromBody] CreateEntryTicketRequest createEntryTicketRequest)
     {
-        var ticketResponse = await ticketsService.CreateEntryTicketAsync(createEntryTicketRequest);
-        
-        if (ticketResponse.TicketId == Guid.Empty && string.IsNullOrEmpty(ticketResponse.BarcodeId))
-            return BadRequest(ApiResponse<object>.Fail("صدور بلیط با خطا مواجه شد", "کارت در حال استفاده است", 400));
-        
-        return Ok(ApiResponse<CreateTicketResponse>.Success(ticketResponse, "بلیط پارکینگ با موفقیت ثبت شد"));
+        var command = new CreateTicketCommand(
+            createEntryTicketRequest.EnLicensePlate,
+            createEntryTicketRequest.PlateType,
+            createEntryTicketRequest.VehicleSegmentId,
+            createEntryTicketRequest.DeviceName,
+            createEntryTicketRequest.Base64Images,
+            createEntryTicketRequest.CardUid);
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+            return BadRequest(ApiResponse<object>.Fail(result.Errors, result.Message, 400));
+
+        return Ok(ApiResponse<CreateTicketResponse>.Success(result.Data!, result.Message));
     }
 
     [HttpGet("get-plate-types")]
@@ -82,33 +72,29 @@ public class QueueBreakerController(
     [HttpGet("get-tariffs")]
     public async Task<IActionResult> GetTariffs()
     {
-        var tariffs = await vehicleSegmentsService.GetAllTariffsAsync();
-        return Ok(ApiResponse<List<VehicleSegmentResponse>>.Success(tariffs, "تعرفه ها با موفقیت دریافت شد"));
+        var query = new GetTariffsQuery();
+        var result = await mediator.Send(query);
+
+        if (!result.IsSuccess)
+            return BadRequest(ApiResponse<object>.Fail(result.Errors, result.Message, 400));
+
+        return Ok(ApiResponse<List<VehicleSegmentResponse>>.Success(result.Data!, result.Message));
     }
 
     [Authorize]
     [HttpGet("card-details/{cardUid:long}")]
     public async Task<IActionResult> GetCardDetails([FromRoute] long cardUid)
     {
-        var card = await cardService.GetCardByUidAsync(cardUid);
+        var query = new GetCardDetailsQuery(cardUid);
+        var result = await mediator.Send(query);
 
-        if (card is null)
-            return NotFound(ApiResponse<object>.Fail("کارت یافت نشد", "کارت با این شناسه وجود ندارد", 404));
-
-        if (!card.IsActive)
-            return BadRequest(ApiResponse<object>.Fail("کارت غیرفعال است", "این کارت فعال نشده است و نمی‌توان از آن استفاده کرد", 400));
-
-        var ticket = await parkingService.GetTicketByCardUidAsync(card.CardSerialNo);
-        if (ticket is null)
-            return NotFound(ApiResponse<object>.Fail("بلیط یافت نشد", "برای این کارت بلیطی صادر نشده است", 404));
-
-        var response = new PlateAndTariffResponse
+        if (!result.IsSuccess)
         {
-            FaLicensePlate = ticket.LicensePlate,
-            EnLicencePlate = ticket.EnLicensePlate,
-            Tariff = ticket.VehicleManufacturerName
-        };
+            // Determine status code based on the message
+            var statusCode = result.Message?.Contains("یافت نشد") == true ? 404 : 400;
+            return StatusCode(statusCode, ApiResponse<object>.Fail(result.Errors, result.Message, statusCode));
+        }
 
-        return Ok(ApiResponse<PlateAndTariffResponse>.Success(response, "جزئیات کارت با موفقیت دریافت شد"));
+        return Ok(ApiResponse<PlateAndTariffResponse>.Success(result.Data!, result.Message));
     }
 }

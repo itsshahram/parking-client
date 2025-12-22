@@ -26,7 +26,7 @@ public class ApiResponse<T>
             StatusCode = statusCode
         };
 
-    private static ApiResponse<T> Fail(List<string> errors, string? message = null, int statusCode = 400)
+    public static ApiResponse<T> Fail(List<string> errors, string? message = null, int statusCode = 400)
         => new()
         {
             IsSuccess = false,
