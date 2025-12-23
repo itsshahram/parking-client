@@ -2,6 +2,7 @@
 using Parking.Domain.General;
 using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Application.Abstractions.UnitOfWork;
+using Parking.WebApi.Application.Common.Exceptions;
 using Parking.WebApi.Helpers;
 using Parking.WebApi.Helpers.PriceCalculation;
 using Parking.WebApi.Requests;
@@ -28,19 +29,19 @@ public class TicketsService(
         return await parkingTicketRepository.GetByCardUidAsync(cardUid);
     }
 
-    public async Task<CreateTicketResponse> CreateEntryTicketAsync(CreateEntryTicketRequest request)
+    public async Task<CreateTicketResponse?> CreateEntryTicketAsync(CreateEntryTicketRequest request)
     {
         var card = await cardRepository.GetByCardSerialNoAsync(request.CardUid);
         if (card is { IsInUse: true })
-            return new CreateTicketResponse { TicketId = Guid.Empty, BarcodeId = string.Empty };
+            return null;
         
         var parkingLot = await parkingLotRepository.GetFirstAsync();
         if (parkingLot == null)
-            throw new InvalidOperationException("No parking lot found");
+            throw new CustomNotFoundException("پارکینگی یافت نشد");
 
         var vehicleSegment = await vehicleSegmentRepository.GetByIdAsync(request.VehicleSegmentId);
         if (vehicleSegment == null)
-            throw new InvalidOperationException("Vehicle segment not found");
+            throw new CustomNotFoundException("تعرفه برای این کارت یافت نشد");
         
         var refinedLicensePlate = ServicesHelpers.RefineLicensePlate(request.EnLicensePlate);
         
@@ -117,11 +118,13 @@ public class TicketsService(
         var segment = await vehicleSegmentRepository.GetByIdAsync((int)ticket.VehicleSegmentId!);
         var segmentPrices = await parkingVehicleSegmentPriceRepository.GetSegmentPricesByParkingSegmentIdAsync(segment.Id);
         var variableSegmentPrices = await parkingVehicleSegmentVariablePriceRepository.GetVariablePricesByParkingSegmentIdAsync(segment.Id);
+        var card = await cardRepository.GetByCardSerialNoAsync(cardUid);
         
         var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate);
-        var card = await cardRepository.GetByCardSerialNoAsync(cardUid);
+        
         var varTime = DateTime.Now - ticket.StartTime;
         var description = $"{varTime.Days} روز و {varTime.Hours} ساعت و {varTime.Minutes} دقیقه در {segment.NameFa}";
+        
         if (card?.PercentDiscount > 0)
         {
             description += $" | کارت دارای تخفیف {card.PercentDiscount}% است";

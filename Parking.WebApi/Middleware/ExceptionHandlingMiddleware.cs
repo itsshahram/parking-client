@@ -36,16 +36,10 @@ public class ExceptionHandlingMiddleware(
                 errors = validationException.Errors;
                 break;
             
-            case ArgumentException argumentException:  // <-- این رو اضافه کردم
+            case ArgumentException argumentException:
                 statusCode = HttpStatusCode.BadRequest;
                 message = argumentException.Message;
                 errors = new List<string> { argumentException.Message };
-                break;
-
-            case NotFoundException notFoundException:
-                statusCode = HttpStatusCode.NotFound;
-                message = notFoundException.Message;
-                errors = new List<string> { notFoundException.Message };
                 break;
 
             case UnauthorizedAccessException:
