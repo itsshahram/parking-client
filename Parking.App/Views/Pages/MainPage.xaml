@@ -147,32 +147,147 @@
                     </StackPanel>
 
 
-                    <StackPanel>
+
+                    <StackPanel FlowDirection="RightToLeft">
+
                         <Border Background="#33828FA8" CornerRadius="7" Margin="0 5">
                             <StackPanel>
-                                <DockPanel  Margin="10">
-                                    <ui:ToggleSwitch x:Name="customDateToggle"  FlowDirection="LeftToRight" DockPanel.Dock="Right" Checked="CustomDateToggle_Checked" Unchecked="CustomDateToggle_Unchecked" OffContent="غیر فعال" OnContent="فعال"/>
-                                    <Label DockPanel.Dock="Left" Content="ورود زمان بصورت دستی" Margin="0 0 20 0"/>
+
+                                <DockPanel Margin="10">
+                                    <ui:ToggleSwitch x:Name="customDateToggle"
+                                 DockPanel.Dock="Right"
+                                 FlowDirection="LeftToRight"
+                                 Checked="CustomDateToggle_Checked"
+                                 Unchecked="CustomDateToggle_Unchecked"
+                                 OffContent="غیر فعال"
+                                 OnContent="فعال"/>
+
+                                    <Label DockPanel.Dock="Left"
+                       Content="ورود زمان بصورت دستی"
+                       Margin="0 0 20 0"/>
                                 </DockPanel>
-                                <Border Background="#33828FA8" FlowDirection="LeftToRight" x:Name="timeBox" Visibility="Collapsed" CornerRadius="5" Padding="10" Margin="5">
-                                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0 5 0 0">
-                                        <ui:TextBox x:Name="minutesTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="_ _" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
-                                        <TextBlock Text=":" HorizontalAlignment="Center" FontSize="25"/>
-                                        <ui:TextBox Name="hourTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="_ _" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
-                                        <Separator Margin="5 0 5 0"/>
-                                        <ui:TextBox x:Name="dayTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="روز" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
-                                        <TextBlock Text="/" VerticalAlignment="Center"/>
-                                        <ui:TextBox x:Name="monthTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="2" PlaceholderText="ماه" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
-                                        <TextBlock Text="/" VerticalAlignment="Center"/>
-                                        <ui:TextBox x:Name="yearTextbox" TextChanged="TimeTextbox_TextChanged" HorizontalContentAlignment="Center" MaxLength="4" PlaceholderText="14xx" Icon="NetworkAdapter16" FlowDirection="LeftToRight"/>
-                                    </StackPanel>
+
+                                <Border x:Name="timeBox"
+                    Background="#33828FA8"
+                    Visibility="Collapsed"
+                    CornerRadius="5"
+                    Padding="10"
+                    Margin="5">
+
+                                    <!-- RTL SAFE ROW -->
+                                    <DockPanel Margin="0 5"
+                           LastChildFill="False">
+
+                                        <!-- YEAR -->
+                                        <ui:TextBox x:Name="yearTextbox"
+                                DockPanel.Dock="Right"
+                                Width="55"
+                                FlowDirection="LeftToRight"
+                                MaxLength="4"
+                                TextAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                PlaceholderText="14xx"
+                                ClearButtonEnabled="False"
+                                Foreground="Black"
+                                CaretBrush="Black"
+                                SelectionBrush="#55828FA8"
+                                Background="White"
+
+                                PreviewTextInput="NumericOnly_PreviewTextInput"
+                                DataObject.Pasting="NumericOnly_Pasting"
+                                TextChanged="TimeTextbox_TextChanged"/>
+
+                                        <TextBlock DockPanel.Dock="Right" Text="/" Margin="3"/>
+
+                                        <!-- MONTH -->
+                                        <ui:TextBox x:Name="monthTextbox"
+                                DockPanel.Dock="Right"
+                                Width="40"
+                                FlowDirection="LeftToRight"
+                                MaxLength="2"
+                                TextAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                PlaceholderText="ماه"
+                                ClearButtonEnabled="False"
+                                Foreground="Black"
+                                CaretBrush="Black"
+                                SelectionBrush="#55828FA8"
+                                Background="White"
+
+                                PreviewTextInput="NumericOnly_PreviewTextInput"
+                                DataObject.Pasting="NumericOnly_Pasting"
+                                TextChanged="TimeTextbox_TextChanged"/>
+
+                                        <TextBlock DockPanel.Dock="Right" Text="/" Margin="3"/>
+
+                                        <!-- DAY -->
+                                        <ui:TextBox x:Name="dayTextbox"
+                                DockPanel.Dock="Right"
+                                Width="40"
+                                FlowDirection="LeftToRight"
+                                MaxLength="2"
+                                TextAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                PlaceholderText="روز"
+                                ClearButtonEnabled="False"
+                                Foreground="Black"
+                                CaretBrush="Black"
+                                SelectionBrush="#55828FA8"
+                                Background="White"
+
+                                PreviewTextInput="NumericOnly_PreviewTextInput"
+                                DataObject.Pasting="NumericOnly_Pasting"
+                                TextChanged="TimeTextbox_TextChanged"/>
+
+                                        <Separator DockPanel.Dock="Right" Margin="5 0"/>
+
+                                        <!-- HOUR -->
+                                        <ui:TextBox x:Name="hourTextbox"
+                                DockPanel.Dock="Right"
+                                Width="40"
+                                FlowDirection="LeftToRight"
+                                MaxLength="2"
+                                TextAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                PlaceholderText="__"
+                                ClearButtonEnabled="False"
+                                Foreground="Black"
+                                CaretBrush="Black"
+                                SelectionBrush="#55828FA8"
+                                Background="White"
+                                PreviewTextInput="NumericOnly_PreviewTextInput"
+                                DataObject.Pasting="NumericOnly_Pasting"
+                                TextChanged="TimeTextbox_TextChanged"/>
+
+                                        <TextBlock DockPanel.Dock="Right" Text=":" Margin="3"/>
+
+                                        <!-- MINUTE -->
+                                        <ui:TextBox x:Name="minutesTextbox"
+                                DockPanel.Dock="Right"
+                                Width="40"
+                                FlowDirection="LeftToRight"
+                                MaxLength="2"
+                                TextAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                PlaceholderText="__"
+                                ClearButtonEnabled="False"
+                                Foreground="Black"
+                                CaretBrush="Black"
+                                SelectionBrush="#55828FA8"
+                                Background="White"
+
+                                PreviewTextInput="NumericOnly_PreviewTextInput"
+                                DataObject.Pasting="NumericOnly_Pasting"
+                                TextChanged="TimeTextbox_TextChanged"/>
+
+                                    </DockPanel>
                                 </Border>
 
                             </StackPanel>
-
                         </Border>
 
                     </StackPanel>
+
                     <Border Background="#33828FA8" CornerRadius="5" Margin="0 5">
 
                         <StackPanel>
@@ -196,7 +311,7 @@
                                     </StackPanel>-->
                                     <StackPanel Margin="0 5">
                                         <TextBlock Text="توضیحات پیش فرض" />
-                                                    <ComboBox x:Name="DescriptionComboBox" 
+                                        <ComboBox x:Name="DescriptionComboBox" 
                                                 SelectedIndex="0"
                                                               DisplayMemberPath="Text"
                                                 SelectedItem="{Binding SelectedDescription, Mode=TwoWay}"

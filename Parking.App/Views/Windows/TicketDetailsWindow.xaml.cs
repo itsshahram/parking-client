@@ -151,14 +151,14 @@ namespace Parking.App.Views.Windows
                     .Replace("naghdi", "نقدی")
                     .Replace("POS", "دستگاه کارتخوان");
 
+                if (ticket.StartTime.Date == DateTime.Now.Date)
+                    ticket.StartTimeString = "امروز";
+
+                if (ticket.EndTime?.Date == DateTime.Now.Date)
+                    ticket.EndTimeString = "امروز";
+
                 if (ticket.IsExited != true)
                 {
-                    if (ticket.StartTime.Date == DateTime.Now.Date)
-                        ticket.StartTimeString = "امروز";
-
-                    if (ticket.EndTime?.Date == DateTime.Now.Date)
-                        ticket.EndTimeString = "امروز";
-
                     ticket.EndTimeString = string.Empty;
                     ticket.EndTimeOnlyString = string.Empty;
                 }

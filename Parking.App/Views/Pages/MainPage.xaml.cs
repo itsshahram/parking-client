@@ -23,6 +23,9 @@ namespace Parking.App.Views.Pages
         public MainPageViewModel ViewModel { get; private set; } = new MainPageViewModel();
         public HotKeyManagementViewModel _hotKeyVm { get; private set; } = new HotKeyManagementViewModel();
 
+        private static readonly Regex _numericRegex = new(@"^[0-9]+$");
+
+
 
         public MainPage()
         {
@@ -42,6 +45,26 @@ namespace Parking.App.Views.Pages
             DescriptionComboBox.ItemsSource = ViewModel.Descriptions;
             DescriptionComboBox.SelectedIndex = 0;
         }
+
+        private void NumericOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !_numericRegex.IsMatch(e.Text);
+        }
+
+        private void NumericOnly_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                var text = (string)e.DataObject.GetData(typeof(string));
+                if (!_numericRegex.IsMatch(text))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Console.WriteLine("پنجره در حال بسته شدن است.");
@@ -1354,7 +1377,6 @@ namespace Parking.App.Views.Pages
 
         }
 
-        private static readonly Regex _numericRegex = new Regex("[^0-9]+");
 
         private void BarcodeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
