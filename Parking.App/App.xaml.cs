@@ -164,10 +164,11 @@ namespace Parking.App
 
             if (!SingleInstanceApp.IsFirstInstance())
             {
-                SingleInstanceApp.ActivatePreviousInstance();
-                Shutdown();
+                SingleInstanceApp.ActivatePreviousInstance(); // Restore hidden window
+                Shutdown(); // Close the new instance
                 return;
             }
+
 
             LoadDatabaseCredentials();
 
@@ -261,19 +262,39 @@ namespace Parking.App
             {
                 mainWindow = _host.Services.GetRequiredService<MainWindow>();
                 Application.Current.MainWindow = mainWindow;
+
+                mainWindow.Closing += (s, e) =>
+                {
+                    e.Cancel = true;
+                    mainWindow.Hide();
+                };
             }
+
+            if (mainWindow.WindowState == WindowState.Minimized)
+                mainWindow.WindowState = WindowState.Normal;
 
             if (!mainWindow.IsVisible)
                 mainWindow.Show();
 
+
             mainWindow.Activate();
+            mainWindow.Topmost = true;  
+            mainWindow.Topmost = false;
         }
+
 
         public void CloseMainWindow()
         {
-            mainWindow?.Close();
-            mainWindow = null;
+            if (mainWindow != null)
+            {
+                mainWindow.Closing -= null;
+
+                mainWindow.Close();
+                mainWindow = null;
+                Application.Current.MainWindow = null;
+            }
         }
+
 
         private static bool _dbErrorWindowOpen = false;
 

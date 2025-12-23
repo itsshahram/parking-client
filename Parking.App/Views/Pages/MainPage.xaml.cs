@@ -25,8 +25,6 @@ namespace Parking.App.Views.Pages
 
         private static readonly Regex _numericRegex = new(@"^[0-9]+$");
 
-
-
         public MainPage()
         {
             _parkingService = App.GetService<IParkingService>();

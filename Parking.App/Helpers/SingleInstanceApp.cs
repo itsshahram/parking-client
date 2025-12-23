@@ -1,80 +1,106 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
+using System.Runtime.InteropServices;
 
-namespace Parking.App.Helpers;
-
-public class SingleInstanceApp
+namespace Parking.App.Helpers
 {
-    private static Mutex? _mutex;
-    private const string MutexName = "Global\\Parking.App";
-
-    [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    private static MainWindow? _mainWindow;
-
-    private const int SW_RESTORE = 9;
-    private const int SW_SHOW = 5;
-
-    public static bool IsFirstInstance()
+    public static class SingleInstanceApp
     {
-        _mutex = new Mutex(true, MutexName, out bool isNewInstance);
-        return isNewInstance;
-    }
+        private static Mutex? _mutex;
+        private const string MutexName = "Global\\Parking.App";
 
-    public static void SetMainWindow(MainWindow window)
-    {
-        _mainWindow = window;
-    }
-    public static void ActivatePreviousInstance()
-    {
-        try
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        private static MainWindow? _mainWindow;
+
+        private const int SW_RESTORE = 9;
+        private const int SW_SHOW = 5;
+
+        /// <summary>
+        /// Checks if this is the first instance of the app.
+        /// </summary>
+        public static bool IsFirstInstance()
         {
+            _mutex = new Mutex(true, MutexName, out bool isNewInstance);
+            return isNewInstance;
+        }
 
-            if (_mainWindow != null)
+        /// <summary>
+        /// Sets the reference to the main window for single-instance restore.
+        /// </summary>
+        public static void SetMainWindow(MainWindow window)
+        {
+            _mainWindow = window;
+        }
+
+        /// <summary>
+        /// Activates the previous instance if another is running.
+        /// Restores the hidden main window if available.
+        /// </summary>
+        public static void ActivatePreviousInstance()
+        {
+            try
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (_mainWindow != null)
                 {
-                    _mainWindow.Show();
-                    _mainWindow.WindowState = WindowState.Normal;
-                    _mainWindow.Activate();
-                });
-            }
-            else
-            {
-                // Fallback to process-based activation if window reference is not available
-                Process current = Process.GetCurrentProcess();
-                foreach (Process process in Process.GetProcessesByName(current.ProcessName))
-                {
-                    if (process.Id != current.Id)
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ShowWindow(process.MainWindowHandle, SW_SHOW);
-                        ShowWindow(process.MainWindowHandle, SW_RESTORE);
-                        SetForegroundWindow(process.MainWindowHandle);
-                        break;
+                        // Restore if minimized
+                        if (_mainWindow.WindowState == WindowState.Minimized)
+                            _mainWindow.WindowState = WindowState.Normal;
+
+                        // Show if hidden
+                        if (_mainWindow.Visibility != Visibility.Visible)
+                            _mainWindow.Show();
+
+                        // Bring to front
+                        _mainWindow.Activate();
+                        _mainWindow.Topmost = true;  // optional to force focus
+                        _mainWindow.Topmost = false;
+                    });
+                }
+                else
+                {
+                    // Fallback to process-based activation
+                    var current = Process.GetCurrentProcess();
+                    foreach (var process in Process.GetProcessesByName(current.ProcessName))
+                    {
+                        if (process.Id != current.Id && process.MainWindowHandle != IntPtr.Zero)
+                        {
+                            ShowWindow(process.MainWindowHandle, SW_SHOW);
+                            ShowWindow(process.MainWindowHandle, SW_RESTORE);
+                            SetForegroundWindow(process.MainWindowHandle);
+                            break;
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error activating previous instance: {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            //MessageBox.Show($"Error activating previous instance: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
 
-    public static void Cleanup()
-    {
-        _mutex?.ReleaseMutex();
-        _mutex?.Dispose();
-        _mainWindow = null;
+
+        /// <summary>
+        /// Releases the mutex and clears references.
+        /// </summary>
+        public static void Cleanup()
+        {
+            try
+            {
+                _mutex?.ReleaseMutex();
+                _mutex?.Dispose();
+            }
+            catch { /* ignore */ }
+
+            _mainWindow = null;
+        }
     }
 }
