@@ -5,4 +5,6 @@ namespace Parking.WebApi.Application.Abstractions.EntityRepositories;
 public interface IParkingTicketRepository : IGenericRepository<ParkingTicket>
 {
     Task<ParkingTicket?> GetByCardUidAsync(decimal? cardUid);
+    Task<ParkingTicket?> GetNotExitedTicketsWithCardUidAsync(decimal? cardUid);
+    void UpdateTicket(ParkingTicket ticket);
 }

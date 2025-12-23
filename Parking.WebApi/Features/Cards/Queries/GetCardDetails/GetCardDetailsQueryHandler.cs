@@ -7,7 +7,7 @@ namespace Parking.WebApi.Features.Cards.Queries.GetCardDetails;
 
 public class GetCardDetailsQueryHandler(
     ICardService cardService, 
-    IParkingService parkingService) : IRequestHandler<GetCardDetailsQuery, Result<PlateAndTariffResponse>>
+    ITicketsService ticketsService) : IRequestHandler<GetCardDetailsQuery, Result<PlateAndTariffResponse>>
 {
     public async Task<Result<PlateAndTariffResponse>> Handle(GetCardDetailsQuery request, CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public class GetCardDetailsQueryHandler(
         if (!card.IsActive)
             return Result<PlateAndTariffResponse>.Failure("این کارت فعال نشده است و نمی‌توان از آن استفاده کرد", "کارت غیرفعال است");
 
-        var ticket = await parkingService.GetTicketByCardUidAsync(card.CardSerialNo);
+        var ticket = await ticketsService.GetTicketByCardUidAsync((long)card.CardSerialNo!);
         if (ticket is null)
             return Result<PlateAndTariffResponse>.Failure("برای این کارت بلیطی صادر نشده است", "بلیط یافت نشد");
 

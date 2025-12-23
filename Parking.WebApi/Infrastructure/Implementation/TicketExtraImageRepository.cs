@@ -1,4 +1,5 @@
-﻿using Parking.Domain.Entities.ParkingTicket;
+﻿using Microsoft.EntityFrameworkCore;
+using Parking.Domain.Entities.ParkingTicket;
 using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Infrastructure.Context;
 using Parking.WebApi.Infrastructure.Repository;
@@ -11,5 +12,13 @@ public class TicketExtraImageRepository(
     public async Task AddRangeImagesAsync(List<ParkingTicketExtraImage> ticketExtraImages)
     {
         await DbSet.AddRangeAsync(ticketExtraImages);
+    }
+
+    public async Task<List<string?>> GetExtraImagesStringAsync(Guid ticketId)
+    {
+        return await DbSet
+            .Where(i => i.TicketId == ticketId)
+            .Select(x => x.Image)
+            .ToListAsync();
     }
 }

@@ -13,4 +13,14 @@ public class ParkingTicketRepository(
     {
         return await DbSet.FirstOrDefaultAsync(t => t.CardUid == cardUid);
     }
+
+    public async Task<ParkingTicket?> GetNotExitedTicketsWithCardUidAsync(decimal? cardUid)
+    {
+        return await DbSet.FirstOrDefaultAsync(t => t.CardUid == cardUid && !t.IsExited);
+    }
+
+    public void UpdateTicket(ParkingTicket ticket)
+    {
+        DbSet.Update(ticket);
+    }
 }

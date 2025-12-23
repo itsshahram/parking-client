@@ -3,6 +3,7 @@ using Parking.Domain.General;
 using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Application.Abstractions.UnitOfWork;
 using Parking.WebApi.Helpers;
+using Parking.WebApi.Helpers.PriceCalculation;
 using Parking.WebApi.Requests;
 using Parking.WebApi.Services.Contracts;
 using Parking.WebApi.Responses;
@@ -10,6 +11,8 @@ using Parking.WebApi.Responses;
 namespace Parking.WebApi.Services.Implementations;
 
 public class TicketsService(
+    IParkingVehicleSegmentPriceRepository parkingVehicleSegmentPriceRepository,
+    IParkingVehicleSegmentVariablePriceRepository parkingVehicleSegmentVariablePriceRepository,
     IParkingTicketRepository parkingTicketRepository,
     ICardRepository cardRepository,
     IVehicleSegmentRepository vehicleSegmentRepository,
@@ -20,6 +23,11 @@ public class TicketsService(
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork) : ITicketsService
 {
+    public async Task<ParkingTicket?> GetTicketByCardUidAsync(long cardUid)
+    {
+        return await parkingTicketRepository.GetByCardUidAsync(cardUid);
+    }
+
     public async Task<CreateTicketResponse> CreateEntryTicketAsync(CreateEntryTicketRequest request)
     {
         var card = await cardRepository.GetByCardSerialNoAsync(request.CardUid);
@@ -98,5 +106,75 @@ public class TicketsService(
         await unitOfWork.SaveChangesAsync();
         
         return new CreateTicketResponse { TicketId =  ticket.Id, BarcodeId = ticket.BarcodeId.ToString() };
+    }
+    
+    public async Task<TicketDetailsResponse?> GetTicketDetailsByCardUidAsync(long cardUid)
+    {
+        var ticket = await parkingTicketRepository.GetNotExitedTicketsWithCardUidAsync(cardUid);
+        if (ticket is null)
+            return null;
+        
+        var segment = await vehicleSegmentRepository.GetByIdAsync((int)ticket.VehicleSegmentId!);
+        var segmentPrices = await parkingVehicleSegmentPriceRepository.GetSegmentPricesByParkingSegmentIdAsync(segment.Id);
+        var variableSegmentPrices = await parkingVehicleSegmentVariablePriceRepository.GetVariablePricesByParkingSegmentIdAsync(segment.Id);
+        
+        var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate);
+        var card = await cardRepository.GetByCardSerialNoAsync(cardUid);
+        var varTime = DateTime.Now - ticket.StartTime;
+        var description = $"{varTime.Days} روز و {varTime.Hours} ساعت و {varTime.Minutes} دقیقه در {segment.NameFa}";
+        if (card?.PercentDiscount > 0)
+        {
+            description += $" | کارت دارای تخفیف {card.PercentDiscount}% است";
+            discount = (short)card.PercentDiscount;
+        }
+
+        var parkingCostCalculator = new ParkingCostCalculator(
+            (int)segment.ParkingEntranceFixedFee, 
+            (int)segment.DailyRate,
+            segment.FreeEntranceMinutes, 
+            segment.ThresholdNumberOfDays, 
+            segment.DailyPriceAfterCrossingThreshold, 
+            segment.ThresholdHoursPerDay,
+            discount, 
+            segment.TaxPercentage, 
+            segmentPrices,
+            variableSegmentPrices);
+        
+        var calculationResult = parkingCostCalculator.CalculateCost(ticket.StartTime, DateTime.Now);
+        
+        if (card?.FixDiscount > 0)
+        {
+            calculationResult.PayableAmount = Math.Max(calculationResult.PayableAmount - card.FixDiscount, 0);
+            description += $" | کارت دارای تخفیف {card.FixDiscount} ریال است";
+        }
+
+        // update Ticket
+        ticket.DurationMinutes = (int)varTime.TotalMinutes;
+        ticket.DiscountPercent = (byte)discount;
+        ticket.TotalAmount = calculationResult.TotalWithoutDiscount;
+        ticket.Description = description;
+        ticket.TicketStatus = TicketStatus.Unsynced;
+        
+        parkingTicketRepository.UpdateTicket(ticket);
+
+        await unitOfWork.SaveChangesAsync();
+        
+        var images = new List<string>();
+        if (!string.IsNullOrEmpty(ticket.StartImage))
+            images.Add(ticket.StartImage);
+        
+        var extraImages = await ticketExtraImageRepository.GetExtraImagesStringAsync(ticket.Id);
+        if (extraImages.Count > 0)
+            images.AddRange(extraImages);
+
+        return new TicketDetailsResponse
+        {
+            BarcodeId = ticket.BarcodeId.ToString(),
+            EnLicensePlate = ticket.EnLicensePlate,
+            FaLicensePlate = ticket.LicensePlate,
+            TicketId = ticket.Id.ToString(),
+            TotalAmount = calculationResult.PayableAmount,
+            Images = images
+        };
     }
 }                            

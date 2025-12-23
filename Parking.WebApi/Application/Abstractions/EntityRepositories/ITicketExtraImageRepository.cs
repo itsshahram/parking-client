@@ -6,4 +6,5 @@ namespace Parking.WebApi.Application.Abstractions.EntityRepositories;
 public interface ITicketExtraImageRepository : IGenericRepository<ParkingTicketExtraImage>
 {
     Task AddRangeImagesAsync(List<ParkingTicketExtraImage> ticketExtraImages);
+    Task<List<string?>> GetExtraImagesStringAsync(Guid ticketId);
 }

@@ -6,7 +6,8 @@ using Parking.WebApi.Responses;
 namespace Parking.WebApi.Middleware;
 
 public class ExceptionHandlingMiddleware(
-    RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    RequestDelegate next, 
+    ILogger<ExceptionHandlingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -33,6 +34,12 @@ public class ExceptionHandlingMiddleware(
                 statusCode = HttpStatusCode.BadRequest;
                 message = "خطاهای اعتبارسنجی";
                 errors = validationException.Errors;
+                break;
+            
+            case ArgumentException argumentException:  // <-- این رو اضافه کردم
+                statusCode = HttpStatusCode.BadRequest;
+                message = argumentException.Message;
+                errors = new List<string> { argumentException.Message };
                 break;
 
             case NotFoundException notFoundException:

@@ -16,7 +16,7 @@ public class ApplicationDbContext(
     public DbSet<ParkingSection> ParkingSections { get; set; } = null!;
     public DbSet<ParkingTicket> ParkingTickets { get; set; } = null!;
     public DbSet<VehicleSegment> VehicleSegments { get; set; } = null!;
-    public DbSet<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrices { get; set; } = null!;
+    public DbSet<ParkingVehicleSegmentPrice> ParkingVehicleSegmentPrice { get; set; } = null!;
     public DbSet<ParkingVehicleSegmentVariablePrice> ParkingVehicleSegmentVariablePrices { get; set; } = null!;
     public DbSet<LicensePlateGroup> LicensePlateGroups { get; set; } = null!;
     public DbSet<LicensePlate> LicensePlates { get; set; } = null!;

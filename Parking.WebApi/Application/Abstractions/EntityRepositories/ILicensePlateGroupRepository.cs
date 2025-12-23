@@ -6,4 +6,5 @@ namespace Parking.WebApi.Application.Abstractions.EntityRepositories;
 public interface ILicensePlateGroupRepository : IGenericRepository<LicensePlateGroup>
 {
     Task<LicensePlateGroup?> GetActiveByIdAsync(Guid? groupId);
+    Task<short> GetLicensePlateGroupDiscountWithLicensePlateAsync(string licensePlate);
 }

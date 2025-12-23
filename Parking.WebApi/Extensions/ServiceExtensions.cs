@@ -15,20 +15,21 @@ public static class ServiceExtensions
     public static void AddToDi(this IServiceCollection services)
     {
         services.AddScoped<ICardRepository, CardRepository>();
-        services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
-        services.AddScoped<ILicensePlateGroupRepository, LicensePlateGroupRepository>();
         services.AddScoped<IParkingLotRepository, ParkingLotRepository>();
+        services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
         services.AddScoped<IParkingTicketRepository, ParkingTicketRepository>();
         services.AddScoped<IVehicleSegmentRepository, VehicleSegmentRepository>();
         services.AddScoped<ITicketExtraImageRepository, TicketExtraImageRepository>();
+        services.AddScoped<ILicensePlateGroupRepository, LicensePlateGroupRepository>();
+        services.AddScoped<IParkingVehicleSegmentPriceRepository, ParkingVehicleSegmentPriceRepository>();
+        services.AddScoped<IParkingVehicleSegmentVariablePriceRepository, ParkingVehicleSegmentVariablePriceRepository>();
         
         services.AddScoped<UserManager<ApplicationUser>>();
         
         services.AddScoped<IJwtService, JwtService>();
-        services.AddScoped<IVehicleSegmentsService, VehicleSegmentsService>();
         services.AddScoped<ICardService, CardService>();
-        services.AddScoped<IParkingService, ParkingService>();
         services.AddScoped<ITicketsService, TicketsService>();
+        services.AddScoped<IVehicleSegmentsService, VehicleSegmentsService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         

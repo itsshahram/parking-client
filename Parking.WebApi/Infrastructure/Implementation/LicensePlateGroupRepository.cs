@@ -15,4 +15,21 @@ public class LicensePlateGroupRepository(
             g.Id == groupId &&
             g.StartDate < DateTime.Now);
     }
+
+    public async Task<short> GetLicensePlateGroupDiscountWithLicensePlateAsync(string licensePlate)
+    {
+        var now = DateTime.Now;
+
+        var licensePlateGroup = await DbSet
+            .Where(g =>
+                g.LicensePlates.Any(x => x.EnLicensePlate == licensePlate) &&
+                g.StartDate <= now &&
+                g.EndDate >= now
+            )
+            .OrderByDescending(g => g.StartDate)
+            .ThenByDescending(g => g.EndDate)
+            .FirstOrDefaultAsync();
+
+        return licensePlateGroup?.DiscountPercent ?? 0;
+    }
 }
