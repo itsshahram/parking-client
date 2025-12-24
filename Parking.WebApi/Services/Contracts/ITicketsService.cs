@@ -10,4 +10,5 @@ public interface ITicketsService
     Task<CreateTicketResponse?> CreateEntryTicketAsync(CreateEntryTicketRequest request);
     Task<TicketDetailsResponse?> GetTicketDetailsByCardUidAsync(long cardUid);
     Task<TicketDetailsResponse?> GetTicketDetailsByBarcodeIdAsync(long barcodeId);
+    Task UpdateTicketPaymentAsync(PaymentRequest paymentRequest);
 }

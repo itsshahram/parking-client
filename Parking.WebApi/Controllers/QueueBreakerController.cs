@@ -5,6 +5,7 @@ using Parking.WebApi.Features.Auth.Commands.Login;
 using Parking.WebApi.Features.Cards.Queries.GetCardDetails;
 using Parking.WebApi.Features.Tariffs.Queries.GetTariffs;
 using Parking.WebApi.Features.Tickets.Commands.CreateTicket;
+using Parking.WebApi.Features.Tickets.Commands.UpdateTicketPayment;
 using Parking.WebApi.Features.Tickets.Queries.GetTicketDetailsByBarcodeId;
 using Parking.WebApi.Features.Tickets.Queries.GetTicketDetailsByCardUid;
 using Parking.WebApi.Requests;
@@ -47,6 +48,31 @@ public class QueueBreakerController(
             return BadRequest(ApiResponse<object>.Fail(result.Errors, result.Message, 400));
 
         return Ok(ApiResponse<CreateTicketResponse>.Success(result.Data!, result.Message));
+    }
+    
+    //[Authorize]
+    [HttpPut("ticket-payment")]
+    public async Task<IActionResult> TicketPayment([FromBody] PaymentRequest paymentRequest)
+    {
+        var command = new UpdateTicketPaymentCommand(
+            paymentRequest.PaidType,
+            paymentRequest.TicketId,
+            paymentRequest.Amount,
+            paymentRequest.ExitGate,
+            paymentRequest.DeviceId,
+            paymentRequest.PaidDate,
+            paymentRequest.PaidCreditCard,
+            paymentRequest.MerchantNumber,
+            paymentRequest.Rrn,
+            paymentRequest.TraceNo,
+            paymentRequest.RefId);
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+            return BadRequest(ApiResponse.Fail(result.Errors, result.Message, 400));
+
+        return Ok(ApiResponse.Success(result, result.Message));
     }
 
     [HttpGet("get-plate-types")]

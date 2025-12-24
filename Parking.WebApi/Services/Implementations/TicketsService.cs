@@ -103,8 +103,43 @@ public class TicketsService(
 
         return await BuildTicketDetailsAsync(ticket, barcodeId);
     }
-    
+
+    public async Task UpdateTicketPaymentAsync(PaymentRequest request)
+    {
+        var ticket = await parkingTicketRepository.GetTicketByIdAsync(request.TicketId);
+        
+        if (ticket is null)
+            throw new CustomNotFoundException("بلیط یافت نشد");
+        
+        if (ticket.TotalAmount == ticket.PaidAmount && ticket.IsExited)
+            throw new AlreadyPaidException("قبلا پرداخت انجام شده است");
+        
+        SetTicketPaymentData(ticket, request);
+
+        await unitOfWork.SaveChangesAsync();
+    }
+
     #region Private Helpers
+
+    private void SetTicketPaymentData(ParkingTicket ticket, PaymentRequest request)
+    {
+        var paidType = Enum.Parse<PaidType>(request.PaidType, true);
+        
+        ticket.PaidType = paidType.ToString();
+        ticket.PaidAmount = request.Amount;
+        ticket.TotalAmount = request.Amount;
+        ticket.PaidDate = request.PaidDate.ToLongDateString();
+        ticket.PaidCreditCard = request.PaidCreditCard;
+        ticket.MerchantNumber = request.MerchantNumber;
+        ticket.RRN = request.Rrn;
+        ticket.TraceNo = request.TraceNo;
+        ticket.IsPaid = true;
+        ticket.ExitRegistrarUserId = currentUserService.UserId;
+        ticket.ExitGate = request.ExitGate;
+        ticket.EndTime = DateTime.Now;
+        ticket.DeviceId = request.DeviceId;
+        ticket.IsExited = true;
+    }
 
     private async Task SetLicensePlateGroupAsync(ParkingTicket ticket, string enLicensePlate)
     {
