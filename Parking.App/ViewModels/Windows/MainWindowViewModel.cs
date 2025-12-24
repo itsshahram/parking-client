@@ -2,6 +2,7 @@
 using Parking.App.Views.Pages.CardsPageChilds;
 using Parking.App.Views.Pages.LicensePlate;
 using Parking.Domain.Entities.User;
+using System.Diagnostics;
 
 namespace Parking.App.ViewModels.Windows;
 
@@ -126,31 +127,43 @@ public partial class MainWindowViewModel : ObservableObject
             Command = new CommunityToolkit.Mvvm.Input.RelayCommand(HandleLogout)
         });
     }
+
     public void HandleLogout()
     {
-        TokenStore.Clear();
-        PermissionManager.Instance.DeleteUserPermissions();
-
-        string credentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
-        if (File.Exists(credentialsPath))
-            File.Delete(credentialsPath);
-
-        string keyPath = Path.Combine(AppDataFolder, "aeskey.bin");
-        if (File.Exists(keyPath))
-            File.Delete(keyPath);
-
-        var windowsToClose = Application.Current.Windows.Cast<Window>()
-            .Where(w => !(w is LoginWindow)).ToList();
-
-        foreach (var w in windowsToClose)
-            w.Close();
-
-        Application.Current.Dispatcher.BeginInvoke(async () =>
+        try
         {
-            var loginWindow = App.GetService<LoginWindow>() ?? new LoginWindow();
-            Application.Current.MainWindow = loginWindow;
-            loginWindow.Show();
-        }, DispatcherPriority.ApplicationIdle);
+            TokenStore.Clear();
+            PermissionManager.Instance.DeleteUserPermissions();
+
+            var credentialsPath = Path.Combine(AppDataFolder, "credentials.dat");
+            if (File.Exists(credentialsPath))
+                File.Delete(credentialsPath);
+
+            var keyPath = Path.Combine(AppDataFolder, "aeskey.bin");
+            if (File.Exists(keyPath))
+                File.Delete(keyPath);
+
+            var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+            if (!string.IsNullOrWhiteSpace(exePath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = exePath,
+                    UseShellExecute = true
+                });
+            }
+
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                ex.Message,
+                "خطا در خروج",
+                System.Windows.MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
     }
 }
 
