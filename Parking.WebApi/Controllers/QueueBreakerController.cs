@@ -5,7 +5,8 @@ using Parking.WebApi.Features.Auth.Commands.Login;
 using Parking.WebApi.Features.Cards.Queries.GetCardDetails;
 using Parking.WebApi.Features.Tariffs.Queries.GetTariffs;
 using Parking.WebApi.Features.Tickets.Commands.CreateTicket;
-using Parking.WebApi.Features.Tickets.Queries.GetTicketDetails;
+using Parking.WebApi.Features.Tickets.Queries.GetTicketDetailsByBarcodeId;
+using Parking.WebApi.Features.Tickets.Queries.GetTicketDetailsByCardUid;
 using Parking.WebApi.Requests;
 using Parking.WebApi.Responses;
 
@@ -99,10 +100,25 @@ public class QueueBreakerController(
     }
 
     [Authorize]
-    [HttpGet("get-ticket-details/{cardUid:long}")]
-    public async Task<IActionResult> GetTicketDetails([FromRoute] long cardUid)
+    [HttpGet("get-ticket-details/cardUid/{cardUid:long}")]
+    public async Task<IActionResult> GetTicketDetailsByCardUid([FromRoute] long cardUid)
     {
-        var query = new GetTicketDetailsQuery(cardUid);
+        var query = new GetTicketDetailsByCardUidQuery(cardUid);
+        var result = await mediator.Send(query);
+
+        if (result.IsSuccess) 
+            return Ok(ApiResponse<TicketDetailsResponse>.Success(result.Data!, result.Message));
+        
+        var statusCode = result.Message?.Contains("یافت نشد") == true ? 404 : 400;
+        
+        return StatusCode(statusCode, ApiResponse<object>.Fail(result.Errors, result.Message, statusCode));
+    }
+    
+    [Authorize]
+    [HttpGet("get-ticket-details/barcodeId/{barcodeId:long}")]
+    public async Task<IActionResult> GetTicketDetailsByBarcodeId([FromRoute] long barcodeId)
+    {
+        var query = new GetTicketDetailsByBarcodeIdQuery(barcodeId);
         var result = await mediator.Send(query);
 
         if (result.IsSuccess) 

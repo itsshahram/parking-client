@@ -6,6 +6,6 @@ namespace Parking.WebApi.Application.Abstractions.EntityRepositories;
 
 public interface ICardRepository : IGenericRepository<Card>
 {
-    Task<Card?> GetByCardSerialNoAsync(long? cardSerialNo);
-    Task UpdateCardUsageStatusAsync(long? cardSerialNo, bool isInUse);
+    Task<Card?> GetCardByCardSerialNoOrBarcodeIdAsync(long? cardSerialNo);
+    Task UpdateCardUsageStatusAsync(decimal? cardSerialNo, bool isInUse);
 }

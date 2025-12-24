@@ -35,5 +35,9 @@ public class CreateTicketCommandHandler(
         {
             return Result<CreateTicketResponse>.Failure(ex.Message, "یافت نشد");
         }
+        catch (AlreadyExistsException ex)
+        {
+            return Result<CreateTicketResponse>.Failure(ex.Message, "درخواست نامعتبر");
+        }
     }
 }

@@ -11,7 +11,7 @@ public class CardService(
 {
     public async Task<PlateAndTariffResponse> GetCardByUidAsync(long cardUid)
     {
-        var card = await cardRepository.GetByCardSerialNoAsync(cardUid);
+        var card = await cardRepository.GetCardByCardSerialNoOrBarcodeIdAsync(cardUid);
 
         if (card is null)
             throw new CustomNotFoundException("کارت با این شناسه وجود ندارد");

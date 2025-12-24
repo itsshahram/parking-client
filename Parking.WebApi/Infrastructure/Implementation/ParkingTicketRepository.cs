@@ -14,9 +14,19 @@ public class ParkingTicketRepository(
         return await DbSet.FirstOrDefaultAsync(t => t.CardUid == cardUid);
     }
 
-    public async Task<ParkingTicket?> GetNotExitedTicketsWithCardUidAsync(decimal? cardUid)
+    public async Task<ParkingTicket?> GetNotExitedTicketWithCardUidAsync(decimal? cardUid)
     {
         return await DbSet.FirstOrDefaultAsync(t => t.CardUid == cardUid && !t.IsExited);
+    }
+
+    public async Task<ParkingTicket?> GetNotExitedTicketByBarcodeIdAsync(long barcodeId)
+    {
+        return await DbSet.FirstOrDefaultAsync(t => t.BarcodeId == barcodeId && !t.IsExited);
+    }
+
+    public async Task<bool> IsExistedLicensePlate(string licensePlate)
+    {
+        return await DbSet.AnyAsync(t => t.EnLicensePlate == licensePlate);
     }
 
     public void UpdateTicket(ParkingTicket ticket)
