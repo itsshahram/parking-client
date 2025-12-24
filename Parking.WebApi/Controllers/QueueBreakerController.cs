@@ -100,7 +100,7 @@ public class QueueBreakerController(
     }
 
     [Authorize]
-    [HttpGet("get-ticket-details/cardUid/{cardUid:long}")]
+    [HttpGet("get-ticket-details/{cardUid:long}")]
     public async Task<IActionResult> GetTicketDetailsByCardUid([FromRoute] long cardUid)
     {
         var query = new GetTicketDetailsByCardUidQuery(cardUid);
