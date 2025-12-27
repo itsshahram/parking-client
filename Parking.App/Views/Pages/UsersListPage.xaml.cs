@@ -12,14 +12,15 @@ namespace Parking.App.Views.Pages
     /// </summary>
     public partial class UsersListPage : Page
     {
-        private UsersListPageViewModel ViewModel { get; set; } = new();
+        private UsersListPageViewModel ViewModel { get; set; }
         private readonly Logger<UsersListPage> logger;
         private readonly IUserService _userService;
         public UsersListPage()
         {
             InitializeComponent();
-            DataContext = ViewModel;
             _userService = App.GetService<IUserService>();
+            ViewModel = new UsersListPageViewModel(_userService);
+            DataContext = ViewModel;
 
             _ = LoadUsersAsync();
         }

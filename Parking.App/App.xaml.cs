@@ -109,6 +109,7 @@ namespace Parking.App
                     services.AddTransient<LoginWindow>();
                     services.AddTransient<DatabaseErrorWindow>();
                     services.AddTransient<AddUserWindow>();
+                    services.AddTransient<EditUserWindow>();
                     services.AddTransient<TicketDetailsWindow>();
                     services.AddTransient<CustomAmountPaymentModalWindow>();
 

@@ -1,5 +1,6 @@
 ﻿using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
+using Parking.Domain.Enums;
 using Parking.Domain.General;
 
 namespace Parking.App.Services.Interfaces;
@@ -14,7 +15,7 @@ public interface IUserService
     string GetUserRoleByUserId(Guid userId);
     ApplicationUser GetUserByUsername(string username);
     Task<(bool IsSuccess, bool IsExist)> CreateUser(ApplicationUser user, string role, string password);
-    bool UpdateUser(ApplicationUser user);
+    Task<UserServiceStatus> UpdateUserAsync(ApplicationUser user);
     bool DeleteUser(Guid id);
     bool ChangePassword(Guid id, string newPassword);
     Task<ApplicationUserRole?> GetUserRole(Guid UserId);
