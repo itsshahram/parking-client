@@ -57,7 +57,7 @@ public class TicketsService(
             VehicleManufacturerName = vehicleSegment.NameFa,
             EnLicensePlate = refinedLicensePlate.EnLicensePlate,
             LicensePlate = refinedLicensePlate.FaLicensePlate,
-            DeviceId = string.Empty,
+            DeviceId = request.DeviceId,
             IP = ServicesHelpers.GetLocalIpAddress(),
             BarcodeId = ServicesHelpers.GenerateRandomBarcodeId(),
             TicketStatus = TicketStatus.Unsynced,
@@ -74,7 +74,7 @@ public class TicketsService(
         };
 
         await SetLicensePlateGroupAsync(ticket, request.EnLicensePlate);
-        await SetTicketImagesAsync(ticket, request.Base64Images);
+        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.StartImage = image, "ورودی");
 
         await parkingTicketRepository.AddAsync(ticket);
 
@@ -113,9 +113,15 @@ public class TicketsService(
         
         if (ticket.TotalAmount == ticket.PaidAmount && ticket.IsExited)
             throw new AlreadyPaidException("قبلا پرداخت انجام شده است");
+
+        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.ExitImage = image, "خروجی");
+        
+        if (ticket.CardUid is not null)
+            await cardRepository.UpdateCardUsageStatusAsync(ticket.CardUid, false);
         
         SetTicketPaymentData(ticket, request);
 
+        parkingTicketRepository.UpdateTicket(ticket);
         await unitOfWork.SaveChangesAsync();
     }
 
@@ -150,26 +156,33 @@ public class TicketsService(
             ticket.LicensePlateGroupId = licensePlateGroup?.Id ?? Guid.Empty;
         }
     }
-
-    private async Task SetTicketImagesAsync(ParkingTicket ticket, List<string>? base64Images)
+    
+    private async Task SetTicketImagesAsync(
+        ParkingTicket ticket,
+        List<string>? base64Images,
+        Action<ParkingTicket, string?> setMainImage,
+        string imageTypePrefix)
     {
         if (base64Images == null || base64Images.Count == 0)
         {
-            ticket.StartImage = null;
+            setMainImage(ticket, null);
             return;
         }
 
-        ticket.StartImage = base64Images.First();
+        setMainImage(ticket, base64Images.First());
 
         if (base64Images.Count > 1)
         {
+            var now = DateTime.UtcNow;
+
             var extraImages = base64Images
                 .Skip(1)
-                .Select(img => new ParkingTicketExtraImage
+                .Select((img, index) => new ParkingTicketExtraImage
                 {
                     TicketId = ticket.Id,
                     Image = img,
-                    CreateDateTime = DateTime.UtcNow,
+                    FaName = $"عکس_{imageTypePrefix}_پوز_{ticket.LicensePlate}_{index + 1:D2}",
+                    CreateDateTime = now,
                     GateName = ticket.DeviceId,
                     ShowInPage = true
                 })

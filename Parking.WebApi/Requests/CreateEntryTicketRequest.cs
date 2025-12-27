@@ -14,6 +14,7 @@ public class CreateEntryTicketRequest
     public int VehicleSegmentId { get; set; }
 
     public string DeviceName { get; set; } = string.Empty;
+    public string DeviceId { get; set; } = string.Empty;
     public List<string>? Base64Images { get; set; }
     public long? CardUid { get; set; }
 }

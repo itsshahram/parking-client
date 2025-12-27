@@ -16,6 +16,7 @@ public class UpdateTicketPaymentCommandHandler(
             var request = new PaymentRequest
             {
                 PaidType = updateCommand.PaidType,
+                Base64Images = updateCommand.Base64Images,
                 TicketId = updateCommand.TicketId,
                 Amount = updateCommand.Amount,
                 ExitGate = updateCommand.ExitGate,

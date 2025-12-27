@@ -7,13 +7,14 @@ public class UpdateTicketPaymentCommandValidator : AbstractValidator<UpdateTicke
 {
     public UpdateTicketPaymentCommandValidator()
     {
+        // بررسی نوع پرداخت
         RuleFor(x => x.PaidType)
             .Must(x => Enum.TryParse<PaidType>(x, true, out _))
-            .WithMessage("نوع مقدار فقط می تواند مقدار رشته ای Naghdi یا POS باشد");
+            .WithMessage("نوع پرداخت فقط می‌تواند مقدار رشته‌ای Naghdi یا POS باشد");
 
         RuleFor(x => x.TicketId)
             .NotEmpty()
-            .WithMessage("آی دی تیکت را وارد کنید");
+            .WithMessage("شناسه تیکت را وارد کنید");
 
         RuleFor(x => x.Amount)
             .GreaterThan(0)
@@ -26,29 +27,40 @@ public class UpdateTicketPaymentCommandValidator : AbstractValidator<UpdateTicke
         RuleFor(x => x.ExitGate)
             .NotEmpty()
             .WithMessage("گیت خروج را وارد کنید");
-        
-        RuleFor(x => x.Rrn)
-            .NotEmpty()
-            .WithMessage("RRN را وارد کنید");
-        
-        RuleFor(x => x.MerchantNumber)
-            .NotEmpty()
-            .WithMessage("شماره پذیرنده را وارد کنید");
-        
-        RuleFor(x => x.PaidCreditCard)
-            .NotEmpty()
-            .WithMessage("مقدار PaidCreditCard را وارد کنید");
-        
-        RuleFor(x => x.TraceNo)
-            .NotEmpty()
-            .WithMessage("TraceNo را وارد کنید");
 
         RuleFor(x => x.DeviceId)
             .NotEmpty()
             .WithMessage("شناسه دستگاه را وارد کنید");
-        
+
+        // فیلدهایی که برای پرداخت POS اجباری هستند
+        RuleFor(x => x.Rrn)
+            .NotEmpty()
+            .When(x => !IsCashPayment(x.PaidType))
+            .WithMessage("مقدار RRN را وارد کنید");
+
+        RuleFor(x => x.MerchantNumber)
+            .NotEmpty()
+            .When(x => !IsCashPayment(x.PaidType))
+            .WithMessage("مقدار MerchantNumber را وارد کنید");
+
+        RuleFor(x => x.PaidCreditCard)
+            .NotEmpty()
+            .When(x => !IsCashPayment(x.PaidType))
+            .WithMessage("مقدار PaidCreditCard را وارد کنید");
+
+        RuleFor(x => x.TraceNo)
+            .NotEmpty()
+            .When(x => !IsCashPayment(x.PaidType))
+            .WithMessage("مقدار TraceNo را وارد کنید");
+
         RuleFor(x => x.RefId)
             .NotEmpty()
-            .WithMessage("شناسه مرجع را وارد کنید");
+            .When(x => !IsCashPayment(x.PaidType))
+            .WithMessage("مقدار RefId را وارد کنید");
+    }
+
+    private static bool IsCashPayment(string paidType)
+    {
+        return string.Equals(paidType, "Naghdi", StringComparison.OrdinalIgnoreCase);
     }
 }

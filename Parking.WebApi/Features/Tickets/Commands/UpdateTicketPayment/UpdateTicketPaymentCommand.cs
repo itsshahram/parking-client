@@ -5,6 +5,7 @@ namespace Parking.WebApi.Features.Tickets.Commands.UpdateTicketPayment;
 
 public record UpdateTicketPaymentCommand(
     string PaidType,
+    List<string>? Base64Images,
     Guid TicketId,
     long Amount,
     string ExitGate,

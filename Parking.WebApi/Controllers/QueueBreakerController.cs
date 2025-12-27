@@ -50,12 +50,13 @@ public class QueueBreakerController(
         return Ok(ApiResponse<CreateTicketResponse>.Success(result.Data!, result.Message));
     }
     
-    //[Authorize]
+    [Authorize]
     [HttpPut("ticket-payment")]
     public async Task<IActionResult> TicketPayment([FromBody] PaymentRequest paymentRequest)
     {
         var command = new UpdateTicketPaymentCommand(
             paymentRequest.PaidType,
+            paymentRequest.Base64Images,
             paymentRequest.TicketId,
             paymentRequest.Amount,
             paymentRequest.ExitGate,
@@ -72,7 +73,7 @@ public class QueueBreakerController(
         if (!result.IsSuccess)
             return BadRequest(ApiResponse.Fail(result.Errors, result.Message, 400));
 
-        return Ok(ApiResponse.Success(result, result.Message));
+        return Ok(ApiResponse.Success(null, result.Message));
     }
 
     [HttpGet("get-plate-types")]

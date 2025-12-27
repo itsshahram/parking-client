@@ -31,7 +31,7 @@ public class ParkingTicketRepository(
 
     public async Task<bool> IsExistedLicensePlate(string licensePlate)
     {
-        return await DbSet.AnyAsync(t => t.EnLicensePlate == licensePlate);
+        return await DbSet.AnyAsync(t => t.EnLicensePlate == licensePlate && !t.IsExited);
     }
 
     public void UpdateTicket(ParkingTicket ticket)
