@@ -47,6 +47,11 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
+                                <ui:Button Content="ویرایش"
+                                           Command="{Binding DataContext.EditUserCommand,
+                                    RelativeSource={RelativeSource AncestorType=Page}}"
+                                           CommandParameter="{Binding}"
+                                           Margin="5 0"/>
                                 <ui:Button Content="تغییر رمز عبور" 
                                            Click="ChangePassword_Click" 
                                            Margin="5 0"
@@ -56,6 +61,7 @@
                                     RelativeSource={RelativeSource AncestorType=Page}}"
                                            CommandParameter="{Binding}" 
                                            Margin="5 0"/>
+                               
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
