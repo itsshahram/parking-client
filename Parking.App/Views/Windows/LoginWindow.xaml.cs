@@ -42,7 +42,6 @@ namespace Parking.App.Views.Windows
                     Login();
                 }
             }), DispatcherPriority.ApplicationIdle);
-
         }
 
         private void ExitBtn_Click(object sender, RoutedEventArgs e)
@@ -64,14 +63,16 @@ namespace Parking.App.Views.Windows
 
         private void usernameBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
+            if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null &&
+                passwordBox.Text.Length > 2)
                 LoginBtn.IsEnabled = true;
             else LoginBtn.IsEnabled = false;
         }
 
         private void passwordBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
+            if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null &&
+                passwordBox.Text.Length > 2)
                 LoginBtn.IsEnabled = true;
             else LoginBtn.IsEnabled = false;
         }
@@ -83,7 +84,6 @@ namespace Parking.App.Views.Windows
                 if (e.Key == Key.Enter)
                 {
                     Login();
-
                 }
             }
             catch (Exception ex)
@@ -97,12 +97,10 @@ namespace Parking.App.Views.Windows
                 ms.CloseButtonText = "متوجه شدم";
                 await ms.ShowDialogAsync();
             }
-
-
         }
+
         private async void Login()
         {
-
             ExitBtn.IsEnabled = false;
             LoginBtn.IsEnabled = false;
             LoginProgressBar.Visibility = Visibility.Visible;
@@ -110,7 +108,8 @@ namespace Parking.App.Views.Windows
 
             if (CheckUsers())
             {
-                if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
+                if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null &&
+                    passwordBox.Text.Length > 2)
                 {
                     //if (!IsInternetAvailable())
                     //{
@@ -122,7 +121,6 @@ namespace Parking.App.Views.Windows
                     var pasword = passwordBox.Password;
                     var result = _userService?.Login(username, pasword);
 
-
                     if (result == Domain.General.LoginStatus.NotActice)
                     {
                         Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
@@ -133,6 +131,7 @@ namespace Parking.App.Views.Windows
                         ms.CloseButtonText = "متوجه شدم";
                         await ms.ShowDialogAsync();
                     }
+
                     bool syncStatus = false;
                     if (Settings.Default.Application_Sync_Enable)
                     {
@@ -141,6 +140,10 @@ namespace Parking.App.Views.Windows
                         {
                             syncStatus = loginToServerResult.Succeeded;
                         }
+
+                        var canLoginWithOutCheckingServer = await _roleService.GetRoleByName("ParkingManager");
+                        if (canLoginWithOutCheckingServer != null)
+                            syncStatus = false;
                     }
                     else
                         syncStatus = true;
@@ -153,7 +156,6 @@ namespace Parking.App.Views.Windows
                         var user = _userService.GetUserByUsername(username);
                         var parking = _parkingService.GetParkingLotDetails();
 
-
                         TokenStore.RoleName = _userService.GetUserRoleByUserId(user.Id);
 
                         var role = await _roleService.GetRoleByName(TokenStore.RoleName);
@@ -162,9 +164,9 @@ namespace Parking.App.Views.Windows
                         var userPermissions = await _roleService.GetUserPermissions(role.Id, user.Id);
 
                         var permissions = rolePermissions.Select(x => x.Permission.Name)
-                                                         .Concat(userPermissions.Select(x => x.Permission.Name))
-                                                         .Distinct()
-                                                         .ToList();
+                            .Concat(userPermissions.Select(x => x.Permission.Name))
+                            .Distinct()
+                            .ToList();
                         TokenStore.DeletePermissions();
                         TokenStore.SetPermissions(permissions);
 
@@ -194,14 +196,14 @@ namespace Parking.App.Views.Windows
             }
             else
             {
-                if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null && passwordBox.Text.Length > 2)
+                if (usernameBox.Text != null && usernameBox.Text.Length > 3 && passwordBox.Text != null &&
+                    passwordBox.Text.Length > 2)
                 {
                     var username = usernameBox.Text;
                     var password = passwordBox.Password;
                     var result = await _synchronizationService?.CheckTokenAsync(username, password);
                     if (result.Succeeded)
                     {
-
                         if (rememberMe is true)
                             SaveCredentials(username, password);
 
@@ -216,7 +218,8 @@ namespace Parking.App.Views.Windows
 
                             Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
                             ms.Title = "موفق";
-                            ms.Content = "همگام سازی اطلاعات با موفقیت انجام شد، لطفا اپلیکیشن را مجددا راه اندازی کنید";
+                            ms.Content =
+                                "همگام سازی اطلاعات با موفقیت انجام شد، لطفا اپلیکیشن را مجددا راه اندازی کنید";
                             ms.IsPrimaryButtonEnabled = false;
                             ms.IsSecondaryButtonEnabled = false;
                             ms.CloseButtonText = "متوجه شدم";
@@ -234,7 +237,6 @@ namespace Parking.App.Views.Windows
                             ms.CloseButtonText = "متوجه شدم";
                             await ms.ShowDialogAsync();
                         }
-
                     }
                     else
                     {
@@ -258,14 +260,16 @@ namespace Parking.App.Views.Windows
                         "متوجه شدم";
                     await ms.ShowDialogAsync();
                 }
-
             }
+
             ExitBtn.IsEnabled = true;
             LoginBtn.IsEnabled = true;
             passwordBox.Text = "";
             LoginProgressBar.Visibility = Visibility.Collapsed;
         }
+
         private bool CheckUsers() => _userManager.Users.Any();
+
         private async Task<bool> StartSyncJobs()
         {
             if (_synchronizationService != null)
@@ -278,18 +282,18 @@ namespace Parking.App.Views.Windows
                 result = await _synchronizationService?.GetParkingLotDetailsFromServerAsync();
                 if (result.Succeeded)
                 {
-                    await ChangeSyncJobsState("GetParkingInfo", JobState.Success); resultList.Add(true);
+                    await ChangeSyncJobsState("GetParkingInfo", JobState.Success);
+                    resultList.Add(true);
                 }
                 else
                     await ChangeSyncJobsState("GetParkingInfo", JobState.Failed);
-
-
 
                 await ChangeSyncJobsState("GetUsers", JobState.Syncing);
                 result = await _synchronizationService?.GetParkingLotAccountsFromServerAsync();
                 if (result.Succeeded)
                 {
-                    ChangeSyncJobsState("GetUsers", JobState.Success); resultList.Add(true);
+                    ChangeSyncJobsState("GetUsers", JobState.Success);
+                    resultList.Add(true);
                 }
                 else
                     await ChangeSyncJobsState("GetUsers", JobState.Failed);
@@ -298,7 +302,8 @@ namespace Parking.App.Views.Windows
                 result = await _synchronizationService?.ReceiveVehicleSegmentsListFromServerAsync();
                 if (result.Succeeded)
                 {
-                    await ChangeSyncJobsState("GetPrices", JobState.Success); resultList.Add(true);
+                    await ChangeSyncJobsState("GetPrices", JobState.Success);
+                    resultList.Add(true);
                 }
                 else
                     await ChangeSyncJobsState("GetPrices", JobState.Failed);
@@ -308,11 +313,13 @@ namespace Parking.App.Views.Windows
                 result = await _synchronizationService?.ReceiveLicensePlateGroupFromServerAsync();
                 if (result.Succeeded)
                 {
-                    await ChangeSyncJobsState("GetGroups", JobState.Success); resultList.Add(true);
+                    await ChangeSyncJobsState("GetGroups", JobState.Success);
+                    resultList.Add(true);
                 }
 
                 else
                     await ChangeSyncJobsState("GetGroups", JobState.Failed);
+
                 if (resultList.Count(a => a == true) == 4)
                     return true;
                 return false;
@@ -322,62 +329,65 @@ namespace Parking.App.Views.Windows
                 return false;
             }
         }
+
         private async Task ChangeSyncJobsState(string jobName, JobState jobState)
         {
-
             // پیدا کردن DockPanel مربوط به jobName
 
             await this.Dispatcher.InvokeAsync(() =>
-            {
-                var dockPanel = SyncBox.Children.OfType<DockPanel>().FirstOrDefault(dp => dp.Name == jobName + "Box");
-                if (dockPanel == null)
                 {
-                    // اگر DockPanel پیدا نشد
-                    return;
-                }
-                // پیدا کردن TextBlock و تغییر رنگ آن براساس وضعیت
-                var textBlock = dockPanel.Children.OfType<Wpf.Ui.Controls.TextBlock>().FirstOrDefault();
-                if (textBlock != null)
-                {
-                    textBlock.Foreground = GetBrushFromState(jobState);
-                }
-
-                // حذف آیکون یا ProgressRing قدیمی (اگر وجود دارد)
-                var existingIcon = dockPanel.Children.OfType<SymbolIcon>().FirstOrDefault();
-                if (existingIcon != null)
-                {
-                    dockPanel.Children.Remove(existingIcon);
-                }
-                var existingProgressRing = dockPanel.Children.OfType<ProgressRing>().FirstOrDefault();
-                if (existingProgressRing != null)
-                {
-                    dockPanel.Children.Remove(existingProgressRing);
-                }
-
-                if (jobState == JobState.Syncing)
-                {
-                    var progressRing = new ProgressRing
+                    var dockPanel = SyncBox.Children.OfType<DockPanel>()
+                        .FirstOrDefault(dp => dp.Name == jobName + "Box");
+                    if (dockPanel == null)
                     {
-                        IsIndeterminate = true,
-                        Width = 13,
-                        Height = 13,
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Right
-                    };
-                    DockPanel.SetDock(progressRing, Dock.Right);
-                    dockPanel.Children.Add(progressRing);
-                }
-                else if (jobState == JobState.Success || jobState == JobState.Failed)
-                {
-                    var icon = new SymbolIcon
+                        // اگر DockPanel پیدا نشد
+                        return;
+                    }
+
+                    // پیدا کردن TextBlock و تغییر رنگ آن براساس وضعیت
+                    var textBlock = dockPanel.Children.OfType<Wpf.Ui.Controls.TextBlock>().FirstOrDefault();
+                    if (textBlock != null)
                     {
-                        Symbol = jobState == JobState.Success ? SymbolRegular.Checkmark12 : SymbolRegular.Warning16,
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
-                        Foreground = GetBrushFromState(jobState)
-                    };
-                    DockPanel.SetDock(icon, Dock.Right);
-                    dockPanel.Children.Add(icon);
+                        textBlock.Foreground = GetBrushFromState(jobState);
+                    }
+
+                    // حذف آیکون یا ProgressRing قدیمی (اگر وجود دارد)
+                    var existingIcon = dockPanel.Children.OfType<SymbolIcon>().FirstOrDefault();
+                    if (existingIcon != null)
+                    {
+                        dockPanel.Children.Remove(existingIcon);
+                    }
+
+                    var existingProgressRing = dockPanel.Children.OfType<ProgressRing>().FirstOrDefault();
+                    if (existingProgressRing != null)
+                    {
+                        dockPanel.Children.Remove(existingProgressRing);
+                    }
+
+                    if (jobState == JobState.Syncing)
+                    {
+                        var progressRing = new ProgressRing
+                        {
+                            IsIndeterminate = true,
+                            Width = 13,
+                            Height = 13,
+                            HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+                        };
+                        DockPanel.SetDock(progressRing, Dock.Right);
+                        dockPanel.Children.Add(progressRing);
+                    }
+                    else if (jobState == JobState.Success || jobState == JobState.Failed)
+                    {
+                        var icon = new SymbolIcon
+                        {
+                            Symbol = jobState == JobState.Success ? SymbolRegular.Checkmark12 : SymbolRegular.Warning16,
+                            HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+                            Foreground = GetBrushFromState(jobState)
+                        };
+                        DockPanel.SetDock(icon, Dock.Right);
+                        dockPanel.Children.Add(icon);
+                    }
                 }
-            }
             );
         }
 
@@ -386,9 +396,12 @@ namespace Parking.App.Views.Windows
         {
             return state switch
             {
-                JobState.Success => (System.Windows.Media.Brush)Application.Current.Resources["SystemFillColorSuccessBrush"],
-                JobState.Failed => (System.Windows.Media.Brush)Application.Current.Resources["SystemFillColorCriticalBrush"],
-                JobState.Syncing => (System.Windows.Media.Brush)Application.Current.Resources["AccentTextFillColorTertiaryBrush"],
+                JobState.Success => (System.Windows.Media.Brush)Application.Current.Resources[
+                    "SystemFillColorSuccessBrush"],
+                JobState.Failed => (System.Windows.Media.Brush)Application.Current.Resources[
+                    "SystemFillColorCriticalBrush"],
+                JobState.Syncing => (System.Windows.Media.Brush)Application.Current.Resources[
+                    "AccentTextFillColorTertiaryBrush"],
                 _ => System.Windows.Media.Brushes.Black
             };
         }
@@ -428,11 +441,16 @@ namespace Parking.App.Views.Windows
                 AesEncryption.SaveKey(key, Constants.KeyPath);
                 return key;
             }
+
             return AesEncryption.LoadKey(Constants.KeyPath);
         }
+
         private enum JobState
         {
-            None, Syncing, Success, Failed
+            None,
+            Syncing,
+            Success,
+            Failed
         }
     }
 }

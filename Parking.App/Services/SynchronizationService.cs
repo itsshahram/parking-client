@@ -340,7 +340,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         {
                             Name = role,
                             FaName = role.RoleToPersian(),
-                            NormalizedName = role.ToUpper()
+                            NormalizedName = role.ToUpper(),
                         };
                         await roleManager.CreateAsync(newRole);
                     }
@@ -363,6 +363,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         localUser.UserName = user.UserName;
                         localUser.NormalizedUserName = user.UserName.ToUpper();
                         localUser.RegisterDate = DateTime.Now;
+                        
                         await userManager.UpdateAsync(localUser);
                         var x = await userManager.AddToRoleAsync(localUser, user.Role);
                     }
@@ -381,7 +382,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             RegisterDate = DateTime.Now,
                             NormalizedEmail = user.Email.ToUpper(),
                             SecurityStamp = GenerateSecurityStamp(),
-                            PhoneNumber = user.PhoneNumber
+                            PhoneNumber = user.PhoneNumber,
                         };
                         await userManager.CreateAsync(userInfo);
                         var x = await userManager.AddToRoleAsync(userInfo, user.Role);

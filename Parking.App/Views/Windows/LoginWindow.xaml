@@ -37,7 +37,7 @@
         </Border>
         <StackPanel Margin="10" HorizontalAlignment="Center">
             <StackPanel Width="300" Margin="5">
-                <TextBlock Text="نام کاربری"     />
+                <TextBlock Text="نام کاربری"  />
                 <ui:TextBox x:Name="usernameBox" TextChanged="usernameBox_TextChanged" FlowDirection="LeftToRight"/>
             </StackPanel>
             <StackPanel Width="300" Margin="5">
