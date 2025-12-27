@@ -8,4 +8,5 @@ public class TicketDetailsResponse
     public string FaLicensePlate { get; set; } = string.Empty;
     public List<string> Images { get; set; } = [];
     public decimal TotalAmount { get; set; }
+    public decimal PayableAmount { get; set; }
 }

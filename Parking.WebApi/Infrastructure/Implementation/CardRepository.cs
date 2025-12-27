@@ -8,7 +8,7 @@ namespace Parking.WebApi.Infrastructure.Implementation;
 
 public class CardRepository(ApplicationDbContext context) : GenericRepository<Card>(context), ICardRepository
 {
-    public async Task<Card?> GetCardByCardSerialNoOrBarcodeIdAsync(long? cardSerialNo)
+    public async Task<Card?> GetCardByCardSerialNoAsync(long? cardSerialNo)
     {
         return await DbSet.FirstOrDefaultAsync(c => c.CardSerialNo == cardSerialNo);
     }
