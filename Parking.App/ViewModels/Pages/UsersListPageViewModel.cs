@@ -1,6 +1,7 @@
 ﻿using Parking.App.Models.Dto.User;
 using Parking.App.Services.Interfaces;
 using System.ComponentModel;
+using Parking.Domain.Enums;
 
 namespace Parking.App.ViewModels.Pages;
 
@@ -34,6 +35,31 @@ public class UsersListPageViewModel : INotifyPropertyChanged
         EditUserCommand = new RelayCommand<UserListItemModel>(OnEditUser);
     }
 
+    private async Task ShowMessage(string title, string message)
+    {
+        try
+        {
+            if (!App.GlobalCancellationTokenSource.IsCancellationRequested)
+            {
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    Wpf.Ui.Controls.MessageBox ms = new Wpf.Ui.Controls.MessageBox();
+                    ms.FlowDirection = System.Windows.FlowDirection.RightToLeft;
+                    ms.Title = title;
+                    ms.Content = message;
+                    ms.IsPrimaryButtonEnabled = false;
+                    ms.IsSecondaryButtonEnabled = false;
+                    ms.CloseButtonText = "متوجه شدم";
+                    await ms.ShowDialogAsync();
+                });
+            }
+        }
+        catch
+        {
+            System.Windows.MessageBox.Show(message, title);
+        }
+    }
+    
     private void OnAssignRole(UserListItemModel user)
     {
         if (user == null) return;
@@ -58,30 +84,45 @@ public class UsersListPageViewModel : INotifyPropertyChanged
             Owner = App.Current.MainWindow
         };
 
-        if (editUserWindow.ShowDialog() == true)
-        {
-            var existingUser = _userService.GetUserById(user.Id);
-            if (existingUser != null)
-            {
-                // Update fields
-                existingUser.Firstname = editUserWindow.ViewModel.FirstName;
-                existingUser.Lastname = editUserWindow.ViewModel.LastName;
-                existingUser.UserName = editUserWindow.ViewModel.Username;
+        if (editUserWindow.ShowDialog() != true)
+            return;
 
-                // Save to database
-                var success = await _userService.UpdateUserAsync(existingUser);
-                if (success)
-                {
-                    // Update the UI model
-                    user.Firstname = editUserWindow.ViewModel.FirstName;
-                    user.Lastname = editUserWindow.ViewModel.LastName;
-                    user.UserName = editUserWindow.ViewModel.Username;
-                    user.Fullname = $"{editUserWindow.ViewModel.FirstName} {editUserWindow.ViewModel.LastName}";
-                    OnPropertyChanged(nameof(Items)); 
-                }
-            }
+        var existingUser = _userService.GetUserById(user.Id);
+        if (existingUser == null)
+        {
+            await ShowMessage("خطا", "کاربر یافت نشد");
+            return;
+        }
+
+        existingUser.Firstname = editUserWindow.ViewModel.FirstName;
+        existingUser.Lastname = editUserWindow.ViewModel.LastName;
+        existingUser.UserName = editUserWindow.ViewModel.Username;
+
+        var status = await _userService.UpdateUserAsync(existingUser);
+
+        switch (status)
+        {
+            case UserServiceStatus.Success:
+                await ShowMessage("موفق", "اطلاعات کاربر با موفقیت ویرایش شد");
+                break;
+
+            case UserServiceStatus.UserNameExist:
+                await ShowMessage("خطا", "نام کاربری قبلاً استفاده شده است");
+                break;
+
+            case UserServiceStatus.NotFound:
+                await ShowMessage("خطا", "کاربر یافت نشد");
+                break;
+
+            case UserServiceStatus.Failed:
+            default:
+                await ShowMessage("خطا", "خطا در ویرایش اطلاعات");
+                break;
         }
     }
+
+    
+ 
     private void OnManagePermission(UserListItemModel user)
     {
         if (user == null) return;

@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Office.Word;
 using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
+using Parking.Domain.Enums;
 using Parking.Domain.General;
 
 namespace Parking.App.Services;
@@ -229,29 +230,42 @@ public class UserService(
         }
     }
 
-    public async Task<bool> UpdateUserAsync(ApplicationUser user)
+
+    public async Task<UserServiceStatus> UpdateUserAsync(ApplicationUser user)
     {
         try
         {
             var existingUser = await _userManager.FindByIdAsync(user.Id.ToString());
             if (existingUser == null)
-                return false;
+                return UserServiceStatus.NotFound;
 
+            // Check username conflict (excluding current user)
+            bool userNameExist = await _userManager.Users
+                .AnyAsync(x => x.UserName == user.UserName && x.Id != existingUser.Id);
+
+            if (userNameExist)
+                return UserServiceStatus.UserNameExist;
+
+            // Update allowed fields
             existingUser.Firstname = user.Firstname;
             existingUser.Lastname = user.Lastname;
             existingUser.PhoneNumber = user.PhoneNumber;
             existingUser.UserName = user.UserName;
-            existingUser.PasswordHash = user.PasswordHash;
 
-            await _userManager.UpdateAsync(existingUser);
-            return true;
+            var result = await _userManager.UpdateAsync(existingUser);
+
+            if (!result.Succeeded)
+                return UserServiceStatus.Failed;
+
+            return UserServiceStatus.Success;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user with ID: {UserId}", user.Id);
-            return false;
+            return UserServiceStatus.Failed;
         }
     }
+
 
     public async Task<bool> ChangeStaus(Guid id, bool status)
     {
