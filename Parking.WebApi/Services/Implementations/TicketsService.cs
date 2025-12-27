@@ -35,7 +35,7 @@ public class TicketsService(
 
         if (cardSerialNo.HasValue)
         {
-            card = await cardRepository.GetCardByCardSerialNoOrBarcodeIdAsync(request.CardUid!.Value);
+            card = await cardRepository.GetCardByCardSerialNoAsync(request.CardUid!.Value);
             if (card?.IsInUse == true) return null;
         }
         
@@ -92,7 +92,7 @@ public class TicketsService(
         if (ticket == null) 
             return null;
 
-        return await BuildTicketDetailsAsync(ticket, cardUid);
+        return await BuildTicketDetailsAsync(ticket, true, cardUid);
     }
 
     public async Task<TicketDetailsResponse?> GetTicketDetailsByBarcodeIdAsync(long barcodeId)
@@ -101,7 +101,7 @@ public class TicketsService(
         if (ticket == null) 
             return null;
 
-        return await BuildTicketDetailsAsync(ticket, barcodeId);
+        return await BuildTicketDetailsAsync(ticket, false, barcodeId);
     }
 
     public async Task UpdateTicketPaymentAsync(PaymentRequest request)
@@ -111,7 +111,7 @@ public class TicketsService(
         if (ticket is null)
             throw new CustomNotFoundException("بلیط یافت نشد");
         
-        if (ticket.TotalAmount == ticket.PaidAmount && ticket.IsExited)
+        if (ticket.TotalAmountWithDiscount == ticket.PaidAmount && ticket.IsExited)
             throw new AlreadyPaidException("قبلا پرداخت انجام شده است");
 
         await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.ExitImage = image, "خروجی");
@@ -133,7 +133,6 @@ public class TicketsService(
         
         ticket.PaidType = paidType.ToString();
         ticket.PaidAmount = request.Amount;
-        ticket.TotalAmount = request.Amount;
         ticket.PaidDate = request.PaidDate.ToLongDateString();
         ticket.PaidCreditCard = request.PaidCreditCard;
         ticket.MerchantNumber = request.MerchantNumber;
@@ -145,6 +144,7 @@ public class TicketsService(
         ticket.EndTime = DateTime.Now;
         ticket.DeviceId = request.DeviceId;
         ticket.IsExited = true;
+        ticket.RefId = request.RefId;
     }
 
     private async Task SetLicensePlateGroupAsync(ParkingTicket ticket, string enLicensePlate)
@@ -192,24 +192,36 @@ public class TicketsService(
         }
     }
 
-    private async Task<TicketDetailsResponse> BuildTicketDetailsAsync(ParkingTicket ticket, long cardOrBarcodeId)
+    private async Task<TicketDetailsResponse> BuildTicketDetailsAsync(ParkingTicket ticket,bool isCardUid, long cardUidOrBarcodeId)
     {
         var segment = await vehicleSegmentRepository.GetByIdAsync((int)ticket.VehicleSegmentId!);
         var segmentPrices = await parkingVehicleSegmentPriceRepository.GetSegmentPricesByParkingSegmentIdAsync(segment.Id);
         var variableSegmentPrices = await parkingVehicleSegmentVariablePriceRepository.GetVariablePricesByParkingSegmentIdAsync(segment.Id);
-        var card = await cardRepository.GetCardByCardSerialNoOrBarcodeIdAsync(cardOrBarcodeId);
-
-        var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate);
 
         var varTime = DateTime.Now - ticket.StartTime;
+        var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate);
         var description = $"{varTime.Days} روز و {varTime.Hours} ساعت و {varTime.Minutes} دقیقه در {segment.NameFa}";
 
-        if (card?.PercentDiscount > 0)
+        Card? card = null;
+        
+        if (isCardUid)
         {
-            description += $" | کارت دارای تخفیف {card.PercentDiscount}% است";
-            discount = (short)card.PercentDiscount;
+            card = await cardRepository.GetCardByCardSerialNoAsync(cardUidOrBarcodeId);
+            
+            if (card is null)
+                throw new CustomNotFoundException("کارت با این شناسه وجود ندارد");
+            
+            if (card.PercentDiscount > 0)
+            {
+                description += $" | کارت دارای تخفیف {card.PercentDiscount}% است";
+                discount = (short)card.PercentDiscount;
+            }
         }
-
+        else
+        {
+            discount = ticket.DiscountPercent;
+        }
+        
         var parkingCostCalculator = new ParkingCostCalculator(
             (int)segment.ParkingEntranceFixedFee,
             (int)segment.DailyRate,
@@ -223,16 +235,17 @@ public class TicketsService(
             variableSegmentPrices);
 
         var calculationResult = parkingCostCalculator.CalculateCost(ticket.StartTime, DateTime.Now);
-
-        if (card?.FixDiscount > 0)
+        
+        if (card is not null && card.FixDiscount > 0)
         {
             calculationResult.PayableAmount = Math.Max(calculationResult.PayableAmount - card.FixDiscount, 0);
             description += $" | کارت دارای تخفیف {card.FixDiscount} ریال است";
         }
-
+        
+        ticket.TotalAmount = calculationResult.TotalWithoutDiscount;
+        ticket.TotalAmountWithDiscount = calculationResult.PayableAmount;
         ticket.DurationMinutes = (int)varTime.TotalMinutes;
         ticket.DiscountPercent = (byte)discount;
-        ticket.TotalAmount = calculationResult.TotalWithoutDiscount;
         ticket.Description = description;
         ticket.TicketStatus = TicketStatus.Unsynced;
 
@@ -247,7 +260,8 @@ public class TicketsService(
             EnLicensePlate = ticket.EnLicensePlate,
             FaLicensePlate = ticket.LicensePlate,
             TicketId = ticket.Id.ToString(),
-            TotalAmount = calculationResult.PayableAmount,
+            TotalAmount = calculationResult.TotalWithoutDiscount,
+            PayableAmount = calculationResult.PayableAmount,
             Images = images
         };
     }

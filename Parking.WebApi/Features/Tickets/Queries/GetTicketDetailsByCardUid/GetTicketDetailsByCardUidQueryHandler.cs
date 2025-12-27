@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Parking.WebApi.Application.Common.Exceptions;
 using Parking.WebApi.Application.Common.Models;
 using Parking.WebApi.Responses;
 using Parking.WebApi.Services.Contracts;
@@ -10,10 +11,17 @@ public class GetTicketDetailsByCardUidQueryHandler(
 {
     public async Task<Result<TicketDetailsResponse>> Handle(GetTicketDetailsByCardUidQuery request, CancellationToken cancellationToken)
     {
-        var ticketDetails = await ticketsService.GetTicketDetailsByCardUidAsync(request.CardUid);
-        
-        return ticketDetails is null 
-            ? Result<TicketDetailsResponse>.Failure("بلیط با این شناسه وجود ندارد", "بلیط یافت نشد") 
-            : Result<TicketDetailsResponse>.Success(ticketDetails, "جزئیات بلیط با موفقیت دریافت شد");
+        try
+        {
+            var ticketDetails = await ticketsService.GetTicketDetailsByCardUidAsync(request.CardUid);
+
+            return ticketDetails is null
+                ? Result<TicketDetailsResponse>.Failure("بلیط با این شناسه وجود ندارد", "بلیط یافت نشد")
+                : Result<TicketDetailsResponse>.Success(ticketDetails, "جزئیات بلیط با موفقیت دریافت شد");
+        }
+        catch (CustomNotFoundException ex)
+        {
+            return Result<TicketDetailsResponse>.Failure(ex.Message, "یافت نشد");
+        }
     }
 }
