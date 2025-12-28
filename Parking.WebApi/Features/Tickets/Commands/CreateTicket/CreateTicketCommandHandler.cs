@@ -30,7 +30,7 @@ public class CreateTicketCommandHandler(
             return Result<CreateTicketResponse>.Success(createTicketResponse, "بلیط با موفقیت ثبت شد");
         }
         
-        catch (Exception ex) when (ex is AlreadyExistsException or CardIsInUseException or CustomNotFoundException)
+        catch (Exception ex) when (ex is AlreadyExistsException or CardIsInUseException or CustomNotFoundException or InActiveCardException)
         {
             return Result<CreateTicketResponse>.Failure(ex.Message, "درخواست نامعتبر");
         }

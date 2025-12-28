@@ -63,7 +63,23 @@ public class TicketsService(
         Card? card = null;
 
         if (cardSerialNo.HasValue)
+        {
             card = await cardService.GetCardByCardUidAsync((long)cardSerialNo.Value);
+            if (card.IsInUse)
+                throw new CardIsInUseException("کارت در حال استفاده است");
+
+            if (card.EnLicensePlate is not null && card.EnLicensePlate != request.EnLicensePlate)
+                throw new NotAllowedException("پلاک وارد شده با پلاک ثبت شده در کارت مغایرت دارد");
+
+            var now = DateTime.Now;
+
+            var isDateInvalid =
+                card.ActiveDate > now ||
+                card.DeactiveDate < now;
+
+            if (!card.IsActive || isDateInvalid)
+                throw new InActiveCardException("کارت غیرفعال است");
+        }
         
         var isExistedLicensePlate = await parkingTicketRepository.IsExistedLicensePlate(request.EnLicensePlate);
         if (isExistedLicensePlate)
@@ -109,14 +125,20 @@ public class TicketsService(
 
         await unitOfWork.SaveChangesAsync();
 
-        return new CreateTicketResponse { TicketId = ticket.Id, BarcodeId = ticket.BarcodeId.ToString() };
+        return new CreateTicketResponse 
+            {
+                TicketId = ticket.Id,
+                BarcodeId = ticket.BarcodeId.ToString(), 
+                EntryDate = ticket.StartTime, 
+                BarcodePrintType = nameof(BarcodePrintType.Rod),
+                LicensePlate = ticket.LicensePlate,
+                TariffName = vehicleSegment.NameFa!
+            };
     }
 
     public async Task<TicketDetailsResponse> GetTicketDetailsByCardUidAsync(long cardUid)
     {
         var ticket = await parkingTicketRepository.GetNotExitedTicketWithCardUidAsync(cardUid);
-        
-        await cardService.GetCardByCardUidAsync(cardUid);
             
         if (ticket == null) 
             throw new CustomNotFoundException("بلیط برای کارت با این شناسه وجود ندارد");
@@ -277,16 +299,22 @@ public class TicketsService(
 
         var images = await GetTicketImagesAsync(ticket);
 
-        return new TicketDetailsResponse
+        var response = new TicketDetailsResponse
         {
             BarcodeId = ticket.BarcodeId.ToString(),
             EnLicensePlate = ticket.EnLicensePlate,
-            FaLicensePlate = ticket.LicensePlate,
+            FaLicensePlate = ticket.LicensePlate!,
             TicketId = ticket.Id.ToString(),
             TotalAmount = calculationResult.TotalWithoutDiscount,
             PayableAmount = calculationResult.PayableAmount,
-            Images = images
+            Images = images,
+            BarcodePrintType = nameof(BarcodePrintType.Rod),
+            EntryDate = ticket.StartTime,
+            InquiryDate = DateTime.Now,
+            TariffName = ticket.VehicleManufacturerName!
         };
+
+        return response;
     }
 
     private async Task<List<string>> GetTicketImagesAsync(ParkingTicket ticket)

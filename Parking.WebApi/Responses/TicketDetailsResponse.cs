@@ -9,4 +9,8 @@ public class TicketDetailsResponse
     public List<string> Images { get; set; } = [];
     public decimal TotalAmount { get; set; }
     public decimal PayableAmount { get; set; }
+    public string BarcodePrintType { get; set; } = string.Empty;
+    public DateTime EntryDate { get; set; }
+    public DateTime InquiryDate { get; set; }
+    public string TariffName { get; set; } = string.Empty;
 }
