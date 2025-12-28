@@ -16,28 +16,54 @@ public class TicketsService(
     IParkingVehicleSegmentPriceRepository parkingVehicleSegmentPriceRepository,
     IParkingVehicleSegmentVariablePriceRepository parkingVehicleSegmentVariablePriceRepository,
     IParkingTicketRepository parkingTicketRepository,
-    ICardRepository cardRepository,
     IVehicleSegmentRepository vehicleSegmentRepository,
     IParkingLotRepository parkingLotRepository,
     ILicensePlateRepository licensePlateRepository,
     ILicensePlateGroupRepository licensePlateGroupRepository,
     ITicketExtraImageRepository ticketExtraImageRepository,
+    ICardService cardService,
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork) : ITicketsService
 {
-    public async Task<ParkingTicket?> GetTicketByCardUidAsync(long cardUid)
-        => await parkingTicketRepository.GetByCardUidAsync(cardUid);
+    public async Task<ParkingTicket> GetTicketByCardUidAsync(long cardUid)
+    {
+        var ticket = await parkingTicketRepository.GetTicketByCardUidAsync(cardUid);
+        
+        if (ticket is null)
+            throw new CustomNotFoundException("بلیط برای این کارت تعریف نشده است");
 
-    public async Task<CreateTicketResponse?> CreateEntryTicketAsync(CreateEntryTicketRequest request)
+        return ticket.IsExited 
+            ? throw new CustomNotFoundException("وسیله نقلیه دارای این بلیط خارج شده است") 
+            : ticket;
+    }
+    
+    public async Task<PlateAndTariffResponse> GetPlateAndTariffAsync(long cardUid)
+    {
+        var ticket = await GetTicketByCardUidAsync(cardUid);
+
+        return new PlateAndTariffResponse
+        {
+            FaLicensePlate = ticket.LicensePlate,
+            EnLicencePlate = ticket.EnLicensePlate,
+            Tariff = ticket.VehicleManufacturerName
+        };
+    }
+    
+    public async Task<ParkingTicket> GetTicketByIdAsync(Guid ticketId)
+    {
+        var ticket = await parkingTicketRepository.GetTicketByIdAsync(ticketId);
+        
+        return ticket 
+               ?? throw new CustomNotFoundException("بلیط با این آی دی وجود ندارد");
+    }
+
+    public async Task<CreateTicketResponse> CreateEntryTicketAsync(CreateEntryTicketRequest request)
     {
         decimal? cardSerialNo = request.CardUid.HasValue ? request.CardUid.Value : null;
         Card? card = null;
 
         if (cardSerialNo.HasValue)
-        {
-            card = await cardRepository.GetCardByCardSerialNoAsync(request.CardUid!.Value);
-            if (card?.IsInUse == true) return null;
-        }
+            card = await cardService.GetCardByCardUidAsync((long)cardSerialNo.Value);
         
         var isExistedLicensePlate = await parkingTicketRepository.IsExistedLicensePlate(request.EnLicensePlate);
         if (isExistedLicensePlate)
@@ -47,7 +73,7 @@ public class TicketsService(
             ?? throw new CustomNotFoundException("پارکینگی یافت نشد");
 
         var vehicleSegment = await vehicleSegmentRepository.GetByIdAsync(request.VehicleSegmentId)
-            ?? throw new CustomNotFoundException("تعرفه برای این کارت یافت نشد");
+            ?? throw new CustomNotFoundException("برای این کارت تعرفه تعریف نشده است");
 
         var refinedLicensePlate = ServicesHelpers.RefineLicensePlate(request.EnLicensePlate);
 
@@ -74,50 +100,50 @@ public class TicketsService(
         };
 
         await SetLicensePlateGroupAsync(ticket, request.EnLicensePlate);
-        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.StartImage = image, "ورودی");
+        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.StartImage = image, "ورود");
 
         await parkingTicketRepository.AddAsync(ticket);
 
         if (card != null)
-            await cardRepository.UpdateCardUsageStatusAsync(cardSerialNo, true);
+            await cardService.UseCardAsync((long)cardSerialNo!);
 
         await unitOfWork.SaveChangesAsync();
 
         return new CreateTicketResponse { TicketId = ticket.Id, BarcodeId = ticket.BarcodeId.ToString() };
     }
 
-    public async Task<TicketDetailsResponse?> GetTicketDetailsByCardUidAsync(long cardUid)
+    public async Task<TicketDetailsResponse> GetTicketDetailsByCardUidAsync(long cardUid)
     {
         var ticket = await parkingTicketRepository.GetNotExitedTicketWithCardUidAsync(cardUid);
+        
+        await cardService.GetCardByCardUidAsync(cardUid);
+            
         if (ticket == null) 
-            return null;
+            throw new CustomNotFoundException("بلیط برای کارت با این شناسه وجود ندارد");
 
         return await BuildTicketDetailsAsync(ticket, true, cardUid);
     }
 
-    public async Task<TicketDetailsResponse?> GetTicketDetailsByBarcodeIdAsync(long barcodeId)
+    public async Task<TicketDetailsResponse> GetTicketDetailsByBarcodeIdAsync(long barcodeId)
     {
         var ticket = await parkingTicketRepository.GetNotExitedTicketByBarcodeIdAsync(barcodeId);
         if (ticket == null) 
-            return null;
+            throw new CustomNotFoundException("بارکد نامعتبر است");
 
         return await BuildTicketDetailsAsync(ticket, false, barcodeId);
     }
 
     public async Task UpdateTicketPaymentAsync(PaymentRequest request)
     {
-        var ticket = await parkingTicketRepository.GetTicketByIdAsync(request.TicketId);
-        
-        if (ticket is null)
-            throw new CustomNotFoundException("بلیط یافت نشد");
+        var ticket = await GetTicketByIdAsync(request.TicketId);
         
         if (ticket.TotalAmountWithDiscount == ticket.PaidAmount && ticket.IsExited)
-            throw new AlreadyPaidException("قبلا پرداخت انجام شده است");
+            throw new AlreadyPaidException("پرداخت انجام شده است");
 
-        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.ExitImage = image, "خروجی");
+        await SetTicketImagesAsync(ticket, request.Base64Images, (t, image) => t.ExitImage = image, "خروج");
         
         if (ticket.CardUid is not null)
-            await cardRepository.UpdateCardUsageStatusAsync(ticket.CardUid, false);
+            await cardService.ReleaseCardAsync(ticket.CardUid.Value);
         
         SetTicketPaymentData(ticket, request);
 
@@ -206,10 +232,7 @@ public class TicketsService(
         
         if (isCardUid)
         {
-            card = await cardRepository.GetCardByCardSerialNoAsync(cardUidOrBarcodeId);
-            
-            if (card is null)
-                throw new CustomNotFoundException("کارت با این شناسه وجود ندارد");
+            card = await cardService.GetCardByCardUidAsync(cardUidOrBarcodeId);
             
             if (card.PercentDiscount > 0)
             {

@@ -27,15 +27,10 @@ public class CreateTicketCommandHandler(
 
             var createTicketResponse = await ticketsService.CreateEntryTicketAsync(entryTicketRequest);
 
-            return createTicketResponse is null
-                ? Result<CreateTicketResponse>.Failure("صدور بلیط با خطا مواجه شد", "کارت برای خودروی دیگری ثبت شده است")
-                : Result<CreateTicketResponse>.Success(createTicketResponse, "بلیط با موفقیت ثبت شد");
+            return Result<CreateTicketResponse>.Success(createTicketResponse, "بلیط با موفقیت ثبت شد");
         }
-        catch (CustomNotFoundException ex)
-        {
-            return Result<CreateTicketResponse>.Failure(ex.Message, "یافت نشد");
-        }
-        catch (AlreadyExistsException ex)
+        
+        catch (Exception ex) when (ex is AlreadyExistsException or CardIsInUseException or CustomNotFoundException)
         {
             return Result<CreateTicketResponse>.Failure(ex.Message, "درخواست نامعتبر");
         }

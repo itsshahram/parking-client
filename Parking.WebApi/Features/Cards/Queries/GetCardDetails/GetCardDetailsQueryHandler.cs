@@ -7,24 +7,20 @@ using Parking.WebApi.Services.Contracts;
 namespace Parking.WebApi.Features.Cards.Queries.GetCardDetails;
 
 public class GetCardDetailsQueryHandler(
-    ICardService cardService) : IRequestHandler<GetCardDetailsQuery, Result<PlateAndTariffResponse>>
+    ITicketsService ticketsService) : IRequestHandler<GetCardDetailsQuery, Result<PlateAndTariffResponse>>
 {
     public async Task<Result<PlateAndTariffResponse>> Handle(GetCardDetailsQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await cardService.GetCardByUidAsync(request.CardUid);
-            
+            var response = await ticketsService.GetPlateAndTariffAsync(request.CardUid);
+
             return Result<PlateAndTariffResponse>.Success(response, "جزییات کارت با موفقیت دریافت شد");
         }
-        
-        catch (CustomNotFoundException ex)
+
+        catch (Exception ex) when (ex is CustomNotFoundException or InActiveCardException or CardIsInUseException)
         {
-            return Result<PlateAndTariffResponse>.Failure(ex.Message, "یافت نشد");
-        }
-        catch (InActiveCardException ex)
-        {
-            return Result<PlateAndTariffResponse>.Failure(ex.Message, "کارت غیرفعال");
+            return Result<PlateAndTariffResponse>.Failure(ex.Message, "درخواست نامعتبر");
         }
     }
 }

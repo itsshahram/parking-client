@@ -15,13 +15,11 @@ public class GetTicketDetailsByCardUidQueryHandler(
         {
             var ticketDetails = await ticketsService.GetTicketDetailsByCardUidAsync(request.CardUid);
 
-            return ticketDetails is null
-                ? Result<TicketDetailsResponse>.Failure("بلیط با این شناسه وجود ندارد", "بلیط یافت نشد")
-                : Result<TicketDetailsResponse>.Success(ticketDetails, "جزئیات بلیط با موفقیت دریافت شد");
+            return Result<TicketDetailsResponse>.Success(ticketDetails, "جزئیات بلیط با موفقیت دریافت شد");
         }
-        catch (CustomNotFoundException ex)
+        catch (Exception ex) when(ex is CustomNotFoundException or InActiveCardException)
         {
-            return Result<TicketDetailsResponse>.Failure(ex.Message, "یافت نشد");
+            return Result<TicketDetailsResponse>.Failure(ex.Message, "درخواست نامعتبر");
         }
     }
 }

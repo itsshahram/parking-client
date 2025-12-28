@@ -9,7 +9,7 @@ namespace Parking.WebApi.Infrastructure.Implementation;
 public class ParkingTicketRepository(
     ApplicationDbContext context) : GenericRepository<ParkingTicket>(context), IParkingTicketRepository
 {
-    public async Task<ParkingTicket?> GetByCardUidAsync(decimal? cardUid)
+    public async Task<ParkingTicket?> GetTicketByCardUidAsync(decimal? cardUid)
     {
         return await DbSet.FirstOrDefaultAsync(t => t.CardUid == cardUid && !t.IsExited);
     }

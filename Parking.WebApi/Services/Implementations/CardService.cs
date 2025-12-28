@@ -1,36 +1,40 @@
-﻿using Parking.WebApi.Application.Abstractions.EntityRepositories;
+﻿using Parking.Domain.Entities.Parkings;
+using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Application.Common.Exceptions;
-using Parking.WebApi.Responses;
 using Parking.WebApi.Services.Contracts;
 
 namespace Parking.WebApi.Services.Implementations;
 
 public class CardService(
-    ICardRepository cardRepository,
-    ITicketsService ticketsService) : ICardService
+    ICardRepository cardRepository) : ICardService
 {
-    public async Task<PlateAndTariffResponse> GetCardByUidAsync(long cardUid)
+    public async Task<Card> GetCardByCardUidAsync(long cardSerialNo)
     {
-        var card = await cardRepository.GetCardByCardSerialNoAsync(cardUid);
-
+        var card = await cardRepository.GetCardByCardSerialNoAsync(cardSerialNo);
+        
         if (card is null)
             throw new CustomNotFoundException("کارت با این شناسه وجود ندارد");
+        
+        return !card.IsActive 
+            ? throw new InActiveCardException("کارت غیرفعال است و نمی توان از آن استفاده کرد") 
+            : card;
+    }
+    
+    public async Task UseCardAsync(long cardUid)
+    {
+        var card = await GetCardByCardUidAsync(cardUid);
 
-        if (!card.IsActive)
-            throw new InActiveCardException("کارت غیرفعال است و نمی توان از آن استفاده کرد");
+        card.IsInUse = true;
         
-        var ticket = await ticketsService.GetTicketByCardUidAsync((long)card.CardSerialNo!);
+        await cardRepository.UpdateCardUsageStatusAsync(cardUid, true);
+    }
+    
+    public async Task ReleaseCardAsync(long cardUid)
+    {
+        var card = await GetCardByCardUidAsync(cardUid);
+
+        card.IsInUse = false;
         
-        if (ticket is null)
-            throw new CustomNotFoundException("برای این کارت بلیطی صادر نشده است");
-        
-        var response = new PlateAndTariffResponse
-        {
-            FaLicensePlate = ticket.LicensePlate,
-            EnLicencePlate = ticket.EnLicensePlate,
-            Tariff = ticket.VehicleManufacturerName
-        };
-        
-        return response;
+        await cardRepository.UpdateCardUsageStatusAsync(cardUid, false);
     }
 }

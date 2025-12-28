@@ -1,38 +1,40 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Parking.WebApi.Infrastructure.Context;
+﻿using Parking.WebApi.Application.Abstractions.EntityRepositories;
+using Parking.WebApi.Application.Common.Exceptions;
 using Parking.WebApi.Responses;
 using Parking.WebApi.Services.Contracts;
 
 namespace Parking.WebApi.Services.Implementations;
 
 public class VehicleSegmentsService(
-    ApplicationDbContext context) : IVehicleSegmentsService
+    IVehicleSegmentRepository vehicleSegmentRepository) : IVehicleSegmentsService
 {
-    public Task<List<VehicleSegmentResponse>> GetAllTariffsAsync()
+    public async Task<List<VehicleSegmentResponse>> GetAllTariffsAsync()
     {
-        var vehicleSegments = context
-            .VehicleSegments
+        var tariffs = await vehicleSegmentRepository.GetAllAsync();
+
+        var responses = tariffs
             .Select(vs => new VehicleSegmentResponse
             {
                 Id = vs.Id,
                 NameFa = vs.NameFa
             })
-            .ToListAsync();
+            .ToList();
 
-        return vehicleSegments;
+        return responses;
     }
 
     public async Task<VehicleSegmentResponse?> GetTariffByIdAsync(int id)
     {
-        var tariff = await context.VehicleSegments
-            .Where(v => v.Id == id)
-            .Select(v => new VehicleSegmentResponse
+        var tariff = await vehicleSegmentRepository.GetByIdAsync(id);
+        
+        var response = tariff is null
+            ? throw new CustomNotFoundException("تعرفه با این آی دی وجود ندارد")
+            : new VehicleSegmentResponse
             {
-                Id = v.Id,
-                NameFa = v.NameFa
-            })
-            .FirstOrDefaultAsync();
+                Id = tariff.Id,
+                NameFa = tariff.NameFa
+            };
 
-        return tariff;
+        return response;
     }
 }

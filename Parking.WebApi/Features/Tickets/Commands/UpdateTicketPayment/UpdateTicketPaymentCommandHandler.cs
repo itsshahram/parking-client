@@ -33,13 +33,10 @@ public class UpdateTicketPaymentCommandHandler(
 
             return Result.Success("پرداخت بلیط با موفقیت ثبت شد");
         }
-        catch (CustomNotFoundException ex)
+
+        catch (Exception ex) when (ex is CustomNotFoundException or AlreadyExistsException)
         {
-            return Result.Failure(ex.Message, "یافت نشد");
-        }
-        catch (AlreadyPaidException ex)
-        {
-            return Result.Failure(ex.Message, "تسویه شد");
+            return Result.Failure(ex.Message, "درخواست نامعتبر");
         }
     }
 }
