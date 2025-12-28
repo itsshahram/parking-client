@@ -13,12 +13,12 @@ public class LicensePlateGroupRepository(
     {
         return await DbSet.FirstOrDefaultAsync(g => 
             g.Id == groupId &&
-            g.StartDate < DateTime.Now);
+            g.StartDate < DateTime.UtcNow);
     }
 
     public async Task<short> GetLicensePlateGroupDiscountWithLicensePlateAsync(string licensePlate)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var licensePlateGroup = await DbSet
             .Where(g =>
