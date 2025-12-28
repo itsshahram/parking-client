@@ -22,6 +22,7 @@ public class LicensePlateGroupRepository(
 
         var licensePlateGroup = await DbSet
             .Where(g =>
+                g.LicensePlates != null &&
                 g.LicensePlates.Any(x => x.EnLicensePlate == licensePlate) &&
                 g.StartDate <= now &&
                 g.EndDate >= now
