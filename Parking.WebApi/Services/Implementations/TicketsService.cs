@@ -95,7 +95,7 @@ public class TicketsService(
             UserId = currentUserService.UserId,
             IsExited = false,
             IsPaid = false,
-            StartTime = DateTime.Now,
+            StartTime = DateTime.UtcNow,
             EntranceGate = request.DeviceName
         };
 
@@ -167,7 +167,7 @@ public class TicketsService(
         ticket.IsPaid = true;
         ticket.ExitRegistrarUserId = currentUserService.UserId;
         ticket.ExitGate = request.ExitGate;
-        ticket.EndTime = DateTime.Now;
+        ticket.EndTime = DateTime.UtcNow;
         ticket.DeviceId = request.DeviceId;
         ticket.IsExited = true;
         ticket.RefId = request.RefId;
@@ -221,11 +221,15 @@ public class TicketsService(
     private async Task<TicketDetailsResponse> BuildTicketDetailsAsync(ParkingTicket ticket,bool isCardUid, long cardUidOrBarcodeId)
     {
         var segment = await vehicleSegmentRepository.GetByIdAsync((int)ticket.VehicleSegmentId!);
+        
+        if (segment is null)
+            throw new CustomNotFoundException("تعرفه با این آی دی وجود ندارد");
+        
         var segmentPrices = await parkingVehicleSegmentPriceRepository.GetSegmentPricesByParkingSegmentIdAsync(segment.Id);
         var variableSegmentPrices = await parkingVehicleSegmentVariablePriceRepository.GetVariablePricesByParkingSegmentIdAsync(segment.Id);
 
-        var varTime = DateTime.Now - ticket.StartTime;
-        var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate);
+        var varTime = DateTime.UtcNow - ticket.StartTime;
+        var discount = await licensePlateGroupRepository.GetLicensePlateGroupDiscountWithLicensePlateAsync(ticket.EnLicensePlate ?? string.Empty);
         var description = $"{varTime.Days} روز و {varTime.Hours} ساعت و {varTime.Minutes} دقیقه در {segment.NameFa}";
 
         Card? card = null;
@@ -257,7 +261,7 @@ public class TicketsService(
             segmentPrices,
             variableSegmentPrices);
 
-        var calculationResult = parkingCostCalculator.CalculateCost(ticket.StartTime, DateTime.Now);
+        var calculationResult = parkingCostCalculator.CalculateCost(ticket.StartTime, DateTime.UtcNow);
         
         if (card is not null && card.FixDiscount > 0)
         {
@@ -280,8 +284,8 @@ public class TicketsService(
         return new TicketDetailsResponse
         {
             BarcodeId = ticket.BarcodeId.ToString(),
-            EnLicensePlate = ticket.EnLicensePlate,
-            FaLicensePlate = ticket.LicensePlate,
+            EnLicensePlate = ticket.EnLicensePlate ?? string.Empty,
+            FaLicensePlate = ticket.LicensePlate ?? string.Empty,
             TicketId = ticket.Id.ToString(),
             TotalAmount = calculationResult.TotalWithoutDiscount,
             PayableAmount = calculationResult.PayableAmount,
@@ -297,7 +301,11 @@ public class TicketsService(
 
         var extraImages = await ticketExtraImageRepository.GetExtraImagesStringAsync(ticket.Id);
         if (extraImages.Count > 0)
-            images.AddRange(extraImages);
+        {
+            // Filter out null values from extra images
+            var nonNullImages = extraImages.Where(img => !string.IsNullOrEmpty(img)).Select(img => img!);
+            images.AddRange(nonNullImages);
+        }
 
         return images;
     }

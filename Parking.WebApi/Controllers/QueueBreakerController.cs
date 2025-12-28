@@ -73,7 +73,7 @@ public class QueueBreakerController(
         if (!result.IsSuccess)
             return BadRequest(ApiResponse.Fail(result.Errors, result.Message, 400));
 
-        return Ok(ApiResponse.Success(null, result.Message));
+        return Ok(ApiResponse.Success(result.Message));
     }
 
     [HttpGet("get-plate-types")]
