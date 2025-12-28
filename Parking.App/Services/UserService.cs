@@ -1,15 +1,22 @@
-﻿using Parking.App.Models.Dto.User;
+﻿using DocumentFormat.OpenXml.Office.Word;
+using Parking.App.Models.Dto.User;
 using Parking.Domain.Entities.User;
+using Parking.Domain.Enums;
 using Parking.Domain.General;
 
 namespace Parking.App.Services;
 
-public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, UserManager<ApplicationUser> usermanager, RoleManager<ApplicationRole> roleManager) : IUserService
+public class UserService(
+    IUnitOfWork _unitOfWork,
+    ILogger<UserService> logger,
+    UserManager<ApplicationUser> usermanager,
+    RoleManager<ApplicationRole> roleManager) : IUserService
 {
     private readonly ILogger<UserService> _logger = logger;
     private IUnitOfWork unitOfWork = _unitOfWork;
     private readonly PasswordHasher<ApplicationUser> _passwordHasher = new PasswordHasher<ApplicationUser>();
     private readonly UserManager<ApplicationUser> _userManager = usermanager;
+
     public bool ChangePassword(Guid id, string newPassword)
     {
         try
@@ -62,6 +69,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return new List<ApplicationUser>();
         }
     }
+
     public async Task<List<UserListItemModel>> GetAllUsersAsync()
     {
         List<UserListItemModel> result = new List<UserListItemModel>();
@@ -72,7 +80,9 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
 
             foreach (var item in users)
             {
-                var userRole = _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", item.Id);
+                var userRole =
+                    _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0",
+                        item.Id);
                 var role = _unitOfWork.Roles.GetById(userRole.FirstOrDefault().RoleId);
 
                 result.Add(new UserListItemModel
@@ -91,6 +101,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
                     RoleId = role?.Id,
                 });
             }
+
             return result;
         }
         catch (Exception ex)
@@ -99,11 +110,14 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return result;
         }
     }
+
     public string GetUserRoleByUserId(Guid userId)
     {
         try
         {
-            var userRole = _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", userId);
+            var userRole =
+                _unitOfWork.ExecuteRawQuery<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0",
+                    userId);
             if (userRole == null || !userRole.Any())
                 return string.Empty;
 
@@ -116,6 +130,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return "";
         }
     }
+
     public ApplicationUser? GetUserById(Guid id)
     {
         try
@@ -191,6 +206,7 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
             return false;
         }
     }
+
     public async Task<(bool IsSuccess, bool IsExist)> CreateUser(ApplicationUser user, string role, string password)
     {
         try
@@ -215,26 +231,41 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
     }
 
 
-    public bool UpdateUser(ApplicationUser user)
+    public async Task<UserServiceStatus> UpdateUserAsync(ApplicationUser user)
     {
         try
         {
-            var existingUser = _unitOfWork.Users.GetById(user.Id);
+            var existingUser = await _userManager.FindByIdAsync(user.Id.ToString());
             if (existingUser == null)
-                return false;
+                return UserServiceStatus.NotFound;
+
+            // Check username conflict (excluding current user)
+            bool userNameExist = await _userManager.Users
+                .AnyAsync(x => x.UserName == user.UserName && x.Id != existingUser.Id);
+
+            if (userNameExist)
+                return UserServiceStatus.UserNameExist;
+
+            // Update allowed fields
             existingUser.Firstname = user.Firstname;
             existingUser.Lastname = user.Lastname;
             existingUser.PhoneNumber = user.PhoneNumber;
             existingUser.UserName = user.UserName;
-            existingUser.PasswordHash = user.PasswordHash;
-            return true;
+
+            var result = await _userManager.UpdateAsync(existingUser);
+
+            if (!result.Succeeded)
+                return UserServiceStatus.Failed;
+
+            return UserServiceStatus.Success;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user with ID: {UserId}", user.Id);
-            return false;
+            return UserServiceStatus.Failed;
         }
     }
+
 
     public async Task<bool> ChangeStaus(Guid id, bool status)
     {
@@ -251,7 +282,9 @@ public class UserService(IUnitOfWork _unitOfWork, ILogger<UserService> logger, U
 
     public async Task<ApplicationUserRole?> GetUserRole(Guid UserId)
     {
-        var userRole = await _unitOfWork.ExecuteRawQueryAsync<ApplicationUserRole>("SELECT * FROM AspNetUserRoles WHERE UserId = @p0", UserId);
+        var userRole =
+            await _unitOfWork.ExecuteRawQueryAsync<ApplicationUserRole>(
+                "SELECT * FROM AspNetUserRoles WHERE UserId = @p0", UserId);
         return userRole.FirstOrDefault();
     }
 }

@@ -860,7 +860,32 @@ public class ParkingService : IParkingService
                 BarcodeId = ticket.BarcodeId,
                 QueueNumber = ticket.QueueNumber,
                 DriverDescription = ticket.DriverDescription,
+                VehicleSegmentName = ticket.VehicleManufacturerName,
             };
+
+            // Set string properties
+            vm.VehicleSegmentName = ticket.VehicleManufacturerName;
+            vm.EntranceGate = ticket.EntranceGate;
+            vm.ExitGate = ticket.ExitGate;
+            vm.StartTimeString = ticket.StartTime.ToLongShamsiString();
+            vm.StartTimeOnlyString = ticket.StartTime.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ");
+            if (ticket.EndTime.HasValue)
+            {
+                vm.EndTimeString = ticket.EndTime.Value.ToLongShamsiString();
+                vm.EndTimeOnlyString = ticket.EndTime.Value.ToShortTimeString().Replace("AM", "ق.ظ").Replace("PM", "ب.ظ");
+            }
+            else
+            {
+                vm.EndTimeString = string.Empty;
+                vm.EndTimeOnlyString = string.Empty;
+            }
+
+            // Set LicensePlateGroupName
+            if (ticket.LicensePlateGroupId.HasValue)
+            {
+                var group = await unitOfWork.LicensePlateGroups.FirstOrDefaultAsync(g => g.Id == ticket.LicensePlateGroupId.Value);
+                vm.LicensePlateGroupName = group?.Name;
+            }
 
             if (ticket.IsExited)
                 return vm;
@@ -870,6 +895,7 @@ public class ParkingService : IParkingService
 
             if (segment == null)
                 return vm;
+
 
             var segmentPrices = await unitOfWork.ParkingVehicleSegmentPrices
                 .Find(p => p.VehicleSegmentId == ticket.VehicleSegmentId)
@@ -1696,12 +1722,11 @@ public class ParkingService : IParkingService
 
             var validGroup = unitOfWork.LicensePlateGroups
                 .Find(g =>
-                    g.LicensePlates.Any(x => x.EnLicensePlate == licenseEnPlate) &&
+                    g.Id == licensePlate.GroupId &&
                     g.StartDate <= now &&
-                    g.EndDate >= now
+                    g.EndDate >= now &&
+                    g.IsActive
                 )
-                .OrderByDescending(g => g.StartDate)
-                .ThenByDescending(g => g.EndDate)
                 .FirstOrDefault();
 
             return validGroup?.DiscountPercent ?? 0;
@@ -1727,12 +1752,11 @@ public class ParkingService : IParkingService
 
             var validGroup = await unitOfWork.LicensePlateGroups
                 .Find(g =>
-                    g.LicensePlates.Any(x => x.EnLicensePlate == licenseEnPlate) &&
+                    g.Id == licensePlate.GroupId &&
                     g.StartDate <= now &&
-                    g.EndDate >= now
+                    g.EndDate >= now &&
+                    g.IsActive
                 )
-                .OrderByDescending(g => g.StartDate)
-                .ThenByDescending(g => g.EndDate)
                 .FirstOrDefaultAsync();
 
             return validGroup?.DiscountPercent ?? 0;

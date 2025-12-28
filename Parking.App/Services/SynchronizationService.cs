@@ -340,7 +340,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         {
                             Name = role,
                             FaName = role.RoleToPersian(),
-                            NormalizedName = role.ToUpper()
+                            NormalizedName = role.ToUpper(),
                         };
                         await roleManager.CreateAsync(newRole);
                     }
@@ -348,7 +348,7 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
 
                 foreach (var user in users)
                 {
-                    var localUser = await unitOfWork.Users.GetByIdAsync(user.Id);
+                    var localUser = await userManager.FindByIdAsync(user.Id.ToString());
                     if (localUser != null)
                     {
                         localUser.Id = user.Id;
@@ -363,9 +363,9 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                         localUser.UserName = user.UserName;
                         localUser.NormalizedUserName = user.UserName.ToUpper();
                         localUser.RegisterDate = DateTime.Now;
+                        
                         await userManager.UpdateAsync(localUser);
-                        var newUser = await userManager.FindByIdAsync(localUser.Id.ToString());
-                        var x = await userManager.AddToRoleAsync(newUser, user.Role);
+                        var x = await userManager.AddToRoleAsync(localUser, user.Role);
                     }
                     else
                     {
@@ -382,11 +382,10 @@ public class SynchronizationService(IUnitOfWork _unitOfWork,
                             RegisterDate = DateTime.Now,
                             NormalizedEmail = user.Email.ToUpper(),
                             SecurityStamp = GenerateSecurityStamp(),
-                            PhoneNumber = user.PhoneNumber
+                            PhoneNumber = user.PhoneNumber,
                         };
                         await userManager.CreateAsync(userInfo);
-                        var newUser = await userManager.FindByIdAsync(userInfo.Id.ToString());
-                        var x = await userManager.AddToRoleAsync(newUser, user.Role);
+                        var x = await userManager.AddToRoleAsync(userInfo, user.Role);
                     }
                 }
                 return new TServiceResponse<bool>(true, "عملیات موفق", true);
