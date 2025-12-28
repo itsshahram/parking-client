@@ -22,19 +22,19 @@ public class CardService(
     
     public async Task UseCardAsync(long cardUid)
     {
-        var card = await GetCardByCardUidAsync(cardUid);
-
-        card.IsInUse = true;
+        // Validate card exists and is active
+        await GetCardByCardUidAsync(cardUid);
         
+        // Update card usage status in database
         await cardRepository.UpdateCardUsageStatusAsync(cardUid, true);
     }
     
     public async Task ReleaseCardAsync(long cardUid)
     {
-        var card = await GetCardByCardUidAsync(cardUid);
-
-        card.IsInUse = false;
+        // Validate card exists and is active
+        await GetCardByCardUidAsync(cardUid);
         
+        // Update card usage status in database
         await cardRepository.UpdateCardUsageStatusAsync(cardUid, false);
     }
 }

@@ -35,6 +35,36 @@ public class ExceptionHandlingMiddleware(
                 message = "خطاهای اعتبارسنجی";
                 errors = validationException.Errors;
                 break;
+
+            case CustomNotFoundException:
+                statusCode = HttpStatusCode.NotFound;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
+
+            case AlreadyExistsException:
+                statusCode = HttpStatusCode.Conflict;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
+
+            case AlreadyPaidException:
+                statusCode = HttpStatusCode.BadRequest;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
+
+            case CardIsInUseException:
+                statusCode = HttpStatusCode.BadRequest;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
+
+            case InActiveCardException:
+                statusCode = HttpStatusCode.BadRequest;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
             
             case ArgumentException argumentException:
                 statusCode = HttpStatusCode.BadRequest;
@@ -44,8 +74,14 @@ public class ExceptionHandlingMiddleware(
 
             case UnauthorizedAccessException:
                 statusCode = HttpStatusCode.Unauthorized;
-                message = "دسترسی غیرمجاز";
-                errors = new List<string> { "شما مجاز به دسترسی به این منبع نیستید." };
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
+                break;
+
+            case InvalidOperationException:
+                statusCode = HttpStatusCode.InternalServerError;
+                message = exception.Message;
+                errors = new List<string> { exception.Message };
                 break;
 
             default:
