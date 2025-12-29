@@ -21,6 +21,7 @@ public class TicketsService(
     ILicensePlateRepository licensePlateRepository,
     ILicensePlateGroupRepository licensePlateGroupRepository,
     ITicketExtraImageRepository ticketExtraImageRepository,
+    ISeizedLicensePlateRepository seizedLicensePlateRepository,
     ICardService cardService,
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork) : ITicketsService
@@ -158,6 +159,10 @@ public class TicketsService(
     public async Task UpdateTicketPaymentAsync(PaymentRequest request)
     {
         var ticket = await GetTicketByIdAsync(request.TicketId);
+        
+        var isSeizedLicensePlate = await seizedLicensePlateRepository.IsLicensePlateSeizedAsync(ticket.EnLicensePlate);
+        if (isSeizedLicensePlate)
+            throw new LicensePlateSeizedException("این پلاک توسط پارکینگ توقیف شده است");
         
         if (ticket.TotalAmountWithDiscount == ticket.PaidAmount && ticket.IsExited)
             throw new AlreadyPaidException("پرداخت انجام شده است");

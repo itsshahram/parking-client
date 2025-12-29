@@ -21,6 +21,7 @@ public static class ServiceExtensions
         services.AddScoped<IVehicleSegmentRepository, VehicleSegmentRepository>();
         services.AddScoped<ITicketExtraImageRepository, TicketExtraImageRepository>();
         services.AddScoped<ILicensePlateGroupRepository, LicensePlateGroupRepository>();
+        services.AddScoped<ISeizedLicensePlateRepository, SeizedLicensePlateRepository>();
         services.AddScoped<IParkingVehicleSegmentPriceRepository, ParkingVehicleSegmentPriceRepository>();
         services.AddScoped<IParkingVehicleSegmentVariablePriceRepository, ParkingVehicleSegmentVariablePriceRepository>();
         
