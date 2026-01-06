@@ -11,13 +11,29 @@ public class ThresholdHourlyRule(
 
     public Task ApplyAsync(PricingContext context)
     {
+        // Only apply on the last day
         if (context.CurrentDay != context.BillableMinutesPerDay.Keys.Max()) 
             return Task.CompletedTask;
 
-        if (context.CurrentDayBillableMinutes / 60 >= thresholdHours && thresholdHours > 0)
+        var unchargedMinutes = context.GetUnchargedMinutesForCurrentDay();
+        var unchargedHours = unchargedMinutes / 60;
+        
+        if (unchargedHours >= thresholdHours && thresholdHours > 0)
         {
-            context.CurrentDayCost += dailyRate;
-            context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} - یک روز کامل اضافه شد (آستانه {thresholdHours} ساعت)");
+            // Mark all remaining uncharged segments for this day as charged
+            var unchargedSegments = context.GetUnchargedSegmentsForCurrentDay();
+            
+            if (unchargedSegments.Count > 0)
+            {
+                TimeSegmentHelper.MarkSegmentsAsCharged(
+                    context.TimeSegments,
+                    unchargedSegments,
+                    Name,
+                    dailyRate);
+                
+                context.CurrentDayCost += dailyRate;
+                context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} - یک روز کامل اضافه شد (آستانه {thresholdHours} ساعت)");
+            }
         }
         
         return Task.CompletedTask;
