@@ -22,6 +22,17 @@ public class FreePeriodRule(
 
         if (isFree)
         {
+            // Mark all segments for the current day as free (charged with 0 amount)
+            var dayStart = context.CurrentDay.Date;
+            var dayEnd = dayStart.AddDays(1);
+            
+            TimeSegmentHelper.MarkSegmentsAsCharged(
+                context.TimeSegments,
+                dayStart,
+                dayEnd,
+                Name,
+                0);
+            
             context.CurrentDayCost = 0;
             context.CurrentDayBillableMinutes = 0;
             context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} رایگان شد");

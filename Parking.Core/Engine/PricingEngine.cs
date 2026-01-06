@@ -37,7 +37,8 @@ public class PricingEngine(Dictionary<PricingStage, List<IPricingRule>> rules)
         foreach (var dayEntry in context.BillableMinutesPerDay.OrderBy(k => k.Key))
         {
             context.CurrentDay = dayEntry.Key;
-            context.CurrentDayBillableMinutes = dayEntry.Value;
+            // Set initial billable minutes, rules will update based on segments
+            context.CurrentDayBillableMinutes = context.GetUnchargedMinutesForCurrentDay();
             context.CurrentDayCost = 0;
 
             // فقط مراحل روزانه رو اجرا کن
@@ -48,6 +49,8 @@ public class PricingEngine(Dictionary<PricingStage, List<IPricingRule>> rules)
                     foreach (var rule in stageRules)
                     {
                         await rule.ApplyAsync(context);
+                        // Update billable minutes after each rule
+                        context.CurrentDayBillableMinutes = context.GetUnchargedMinutesForCurrentDay();
                     }
                 }
             }
@@ -63,6 +66,12 @@ public class PricingEngine(Dictionary<PricingStage, List<IPricingRule>> rules)
             {
                 await rule.ApplyAsync(context);
             }
+        }
+        
+        // If FinalCost wasn't set by finalize rules, use BaseCost
+        if (context.FinalCost == 0 && context.BaseCost > 0)
+        {
+            context.FinalCost = context.BaseCost;
         }
 
         return context.FinalCost;
