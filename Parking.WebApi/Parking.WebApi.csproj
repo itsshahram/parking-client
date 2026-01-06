@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Parking.Core\Parking.Core.csproj" />
       <ProjectReference Include="..\Parking.Domain\Parking.Domain.csproj" />
     </ItemGroup>
 

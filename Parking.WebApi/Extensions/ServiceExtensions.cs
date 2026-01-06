@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Parking.Core.Service;
 using Parking.Domain.Entities.User;
 using Parking.WebApi.Application.Abstractions.EntityRepositories;
 using Parking.WebApi.Application.Abstractions.UnitOfWork;
@@ -25,12 +26,16 @@ public static class ServiceExtensions
         services.AddScoped<IParkingVehicleSegmentPriceRepository, ParkingVehicleSegmentPriceRepository>();
         services.AddScoped<IParkingVehicleSegmentVariablePriceRepository, ParkingVehicleSegmentVariablePriceRepository>();
         
+        services.AddScoped<ISpecialRulesRepository, SpecialRulesRepository>();
+        
         services.AddScoped<UserManager<ApplicationUser>>();
         
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<ICardService, CardService>();
         services.AddScoped<ITicketsService, TicketsService>();
         services.AddScoped<IVehicleSegmentsService, VehicleSegmentsService>();
+
+        services.AddScoped<IParkingPriceService, ParkingPricingService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
