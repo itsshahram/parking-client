@@ -36,7 +36,11 @@ public static class TimeSegmentHelper
     }
     
     /// <summary>
-    /// Marks segments as charged within a specific time range
+    /// Marks segments as charged within a specific time range.
+    /// NOTE: The 'amount' parameter represents the total charge for the entire time range.
+    /// Currently, this amount is assigned in full to segments that are completely within the range,
+    /// or to the charged portion when splitting. For more accurate accounting, consider passing
+    /// amounts on a per-segment basis using the overload that accepts specific segments.
     /// </summary>
     public static void MarkSegmentsAsCharged(
         List<TimeSegment> segments,
@@ -73,7 +77,9 @@ public static class TimeSegmentHelper
     }
     
     /// <summary>
-    /// Marks specific segments as charged
+    /// Marks specific segments as charged.
+    /// NOTE: The totalAmount is distributed equally across all segments.
+    /// For more accurate distribution, calculate per-segment amounts before calling this method.
     /// </summary>
     public static void MarkSegmentsAsCharged(
         List<TimeSegment> segments,
