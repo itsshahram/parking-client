@@ -10,15 +10,11 @@ public class EntryFeeRule(
 
     public Task ApplyAsync(PricingContext context)
     {
-        if (fee > 0 && context.CurrentDay == context.EntryTime.Date)
+        // DURATION-BASED: Entry fee is applied once at the beginning
+        if (fee > 0)
         {
-            context.CurrentDayCost += fee;
-        }
-
-        if (fee > 0 && context.CurrentDay == context.EntryTime.Date)
-        {
-            //context.CurrentDayBillableMinutes = Math.Max(0, context.CurrentDayBillableMinutes - 60);
-            context.CurrentDayBillableMinutes = Math.Max(0, context.CurrentDayBillableMinutes);
+            context.BaseCost += fee;
+            context.AppliedRules.Add($"هزینه ورود ({fee:N0} تومان)");
         }
 
         return Task.CompletedTask;

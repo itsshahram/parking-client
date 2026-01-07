@@ -9,11 +9,15 @@ public class FreeMinutesRule(
 
     public Task ApplyAsync(PricingContext context)
     {
-        // فقط در روز اول ورود اعمال می‌شه
-        if (context.CurrentDay == context.EntryTime.Date && freeMinutes > 0)
+        // DURATION-BASED: Apply free minutes from entry time
+        if (freeMinutes > 0)
         {
             // Calculate the end time of free period
             var freeEndTime = context.EntryTime.AddMinutes(freeMinutes);
+            
+            // Don't exceed exit time
+            if (freeEndTime > context.ExitTime)
+                freeEndTime = context.ExitTime;
             
             // Mark segments as charged (but with 0 amount) so other rules won't charge them
             TimeSegmentHelper.MarkSegmentsAsCharged(
@@ -23,9 +27,7 @@ public class FreeMinutesRule(
                 Name,
                 0);
             
-            // Update uncharged minutes for current day
-            context.CurrentDayBillableMinutes = context.GetUnchargedMinutesForCurrentDay();
-            context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} - رایگان زمان اولیه ({freeMinutes} دقیقه)");
+            context.AppliedRules.Add($"رایگان زمان اولیه ({freeMinutes} دقیقه) از {context.EntryTime:yyyy/MM/dd HH:mm}");
         }
         return Task.CompletedTask;
     }
