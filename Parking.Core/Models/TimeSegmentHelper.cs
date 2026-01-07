@@ -36,6 +36,22 @@ public static class TimeSegmentHelper
     }
     
     /// <summary>
+    /// Calculates total uncharged minutes within a specific time range
+    /// </summary>
+    public static int GetUnchargedMinutesInRange(List<TimeSegment> segments, DateTime start, DateTime end)
+    {
+        return segments
+            .Where(s => !s.IsCharged && s.Start < end && s.End > start)
+            .Sum(s => 
+            {
+                // Calculate overlap between segment and range
+                var overlapStart = s.Start > start ? s.Start : start;
+                var overlapEnd = s.End < end ? s.End : end;
+                return (int)(overlapEnd - overlapStart).TotalMinutes;
+            });
+    }
+    
+    /// <summary>
     /// Marks segments as charged within a specific time range.
     /// NOTE: The 'amount' parameter represents the total charge for the entire time range.
     /// Currently, this amount is assigned in full to segments that are completely within the range,

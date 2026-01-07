@@ -37,6 +37,26 @@ public class ParkingPricingService : IParkingPriceService
 
         // BaseCalculate: قوانین پایه
         builder.AddRule(PricingStage.BaseCalculate, new EntryFeeRule(segment.ParkingEntranceFixedFee));
+        
+        // DURATION-BASED IMPLEMENTATION: Long-term stay rules from SpecialRule
+        // Add long-term stay rules BEFORE the regular daily rate so they take priority
+        foreach (var rule in orderedSpecialRules.Where(r => 
+            r.MinDurationDays.HasValue && 
+            r.MinDurationDays.Value > 0 && 
+            r.CustomDailyRate.HasValue))
+        {
+            var hourlyRateForRemaining = segmentPrices.Any() 
+                ? segmentPrices.First().HourlyRate 
+                : 0;
+            
+            builder.AddRule(PricingStage.BaseCalculate, new LongTermStayRule(
+                minDays: rule.MinDurationDays.Value,
+                maxDays: rule.MaxDurationDays ?? 0,
+                customDailyRate: rule.CustomDailyRate.Value,
+                hourlyRateForRemaining: hourlyRateForRemaining));
+        }
+        
+        // Regular daily rate (duration-based)
         builder.AddRule(PricingStage.BaseCalculate, new DailyRateRule(
             segment.DailyRate,
             segment.DailyPriceAfterCrossingThreshold,
