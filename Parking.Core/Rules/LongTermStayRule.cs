@@ -23,22 +23,24 @@ public class LongTermStayRule(
 
         var totalDays = (int)context.TotalDuration.TotalDays;
 
-        // Check if this stay qualifies for long-term rate
+        // Check if this stay qualifies for long-term rate based on total duration
         if (totalDays < minDays || (maxDays > 0 && totalDays > maxDays))
             return Task.CompletedTask;
 
+        // Calculate how many full days worth of uncharged time we have
         var totalUnchargedMinutes = TimeSegmentHelper.GetUnchargedSegments(context.TimeSegments)
             .Sum(s => s.DurationMinutes);
 
-        var fullDays = totalUnchargedMinutes / 1440;
+        var fullDaysToCharge = totalUnchargedMinutes / 1440;
         
-        if (fullDays < minDays)
+        // Double-check we have enough uncharged time to apply this rule
+        if (fullDaysToCharge < minDays)
             return Task.CompletedTask;
 
         var totalCost = 0m;
 
-        // Apply custom daily rate for each full day
-        var daysToCharge = Math.Min(fullDays, maxDays > 0 ? maxDays : fullDays);
+        // Apply custom daily rate for each full day, capped at maxDays if specified
+        var daysToCharge = maxDays > 0 ? Math.Min(fullDaysToCharge, maxDays) : fullDaysToCharge;
         
         for (int dayIndex = 0; dayIndex < daysToCharge; dayIndex++)
         {
