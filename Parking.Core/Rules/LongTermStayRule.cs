@@ -17,10 +17,9 @@ public class LongTermStayRule(
 
     public Task ApplyAsync(PricingContext context)
     {
-        // Only execute on the first calendar day to avoid running multiple times
-        if (context.CurrentDay != context.BillableMinutesPerDay.Keys.Min())
-            return Task.CompletedTask;
-
+        // DURATION-BASED IMPLEMENTATION
+        // This rule processes the entire parking duration at once, not per calendar day
+        
         var totalDays = (int)context.TotalDuration.TotalDays;
 
         // Check if this stay qualifies for long-term rate based on total duration
@@ -101,7 +100,7 @@ public class LongTermStayRule(
             }
         }
 
-        context.CurrentDayCost += totalCost;
+        context.BaseCost += totalCost;
 
         return Task.CompletedTask;
     }

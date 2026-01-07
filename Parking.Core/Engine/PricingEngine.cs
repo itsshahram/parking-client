@@ -7,32 +7,37 @@ public class PricingEngine(Dictionary<PricingStage, List<IPricingRule>> rules)
 {
     public async Task<decimal> CalculateAsync(PricingContext context)
     {
-        // context.CalculateBaseDuration();
-        //
-        // foreach (var dayEntry in context.BillableMinutesPerDay.OrderBy(k => k.Key))
-        // {
-        //     context.CurrentDay = dayEntry.Key;
-        //     context.CurrentDayBillableMinutes = dayEntry.Value;
-        //     context.CurrentDayCost = 0;
-        //
-        //     foreach (PricingStage stage in Enum.GetValues(typeof(PricingStage)))
-        //     {
-        //         foreach (var rule in rules[stage])
-        //         {
-        //             await rule.ApplyAsync(context);
-        //         }
-        //     }
-        //
-        //     context.DailyCosts[context.CurrentDay] = context.CurrentDayCost;
-        //     context.BaseCost += context.CurrentDayCost;
-        // }
-        //
-        // // return context.FinalCost;
-        // context.FinalCost = context.BaseCost - context.DiscountAmount + context.TaxAmount;
-        //
-        // return context.FinalCost;
+        // DURATION-BASED IMPLEMENTATION
+        // Initialize time segments for tracking
+        context.TimeSegments = TimeSegmentHelper.InitializeSegments(context.EntryTime, context.ExitTime);
         
+        // Execute all stages sequentially (PreProcess -> BaseCalculate -> Adjust -> Finalize)
+        foreach (PricingStage stage in Enum.GetValues(typeof(PricingStage)))
+        {
+            if (rules.TryGetValue(stage, out var stageRules))
+            {
+                foreach (var rule in stageRules)
+                {
+                    await rule.ApplyAsync(context);
+                }
+            }
+        }
         
+        // If FinalCost wasn't set by finalize rules, use BaseCost
+        if (context.FinalCost == 0 && context.BaseCost > 0)
+        {
+            context.FinalCost = context.BaseCost;
+        }
+
+        return context.FinalCost;
+    }
+    
+    /* OLD CALENDAR-BASED IMPLEMENTATION (COMMENTED OUT - DO NOT USE)
+     * This approach iterated over calendar days which caused incorrect calculations
+     * when vehicles entered mid-day and exited the next day
+     * 
+    public async Task<decimal> CalculateAsync(PricingContext context)
+    {
         context.CalculateBaseDuration();
         foreach (var dayEntry in context.BillableMinutesPerDay.OrderBy(k => k.Key))
         {
@@ -76,5 +81,5 @@ public class PricingEngine(Dictionary<PricingStage, List<IPricingRule>> rules)
 
         return context.FinalCost;
     }
-    
+    */
 }
