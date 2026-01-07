@@ -53,10 +53,8 @@ public static class TimeSegmentHelper
     
     /// <summary>
     /// Marks segments as charged within a specific time range.
-    /// NOTE: The 'amount' parameter represents the total charge for the entire time range.
-    /// Currently, this amount is assigned in full to segments that are completely within the range,
-    /// or to the charged portion when splitting. For more accurate accounting, consider passing
-    /// amounts on a per-segment basis using the overload that accepts specific segments.
+    /// The 'amount' parameter represents the total charge for the entire time range,
+    /// which will be distributed proportionally across all affected segments.
     /// </summary>
     public static void MarkSegmentsAsCharged(
         List<TimeSegment> segments,
@@ -69,19 +67,42 @@ public static class TimeSegmentHelper
             .Where(s => !s.IsCharged && s.Start < end && s.End > start)
             .ToList();
         
+        if (affectedSegments.Count == 0)
+            return;
+        
+        // Calculate total minutes to be charged for proportional distribution
+        var totalMinutesToCharge = affectedSegments.Sum(s =>
+        {
+            var overlapStart = s.Start > start ? s.Start : start;
+            var overlapEnd = s.End < end ? s.End : end;
+            return (int)(overlapEnd - overlapStart).TotalMinutes;
+        });
+        
         foreach (var segment in affectedSegments)
         {
             // If segment is completely within the range, just mark it
             if (segment.Start >= start && segment.End <= end)
             {
+                // Distribute amount proportionally based on segment duration
+                var proportionalAmount = totalMinutesToCharge > 0
+                    ? amount * segment.DurationMinutes / totalMinutesToCharge
+                    : 0;
+                
                 segment.IsCharged = true;
                 segment.ChargedBy = chargedBy;
-                segment.ChargedAmount = amount;
+                segment.ChargedAmount = proportionalAmount;
             }
             else
             {
                 // Need to split the segment
-                var splitSegments = SplitSegment(segment, start, end, chargedBy, amount);
+                var overlapStart = segment.Start > start ? segment.Start : start;
+                var overlapEnd = segment.End < end ? segment.End : end;
+                var overlapMinutes = (int)(overlapEnd - overlapStart).TotalMinutes;
+                var proportionalAmount = totalMinutesToCharge > 0
+                    ? amount * overlapMinutes / totalMinutesToCharge
+                    : 0;
+                
+                var splitSegments = SplitSegment(segment, start, end, chargedBy, proportionalAmount);
                 
                 // Remove original segment
                 segments.Remove(segment);

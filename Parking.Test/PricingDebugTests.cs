@@ -59,15 +59,15 @@ public class PricingDebugTests
         {
             _output.WriteLine($"  - {rule}");
         }
-        _output.WriteLine($"Daily Costs:");
-        foreach (var dc in context.DailyCosts)
+        
+        // Debug: Output segment charges grouped by day
+        _output.WriteLine($"Charges by Day:");
+        var segmentsByDay = TimeSegmentHelper.GroupSegmentsByDay(context.TimeSegments);
+        foreach (var dayGroup in segmentsByDay.OrderBy(g => g.Key))
         {
-            _output.WriteLine($"  {dc.Key:yyyy-MM-dd}: {dc.Value}");
-        }
-        _output.WriteLine($"Billable Minutes Per Day:");
-        foreach (var bm in context.BillableMinutesPerDay)
-        {
-            _output.WriteLine($"  {bm.Key:yyyy-MM-dd}: {bm.Value} minutes");
+            var dayCost = dayGroup.Value.Where(s => s.IsCharged).Sum(s => s.ChargedAmount);
+            var dayMinutes = dayGroup.Value.Sum(s => s.DurationMinutes);
+            _output.WriteLine($"  {dayGroup.Key:yyyy-MM-dd}: {dayCost} ({dayMinutes} minutes)");
         }
     }
     
@@ -122,10 +122,14 @@ public class PricingDebugTests
         {
             _output.WriteLine($"  - {rule}");
         }
-        _output.WriteLine($"Daily Costs:");
-        foreach (var dc in context.DailyCosts)
+        
+        // Debug: Output segment charges grouped by day
+        _output.WriteLine($"Charges by Day:");
+        var segmentsByDay = TimeSegmentHelper.GroupSegmentsByDay(context.TimeSegments);
+        foreach (var dayGroup in segmentsByDay.OrderBy(g => g.Key))
         {
-            _output.WriteLine($"  {dc.Key:yyyy-MM-dd}: {dc.Value}");
+            var dayCost = dayGroup.Value.Where(s => s.IsCharged).Sum(s => s.ChargedAmount);
+            _output.WriteLine($"  {dayGroup.Key:yyyy-MM-dd}: {dayCost}");
         }
     }
 }
