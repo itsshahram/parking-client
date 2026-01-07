@@ -85,7 +85,7 @@ public static class TimeSegmentHelper
             {
                 // Distribute amount proportionally based on segment duration
                 var proportionalAmount = totalMinutesToCharge > 0
-                    ? amount * segment.DurationMinutes / totalMinutesToCharge
+                    ? amount * (decimal)segment.DurationMinutes / (decimal)totalMinutesToCharge
                     : 0;
                 
                 segment.IsCharged = true;
@@ -99,7 +99,7 @@ public static class TimeSegmentHelper
                 var overlapEnd = segment.End < end ? segment.End : end;
                 var overlapMinutes = (int)(overlapEnd - overlapStart).TotalMinutes;
                 var proportionalAmount = totalMinutesToCharge > 0
-                    ? amount * overlapMinutes / totalMinutesToCharge
+                    ? amount * (decimal)overlapMinutes / (decimal)totalMinutesToCharge
                     : 0;
                 
                 var splitSegments = SplitSegment(segment, start, end, chargedBy, proportionalAmount);
