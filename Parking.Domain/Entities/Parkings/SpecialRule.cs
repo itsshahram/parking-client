@@ -15,6 +15,8 @@ public class SpecialRule
     public TimeSpan? FromTimeOfDay { get; set; }
     public TimeSpan? ToTimeOfDay { get; set; }
     public int? MinDurationMinutes { get; set; }
+    public int? MinDurationDays { get; set; } // Minimum duration in days for long-term stay rules
+    public int? MaxDurationDays { get; set; } // Maximum duration in days for long-term stay rules
     //public string? VehicleType { get; set; } // "Car", "Electric", "SUV"
 
     // عملیات
@@ -24,6 +26,7 @@ public class SpecialRule
     public decimal? RateMultiplier { get; set; }
     public decimal? MaxDailyCharge { get; set; }
     public decimal? MinCharge { get; set; }
+    public decimal? CustomDailyRate { get; set; } // Custom daily rate for long-term stays
 
     public int Priority { get; set; } = 100; // عدد کمتر = اولویت بالاتر
 }
