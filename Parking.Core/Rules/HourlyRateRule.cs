@@ -11,12 +11,13 @@ public class HourlyRateRule(
 
     public Task ApplyAsync(PricingContext context)
     {
-        var unchargedSegments = context.GetUnchargedSegmentsForCurrentDay();
+        // DURATION-BASED: Get all uncharged segments across the entire stay
+        var unchargedSegments = TimeSegmentHelper.GetUnchargedSegments(context.TimeSegments);
         
         if (unchargedSegments.Count == 0) 
             return Task.CompletedTask;
 
-        var cost = 0m;
+        var totalCost = 0m;
 
         foreach (var segment in unchargedSegments)
         {
@@ -64,14 +65,14 @@ public class HourlyRateRule(
                     Name,
                     segmentCost);
                 
-                cost += segmentCost;
+                totalCost += segmentCost;
             }
         }
 
-        context.CurrentDayCost += cost;
+        context.BaseCost += totalCost;
         
-        if (cost > 0) 
-            context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} - نرخ ساعتی ({cost:N0} تومان)");
+        if (totalCost > 0) 
+            context.AppliedRules.Add($"نرخ ساعتی ({totalCost:N0} تومان) - {unchargedSegments.Sum(s => s.DurationMinutes)} دقیقه");
         
         return Task.CompletedTask;
     }

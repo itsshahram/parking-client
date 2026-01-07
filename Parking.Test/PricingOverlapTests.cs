@@ -207,12 +207,16 @@ public class PricingOverlapTests
         var cost = await engine.CalculateAsync(context);
         
         // Assert
-        // Oct 1: Free (0), Oct 2: 50000 = 50000 total (Oct 3 has 0 minutes)
+        // Day 1 should be free (0), Day 2 should have daily rate (50000)
         Assert.Equal(50000, cost);
         
-        // Verify daily costs
-        Assert.Equal(0, context.DailyCosts[new DateTime(2025, 10, 1)]);
-        Assert.Equal(50000, context.DailyCosts[new DateTime(2025, 10, 2)]);
+        // Verify segments for each day
+        var segmentsByDay = TimeSegmentHelper.GroupSegmentsByDay(context.TimeSegments);
+        var day1Cost = segmentsByDay[new DateTime(2025, 10, 1)].Where(s => s.IsCharged).Sum(s => s.ChargedAmount);
+        var day2Cost = segmentsByDay[new DateTime(2025, 10, 2)].Where(s => s.IsCharged).Sum(s => s.ChargedAmount);
+        
+        Assert.Equal(0, day1Cost); // Day 1 is free
+        Assert.Equal(50000, day2Cost); // Day 2 has daily rate
     }
 
     [Fact]
@@ -302,7 +306,7 @@ public class PricingOverlapTests
         // Free first 60 minutes
         builder.AddRule(PricingStage.PreProcess, new FreeMinutesRule(60));
         
-        // Daily rate - but won't apply because we don't have full days after free time
+        // Daily rate - will apply because after free time we have exactly 23 hours (meets threshold)
         builder.AddRule(PricingStage.BaseCalculate, new DailyRateRule(50000));
         
         // Hourly rate (as fallback for incomplete days)
@@ -330,11 +334,11 @@ public class PricingOverlapTests
         
         // Assert
         // Entry: 5000
-        // 24 hours total - 1 hour free = 23 hours
-        // Oct 1: 13 hours (11:00-00:00) = 130000
-        // Oct 2: 10 hours (00:00-10:00) = 100000
-        // Total: 5000 + 230000 = 235000
-        Assert.Equal(235000, cost);
+        // 24 hours total - 1 hour free = 23 hours uncharged
+        // 23 hours (1380 minutes) meets the threshold for daily rate (1380 minutes = 23 hours)
+        // Daily rate: 50000
+        // Total: 5000 + 50000 = 55000
+        Assert.Equal(55000, cost);
         
         // Verify no actual double-charging by checking that base cost matches segment total
         var totalChargedFromSegments = TimeSegmentHelper.GetTotalChargedAmount(context.TimeSegments);

@@ -11,11 +11,12 @@ public class VariableRateRule(
 
     public Task ApplyAsync(PricingContext context)
     {
-        // Variable rate only applies on the first day if total stay is less than 24 hours
-        if (context.TotalMinutes >= 1440 || context.CurrentDay != context.EntryTime.Date)
+        // DURATION-BASED: Variable rate only applies on short stays (less than 24 hours)
+        // and only if there are uncharged segments
+        if (context.TotalMinutes >= 1440)
             return Task.CompletedTask;
 
-        var unchargedSegments = context.GetUnchargedSegmentsForCurrentDay();
+        var unchargedSegments = TimeSegmentHelper.GetUnchargedSegments(context.TimeSegments);
         
         if (unchargedSegments.Count == 0)
             return Task.CompletedTask;
@@ -50,12 +51,10 @@ public class VariableRateRule(
                 unchargedSegments,
                 Name,
                 cost);
+                
+            context.BaseCost += cost;
+            context.AppliedRules.Add($"نرخ متغیر ({cost:N0} تومان) - {totalUnchargedMinutes} دقیقه");
         }
-
-        context.CurrentDayCost += cost;
-        
-        if (cost > 0) 
-            context.AppliedRules.Add($"روز {context.CurrentDay:yyyy/MM/dd} - نرخ متغیر ({cost:N0} تومان)");
         
         return Task.CompletedTask;
     }

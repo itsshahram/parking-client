@@ -21,14 +21,19 @@ public class DailyRateRule(
         if (totalUnchargedMinutes < 1380) // Need at least 23 hours for daily rate
             return Task.CompletedTask;
 
-        var fullDaysPossible = totalUnchargedMinutes / 1440;
+        // Calculate total number of 24-hour periods in the parking duration
+        var totalPeriods = (int)Math.Ceiling((context.ExitTime - context.EntryTime).TotalDays);
         var totalCost = 0m;
 
         // Process each full 24-hour period from entry time
-        for (int periodIndex = 0; periodIndex < fullDaysPossible; periodIndex++)
+        for (int periodIndex = 0; periodIndex < totalPeriods; periodIndex++)
         {
             var periodStart = context.EntryTime.AddDays(periodIndex);
             var periodEnd = periodStart.AddDays(1);
+            
+            // Don't go past exit time
+            if (periodEnd > context.ExitTime)
+                periodEnd = context.ExitTime;
 
             var unchargedMinutesInPeriod = TimeSegmentHelper.GetUnchargedMinutesInRange(
                 context.TimeSegments, periodStart, periodEnd);
